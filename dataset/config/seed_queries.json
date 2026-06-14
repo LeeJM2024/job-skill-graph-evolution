@@ -1,0 +1,99 @@
+{
+  "description": "中文岗位 JD 扩大采集配置，围绕赛题中的岗位能力图谱、数字技术岗位、产业场景和动态演化分析扩展关键词。",
+  "defaults": {
+    "page": 1,
+    "pageSize": 100,
+    "maxPages": 40,
+    "targetRecords": 3000,
+    "requestDelayMs": 250,
+    "domesticOnly": true
+  },
+  "sources": ["tencent", "huawei"],
+  "queries": [
+    {
+      "label": "人工智能与大模型岗位群",
+      "keyword": "AI",
+      "cities": ["全国"]
+    },
+    {
+      "label": "大模型应用岗位群",
+      "keyword": "大模型",
+      "cities": ["全国"]
+    },
+    {
+      "label": "算法与机器学习岗位群",
+      "keyword": "算法",
+      "cities": ["全国"]
+    },
+    {
+      "label": "数据工程与数据治理岗位群",
+      "keyword": "数据",
+      "cities": ["全国"]
+    },
+    {
+      "label": "Java 后端研发岗位群",
+      "keyword": "Java",
+      "cities": ["全国"]
+    },
+    {
+      "label": "Python 研发岗位群",
+      "keyword": "Python",
+      "cities": ["全国"]
+    },
+    {
+      "label": "云计算与云原生岗位群",
+      "keyword": "云",
+      "cities": ["全国"]
+    },
+    {
+      "label": "物联网与边缘计算岗位群",
+      "keyword": "物联网",
+      "cities": ["全国"]
+    },
+    {
+      "label": "网络安全岗位群",
+      "keyword": "安全",
+      "cities": ["全国"]
+    },
+    {
+      "label": "软件工程岗位群",
+      "keyword": "软件",
+      "cities": ["全国"]
+    },
+    {
+      "label": "测试与质量保障岗位群",
+      "keyword": "测试",
+      "cities": ["全国"]
+    },
+    {
+      "label": "产品与业务分析岗位群",
+      "keyword": "产品",
+      "cities": ["全国"]
+    },
+    {
+      "label": "行业解决方案岗位群",
+      "keyword": "解决方案",
+      "cities": ["全国"]
+    },
+    {
+      "label": "运维与平台工程岗位群",
+      "keyword": "运维",
+      "cities": ["全国"]
+    },
+    {
+      "label": "数据库岗位群",
+      "keyword": "数据库",
+      "cities": ["全国"]
+    },
+    {
+      "label": "嵌入式与智能硬件岗位群",
+      "keyword": "嵌入式",
+      "cities": ["全国"]
+    },
+    {
+      "label": "全量补充岗位",
+      "keyword": "",
+      "cities": ["全国"]
+    }
+  ]
+}

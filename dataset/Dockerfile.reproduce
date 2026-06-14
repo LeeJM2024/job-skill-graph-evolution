@@ -1,0 +1,7 @@
+FROM mvyas7/job-hunt-ai-backend:v1.2.0
+
+COPY requirements.txt /tmp/dataset-requirements.txt
+RUN pip install --no-cache-dir -r /tmp/dataset-requirements.txt
+
+WORKDIR /workspace
+CMD ["sleep", "infinity"]

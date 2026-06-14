@@ -1,0 +1,25 @@
+{
+  "total_jobs": 23714,
+  "jobs_with_skills": 1016,
+  "total_skill_mentions": 4286,
+  "unique_skills": 86,
+  "ui_jobs": 120,
+  "ui_skill_mentions": 1822,
+  "ui_skills": 74,
+  "relation_counts": {
+    "REQUIRES_SKILL": 1742,
+    "PREFERS_SKILL": 80
+  },
+  "category_counts": {
+    "数据与算法": 857,
+    "编程语言": 195,
+    "前端技术": 2,
+    "测试工具": 2,
+    "AI基础设施": 714,
+    "游戏开发": 3,
+    "后端技术": 11,
+    "数据库": 10,
+    "云计算/运维": 26,
+    "移动开发": 2
+  }
+}

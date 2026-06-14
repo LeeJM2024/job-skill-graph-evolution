@@ -1,0 +1,247 @@
+{
+  "input_jobs": 23714,
+  "jobs_with_skills": 1016,
+  "jobs_without_skills": 22698,
+  "job_skill_coverage": 0.0428,
+  "skill_mentions": 4287,
+  "unique_normalized_skills": 86,
+  "top_skills": [
+    [
+      "Large Language Model",
+      1041
+    ],
+    [
+      "AI Agent",
+      578
+    ],
+    [
+      "Multimodal AI",
+      309
+    ],
+    [
+      "Unreal Engine",
+      164
+    ],
+    [
+      "Model Training",
+      144
+    ],
+    [
+      "AIGC",
+      128
+    ],
+    [
+      "GPU",
+      127
+    ],
+    [
+      "Ascend",
+      118
+    ],
+    [
+      "Machine Learning",
+      101
+    ],
+    [
+      "C++",
+      84
+    ],
+    [
+      "Python",
+      81
+    ],
+    [
+      "Model Inference",
+      77
+    ],
+    [
+      "NPU",
+      74
+    ],
+    [
+      "RAG",
+      68
+    ],
+    [
+      "Deep Learning",
+      68
+    ],
+    [
+      "Prompt Engineering",
+      64
+    ],
+    [
+      "Virtualization",
+      57
+    ],
+    [
+      "Distributed Training",
+      54
+    ],
+    [
+      "Triton",
+      45
+    ],
+    [
+      "PyTorch",
+      44
+    ],
+    [
+      "ARM",
+      43
+    ],
+    [
+      "x86",
+      42
+    ],
+    [
+      "LLVM",
+      40
+    ],
+    [
+      "Android",
+      38
+    ],
+    [
+      "RDMA",
+      32
+    ],
+    [
+      "Rust",
+      32
+    ],
+    [
+      "Unity",
+      31
+    ],
+    [
+      "Linux",
+      31
+    ],
+    [
+      "Power BI",
+      30
+    ],
+    [
+      "TensorFlow",
+      29
+    ],
+    [
+      "CUDA",
+      28
+    ],
+    [
+      "NLP",
+      27
+    ],
+    [
+      "iOS",
+      27
+    ],
+    [
+      "vLLM",
+      26
+    ],
+    [
+      "CXL",
+      25
+    ],
+    [
+      "MLIR",
+      23
+    ],
+    [
+      "Model Context Protocol",
+      21
+    ],
+    [
+      "SGLang",
+      21
+    ],
+    [
+      "Go",
+      20
+    ],
+    [
+      "Java",
+      19
+    ],
+    [
+      "Microservices",
+      17
+    ],
+    [
+      "SQL",
+      16
+    ],
+    [
+      "NCCL",
+      15
+    ],
+    [
+      "Automated Testing",
+      14
+    ],
+    [
+      "KVM",
+      14
+    ],
+    [
+      "MPI",
+      14
+    ],
+    [
+      "SPDK",
+      14
+    ],
+    [
+      "C#",
+      11
+    ],
+    [
+      "Security Testing",
+      11
+    ],
+    [
+      "Midjourney",
+      10
+    ]
+  ],
+  "category_counts": {
+    "数据与算法": 2556,
+    "AI基础设施": 1062,
+    "编程语言": 268,
+    "游戏开发": 195,
+    "前端技术": 2,
+    "测试工具": 35,
+    "云计算/运维": 56,
+    "数据库": 25,
+    "移动开发": 70,
+    "后端技术": 18
+  },
+  "mentions_by_source_type": {
+    "enterprise": 4287
+  },
+  "coverage_by_source_type": {
+    "enterprise": {
+      "jobs": 3000,
+      "jobs_with_skills": 1016,
+      "coverage": 0.3387
+    },
+    "government": {
+      "jobs": 20714,
+      "jobs_with_skills": 0,
+      "coverage": 0.0
+    }
+  },
+  "method": {
+    "extractor": "dictionary_sentence_evidence_v1",
+    "notes": [
+      "Deterministic dictionary matching; no LLM is called.",
+      "Evidence is the matched job title, tag string, or JD sentence.",
+      "Each mention keeps character-level span offsets in its evidence sentence, following the SkillSpan-style span annotation idea.",
+      "Technical terms are exported as skillspan_label=knowledge because this baseline focuses on tools, languages, frameworks, and domain knowledge rather than soft-skill phrases.",
+      "Skill type is marked preferred when the evidence contains priority markers such as 优先 or 加分; otherwise required."
+    ]
+  }
+}

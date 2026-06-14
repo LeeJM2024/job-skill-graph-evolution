@@ -1,0 +1,66 @@
+{
+  "experiment": "30_resume_bm25_bge_m3_v1",
+  "resume_count": 30,
+  "candidate_pairs": 6000,
+  "unique_candidate_jobs": 587,
+  "bm25": {
+    "candidate_pairs": 6000,
+    "latency_ms": {
+      "min": 17,
+      "mean": 51.2,
+      "p50": 49.0,
+      "p95": 95.2,
+      "max": 144
+    }
+  },
+  "model": {
+    "model_name": "BAAI/bge-m3",
+    "device": "cuda",
+    "dtype": "torch.float16",
+    "max_length": 1024,
+    "batch_size": 2,
+    "embedding_dimension": 1024,
+    "encoded_texts": 617,
+    "wall_seconds": 21.654
+  },
+  "semantic_score": {
+    "min": 0.4076,
+    "mean": 0.5514,
+    "p50": 0.5536,
+    "p95": 0.6172,
+    "max": 0.7212
+  },
+  "absolute_rank_change": {
+    "min": 0,
+    "mean": 60.3407,
+    "p50": 50.0,
+    "p95": 149.05,
+    "max": 199
+  },
+  "bm25_semantic_top10_overlap": {
+    "min": 0.0,
+    "mean": 0.0267,
+    "p50": 0.0,
+    "p95": 0.155,
+    "max": 0.2
+  },
+  "silver_grade_counts": {
+    "0": 3159,
+    "1": 2445,
+    "2": 378,
+    "3": 18
+  },
+  "silver_formula": {
+    "semantic_rank_percentile": 0.45,
+    "bm25_rank_percentile": 0.2,
+    "resume_skill_coverage_in_jd": 0.2,
+    "target_job_family_match": 0.15
+  },
+  "silver_grade_rules": {
+    "3": "score>=0.75 and family_match>=0.8",
+    "2": "score>=0.55 and (family_match>=0.4 or skill_coverage>=0.2)",
+    "1": "score>=0.35",
+    "0": "otherwise"
+  },
+  "total_wall_seconds": 31.218
+}

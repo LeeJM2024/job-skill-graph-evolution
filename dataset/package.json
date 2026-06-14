@@ -1,0 +1,24 @@
+{
+  "name": "job-hunt-ai-dataset",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Chinese job JD collection and normalization tools for job-hunt-AI.",
+  "scripts": {
+    "collect": "node scripts/collect_public_jobs.mjs --source all --target 3000",
+    "collect:tencent": "node scripts/collect_public_jobs.mjs --source tencent",
+    "collect:huawei": "node scripts/collect_public_jobs.mjs --source huawei",
+    "import:government": "python scripts/import_government_jobs.py",
+    "merge:jobs": "python scripts/merge_job_datasets.py",
+    "process:resumes": "python scripts/process_chinese_resumes.py",
+    "extract:job-skills": "python scripts/extract_job_skills.py",
+    "experiment:test30": "python scripts/run_bm25_bge_m3_experiment.py",
+    "normalize": "node scripts/normalize_jobs.mjs",
+    "pipeline": "npm run collect && npm run normalize",
+    "graph:build": "python scripts/build_neo4j_job_skill_graph.py",
+    "graph:import": "python scripts/build_neo4j_job_skill_graph.py --import-neo4j",
+    "graph:ui": "python -m http.server 8010"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="data:," />
+  <title>JD-Skill 图谱预览</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #d9e1ee;
+      --job: #2563eb;
+      --skill: #059669;
+      --prefer: #d97706;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header {
+      padding: 18px 24px;
+      background: #111827;
+      color: #fff;
+    }
+    header h1 {
+      margin: 0 0 6px;
+      font-size: 22px;
+    }
+    header p {
+      margin: 0;
+      color: #cbd5e1;
+      font-size: 14px;
+    }
+    main {
+      display: grid;
+      grid-template-columns: 320px 1fr 380px;
+      gap: 14px;
+      padding: 14px;
+      height: calc(100vh - 78px);
+    }
+    section {
+      min-height: 0;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(16, 24, 40, 0.06);
+    }
+    .sidebar, .detail {
+      padding: 14px;
+      overflow: auto;
+    }
+    .graph-panel {
+      position: relative;
+      overflow: hidden;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .stat {
+      padding: 10px;
+      border-radius: 10px;
+      background: #f1f5f9;
+    }
+    .stat strong {
+      display: block;
+      font-size: 20px;
+      color: #0f172a;
+    }
+    .stat span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    label {
+      display: block;
+      margin: 10px 0 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    input, select {
+      width: 100%;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-size: 14px;
+      background: #fff;
+    }
+    .hint {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    svg {
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(37, 99, 235, 0.08), transparent 24%),
+        radial-gradient(circle at 80% 70%, rgba(5, 150, 105, 0.08), transparent 26%),
+        #fff;
+    }
+    .link {
+      stroke: #94a3b8;
+      stroke-opacity: 0.55;
+    }
+    .link.prefer {
+      stroke: var(--prefer);
+      stroke-dasharray: 5 4;
+    }
+    .node circle {
+      stroke: #fff;
+      stroke-width: 2;
+      cursor: pointer;
+    }
+    .node text {
+      font-size: 11px;
+      fill: #334155;
+      paint-order: stroke;
+      stroke: #fff;
+      stroke-width: 3px;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
+    .legend {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.92);
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .legend i {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: -1px;
+    }
+    .pill {
+      display: inline-block;
+      padding: 4px 8px;
+      margin: 3px 4px 3px 0;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #3730a3;
+      font-size: 12px;
+    }
+    .detail h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+    .detail h3 {
+      margin: 16px 0 8px;
+      font-size: 14px;
+      color: #334155;
+    }
+    .kv {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 7px 10px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .kv div:nth-child(odd) {
+      color: var(--muted);
+    }
+    .evidence {
+      margin-top: 10px;
+      padding: 10px;
+      border-left: 3px solid #2563eb;
+      background: #f8fafc;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    .empty {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+    .error {
+      margin: 20px;
+      padding: 16px;
+      border-radius: 12px;
+      background: #fff1f2;
+      color: #9f1239;
+      border: 1px solid #fecdd3;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>JD-Skill 图谱预览</h1>
+    <p>基于岗位清洗表和技能抽取结果生成：Job -> REQUIRES_SKILL / PREFERS_SKILL -> Skill</p>
+  </header>
+  <main>
+    <section class="sidebar">
+      <div class="stats" id="stats"></div>
+      <label for="searchInput">搜索岗位 / 技能</label>
+      <input id="searchInput" placeholder="例如 Python、AI、腾讯、RAG" />
+      <label for="categorySelect">技能类别</label>
+      <select id="categorySelect">
+        <option value="">全部类别</option>
+      </select>
+      <label for="relationSelect">关系类型</label>
+      <select id="relationSelect">
+        <option value="">全部关系</option>
+        <option value="REQUIRES_SKILL">REQUIRES_SKILL</option>
+        <option value="PREFERS_SKILL">PREFERS_SKILL</option>
+      </select>
+      <p class="hint">
+        点击节点或连线查看详情。蓝色是岗位，绿色是技能，橙色虚线表示优先/加分技能。
+        如果直接双击 HTML 不能读取 JSON，请在 dataset 目录运行：
+        <br />python -m http.server 8010
+      </p>
+    </section>
+    <section class="graph-panel">
+      <div class="legend">
+        <div><i style="background: var(--job);"></i>Job 岗位</div>
+        <div><i style="background: var(--skill);"></i>Skill 技能</div>
+        <div><i style="background: var(--prefer);"></i>PREFERS_SKILL</div>
+      </div>
+      <svg id="graph"></svg>
+    </section>
+    <section class="detail" id="detail">
+      <h2>详情</h2>
+      <p class="empty">请选择一个岗位、技能或关系。</p>
+    </section>
+  </main>
+
+  <script>
+    const graphPath = "../graph/job_skill_graph.json";
+    const state = { graph: null, selected: null };
+    const svg = document.querySelector("#graph");
+    const detail = document.querySelector("#detail");
+    const searchInput = document.querySelector("#searchInput");
+    const categorySelect = document.querySelector("#categorySelect");
+    const relationSelect = document.querySelector("#relationSelect");
+    const svgNs = "http://www.w3.org/2000/svg";
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function stat(label, value) {
+      return `<div class="stat"><strong>${escapeHtml(value)}</strong><span>${escapeHtml(label)}</span></div>`;
+    }
+
+    function renderStats(meta) {
+      document.querySelector("#stats").innerHTML = [
+        stat("岗位总数", meta.total_jobs),
+        stat("有技能岗位", meta.jobs_with_skills),
+        stat("UI节点", meta.ui_jobs + meta.ui_skills),
+        stat("UI关系", meta.ui_skill_mentions)
+      ].join("");
+    }
+
+    function renderCategoryOptions(nodes) {
+      const categories = [...new Set(nodes.filter(n => n.type === "Skill").map(n => n.category).filter(Boolean))].sort();
+      for (const category of categories) {
+        const option = document.createElement("option");
+        option.value = category;
+        option.textContent = category;
+        categorySelect.appendChild(option);
+      }
+    }
+
+    function filteredGraph() {
+      const query = searchInput.value.trim().toLowerCase();
+      const category = categorySelect.value;
+      const relation = relationSelect.value;
+      const graph = state.graph;
+      const nodeById = new Map(graph.nodes.map(n => [n.id, n]));
+
+      let links = graph.links.filter(link => !relation || link.type === relation);
+      if (category) {
+        links = links.filter(link => nodeById.get(link.target)?.category === category);
+      }
+      if (query) {
+        links = links.filter(link => {
+          const source = nodeById.get(link.source);
+          const target = nodeById.get(link.target);
+          const haystack = [
+            source?.label, source?.company_name, source?.source_name,
+            target?.label, target?.category, link.evidence_sentence
+          ].join(" ").toLowerCase();
+          return haystack.includes(query);
+        });
+      }
+      const ids = new Set();
+      links.forEach(link => {
+        ids.add(link.source);
+        ids.add(link.target);
+      });
+      const nodes = graph.nodes.filter(node => ids.has(node.id));
+      return { nodes, links };
+    }
+
+    function createSvg(tag, attrs = {}) {
+      const element = document.createElementNS(svgNs, tag);
+      for (const [key, value] of Object.entries(attrs)) {
+        element.setAttribute(key, value);
+      }
+      return element;
+    }
+
+    function clearSvg() {
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+    }
+
+    function layoutNodes(nodes, links, width, height) {
+      const jobs = nodes.filter(node => node.type === "Job");
+      const skills = nodes.filter(node => node.type === "Skill");
+      const jobIndex = new Map(jobs.map((node, index) => [node.id, index]));
+      const skillIndex = new Map(skills.map((node, index) => [node.id, index]));
+      const jobSkillCount = new Map(jobs.map(node => [node.id, 0]));
+      links.forEach(link => jobSkillCount.set(link.source, (jobSkillCount.get(link.source) || 0) + 1));
+
+      const jobRows = Math.max(1, Math.ceil(Math.sqrt(jobs.length)));
+      const skillRows = Math.max(1, Math.ceil(Math.sqrt(skills.length)));
+
+      for (const node of jobs) {
+        const index = jobIndex.get(node.id);
+        const row = index % jobRows;
+        const col = Math.floor(index / jobRows);
+        node.x = 80 + col * 52;
+        node.y = 60 + row * Math.max(34, (height - 120) / jobRows);
+        node.r = Math.min(15, 7 + Math.sqrt(jobSkillCount.get(node.id) || 1));
+      }
+
+      for (const node of skills) {
+        const index = skillIndex.get(node.id);
+        const row = index % skillRows;
+        const col = Math.floor(index / skillRows);
+        node.x = width * 0.55 + col * Math.max(70, (width * 0.38) / Math.max(1, Math.ceil(skills.length / skillRows)));
+        node.y = 60 + row * Math.max(34, (height - 120) / skillRows);
+        node.r = Math.min(18, 7 + Math.sqrt(node.job_count || 1) * 1.2);
+      }
+
+      const byId = new Map(nodes.map(node => [node.id, node]));
+      return { nodes, links, byId };
+    }
+
+    function renderGraph() {
+      const width = svg.clientWidth || 800;
+      const height = svg.clientHeight || 600;
+      const graph = filteredGraph();
+      clearSvg();
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+
+      if (!graph.nodes.length) {
+        const empty = createSvg("text", {
+          x: width / 2,
+          y: height / 2,
+          "text-anchor": "middle",
+          fill: "#64748b"
+        });
+        empty.textContent = "没有匹配的图谱数据";
+        svg.appendChild(empty);
+        return;
+      }
+
+      const model = layoutNodes(graph.nodes.map(d => ({ ...d })), graph.links.map(d => ({ ...d })), width, height);
+      const linkGroup = createSvg("g");
+      const nodeGroup = createSvg("g");
+      svg.appendChild(linkGroup);
+      svg.appendChild(nodeGroup);
+
+      for (const link of model.links) {
+        const source = model.byId.get(link.source);
+        const target = model.byId.get(link.target);
+        if (!source || !target) continue;
+        const line = createSvg("line", {
+          x1: source.x,
+          y1: source.y,
+          x2: target.x,
+          y2: target.y,
+          class: `link ${link.type === "PREFERS_SKILL" ? "prefer" : ""}`,
+          "stroke-width": Math.max(1, link.confidence * 2.5)
+        });
+        line.addEventListener("click", () => showLink(link));
+        linkGroup.appendChild(line);
+      }
+
+      for (const node of model.nodes) {
+        const group = createSvg("g", { class: "node", transform: `translate(${node.x},${node.y})` });
+        const circle = createSvg("circle", {
+          r: node.r,
+          fill: node.type === "Job" ? "#2563eb" : "#059669"
+        });
+        const text = createSvg("text", { x: node.r + 4, y: 4 });
+        text.textContent = node.label.length > 18 ? `${node.label.slice(0, 18)}...` : node.label;
+        group.appendChild(circle);
+        group.appendChild(text);
+        group.addEventListener("click", () => showNode(node));
+        nodeGroup.appendChild(group);
+      }
+    }
+
+    function showNode(node) {
+      if (node.type === "Job") {
+        detail.innerHTML = `
+          <h2>${escapeHtml(node.label)}</h2>
+          <div class="kv">
+            <div>节点类型</div><div>Job</div>
+            <div>job_id</div><div>${escapeHtml(node.job_id)}</div>
+            <div>公司</div><div>${escapeHtml(node.company_name || "-")}</div>
+            <div>来源</div><div>${escapeHtml(node.source_name || "-")}</div>
+            <div>类型</div><div>${escapeHtml(node.source_type || "-")}</div>
+            <div>地点</div><div>${escapeHtml(node.location || "-")}</div>
+          </div>
+          <h3>标签</h3>
+          ${(node.tags || []).map(tag => `<span class="pill">${escapeHtml(tag)}</span>`).join("") || '<p class="empty">无标签</p>'}
+        `;
+      } else {
+        detail.innerHTML = `
+          <h2>${escapeHtml(node.name)}</h2>
+          <div class="kv">
+            <div>节点类型</div><div>Skill</div>
+            <div>类别</div><div>${escapeHtml(node.category || "-")}</div>
+            <div>关联岗位</div><div>${escapeHtml(node.job_count || 0)}</div>
+          </div>
+        `;
+      }
+    }
+
+    function showLink(link) {
+      detail.innerHTML = `
+        <h2>${escapeHtml(link.type)}</h2>
+        <div class="kv">
+          <div>技能原文</div><div>${escapeHtml(link.raw_skill)}</div>
+          <div>span</div><div>${escapeHtml(link.span_text)} [${escapeHtml(link.span_start)}, ${escapeHtml(link.span_end)}]</div>
+          <div>证据字段</div><div>${escapeHtml(link.evidence_field)}</div>
+          <div>置信度</div><div>${escapeHtml(link.confidence)}</div>
+          <div>方法</div><div>${escapeHtml(link.match_method)}</div>
+        </div>
+        <h3>证据句</h3>
+        <div class="evidence">${escapeHtml(link.evidence_sentence)}</div>
+      `;
+    }
+
+    async function init() {
+      try {
+        const response = await fetch(graphPath);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        state.graph = await response.json();
+        renderStats(state.graph.meta);
+        renderCategoryOptions(state.graph.nodes);
+        renderGraph();
+      } catch (error) {
+        document.querySelector("main").innerHTML = `
+          <section class="error">
+            <strong>没有读取到图谱数据。</strong>
+            <p>请先在 dataset 目录运行 <code>npm run graph:build</code>。</p>
+            <p>如果浏览器禁止直接读取本地 JSON，请运行 <code>python -m http.server 8010</code> 后访问 <code>http://localhost:8010/ui/job_skill_graph.html</code>。</p>
+            <p>错误：${escapeHtml(error.message)}</p>
+          </section>
+        `;
+      }
+    }
+
+    searchInput.addEventListener("input", renderGraph);
+    categorySelect.addEventListener("change", renderGraph);
+    relationSelect.addEventListener("change", renderGraph);
+    window.addEventListener("resize", renderGraph);
+    init();
+  </script>
+</body>
+</html>

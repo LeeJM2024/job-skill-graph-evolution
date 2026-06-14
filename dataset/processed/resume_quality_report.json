@@ -1,0 +1,163 @@
+{
+  "input_rows": 5000,
+  "output_rows": 5000,
+  "unique_resume_ids": 5000,
+  "pii_matches_in_output": 0,
+  "empty_profile_text": 0,
+  "empty_skill_lists": 0,
+  "unique_profile_texts": 4998,
+  "duplicate_profile_rows": 2,
+  "cross_split_profile_leakage": 0,
+  "label_disagreements": 2033,
+  "split_counts": {
+    "train": 2951,
+    "dev": 995,
+    "test": 1054
+  },
+  "screening_label_counts": {
+    "通过": 2500,
+    "不通过": 2500
+  },
+  "target_job_family_counts": {
+    "算法工程师": 456,
+    "测试工程师": 560,
+    "运维工程师": 443,
+    "移动开发工程师": 372,
+    "前端开发工程师": 655,
+    "后端开发工程师": 660,
+    "数据工程师": 461,
+    "云计算工程师": 377,
+    "全栈开发工程师": 354,
+    "数据分析师": 662
+  },
+  "top_skills": [
+    [
+      "Java",
+      3794
+    ],
+    [
+      "Python",
+      3712
+    ],
+    [
+      "SQL",
+      3072
+    ],
+    [
+      "JavaScript",
+      2983
+    ],
+    [
+      "Go",
+      2464
+    ],
+    [
+      "MySQL",
+      2048
+    ],
+    [
+      "MongoDB",
+      1651
+    ],
+    [
+      "Tableau",
+      1123
+    ],
+    [
+      "Power BI",
+      1123
+    ],
+    [
+      "FineBI",
+      1123
+    ],
+    [
+      "Pandas",
+      1118
+    ],
+    [
+      "NumPy",
+      1118
+    ],
+    [
+      "Redis",
+      1079
+    ],
+    [
+      "PostgreSQL",
+      1050
+    ],
+    [
+      "TensorFlow",
+      1044
+    ],
+    [
+      "PyTorch",
+      1044
+    ],
+    [
+      "Spring Boot",
+      1014
+    ],
+    [
+      "Django",
+      1014
+    ],
+    [
+      "Flask",
+      1014
+    ],
+    [
+      "HTML",
+      1009
+    ],
+    [
+      "CSS",
+      1009
+    ],
+    [
+      "React",
+      1009
+    ],
+    [
+      "Vue",
+      1009
+    ],
+    [
+      "Hadoop",
+      1004
+    ],
+    [
+      "Spark",
+      1004
+    ],
+    [
+      "Docker",
+      820
+    ],
+    [
+      "Kubernetes",
+      820
+    ],
+    [
+      "Linux",
+      643
+    ],
+    [
+      "Terraform",
+      604
+    ],
+    [
+      "AWS",
+      594
+    ]
+  ],
+  "skill_level_alignment_warnings": {},
+  "excluded_sensitive_fields": [
+    "姓名",
+    "性别",
+    "年龄",
+    "电话",
+    "邮箱"
+  ]
+}

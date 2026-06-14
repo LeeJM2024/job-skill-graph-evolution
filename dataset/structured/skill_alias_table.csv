@@ -1,0 +1,159 @@
+﻿raw_skill,normalized_skill,category,source,confidence
+Agent,AI Agent,数据与算法,seed,0.80
+智能体,AI Agent,数据与算法,seed,0.90
+AIGC,AIGC,数据与算法,seed,1.00
+Android,Android,移动开发,seed,1.00
+Android (Kotlin),Android,移动开发,existing_skill_aliases_combo,0.75
+Angular,Angular,前端技术,seed,1.00
+ARM,ARM,AI基础设施,seed,1.00
+昇腾,Ascend,AI基础设施,seed,0.90
+自动化测试,Automated Testing,测试工具,seed,0.90
+AWS,AWS,云计算/运维,seed,1.00
+AWS/Azure,AWS,云计算/运维,existing_skill_aliases_combo,0.75
+AWS/Azure,Azure,云计算/运维,existing_skill_aliases_combo,0.75
+Azure,Azure,云计算/运维,seed,1.00
+C#,C#,编程语言,seed,1.00
+C++,C++,编程语言,seed,1.00
+CI/CD,CI/CD,云计算/运维,seed,1.00
+ClickHouse,ClickHouse,数据库,seed,1.00
+Cocos,Cocos,游戏开发,seed,1.00
+ComfyUI,ComfyUI,数据与算法,seed,1.00
+计算机视觉,Computer Vision,数据与算法,seed,0.90
+CSS,CSS,前端技术,seed,1.00
+HTML/CSS,CSS,前端技术,existing_skill_aliases_combo,0.75
+CUDA,CUDA,AI基础设施,seed,1.00
+CXL,CXL,AI基础设施,seed,1.00
+数据仓库,Data Warehouse,数据与算法,seed,0.90
+深度学习,Deep Learning,数据与算法,seed,0.90
+DevOps,DevOps,云计算/运维,seed,1.00
+分布式推理,Distributed Inference,AI基础设施,seed,0.95
+分布式训练,Distributed Training,AI基础设施,seed,0.95
+Django,Django,后端技术,seed,1.00
+Django/Flask,Django,后端技术,existing_skill_aliases_combo,0.75
+Docker,Docker,云计算/运维,seed,1.00
+Docker/Kubernetes,Docker,云计算/运维,existing_skill_aliases_combo,0.75
+DPDK,DPDK,AI基础设施,seed,1.00
+Elasticsearch,Elasticsearch,数据库,seed,1.00
+ES,Elasticsearch,数据库,seed,0.70
+ETL,ETL,数据与算法,seed,1.00
+FastAPI,FastAPI,后端技术,seed,1.00
+FineBI,FineBI,数据与算法,seed,1.00
+Tableau/Power BI/FineBI,FineBI,数据与算法,existing_skill_aliases_combo,0.75
+Django/Flask,Flask,后端技术,existing_skill_aliases_combo,0.75
+Flask,Flask,后端技术,seed,1.00
+Flink,Flink,数据与算法,seed,1.00
+Flutter,Flutter,移动开发,seed,1.00
+React Native/Flutter,Flutter,移动开发,existing_skill_aliases_combo,0.75
+Flux,Flux,数据与算法,seed,0.85
+Go,Go,编程语言,seed,1.00
+Golang,Go,编程语言,seed,0.95
+GPU,GPU,AI基础设施,seed,1.00
+Grafana,Grafana,云计算/运维,seed,1.00
+Hadoop,Hadoop,数据与算法,seed,1.00
+Hadoop/Spark,Hadoop,数据与算法,existing_skill_aliases_combo,0.75
+HTML,HTML,前端技术,seed,1.00
+HTML/CSS,HTML,前端技术,existing_skill_aliases_combo,0.75
+iOS,iOS,移动开发,seed,1.00
+iOS (Swift),iOS,移动开发,existing_skill_aliases_combo,0.75
+Java,Java,编程语言,seed,1.00
+JavaScript,JavaScript,编程语言,seed,1.00
+JMeter,JMeter,测试工具,seed,1.00
+Kafka,Kafka,数据与算法,seed,1.00
+Kafka/RabbitMQ,Kafka,数据与算法,existing_skill_aliases_combo,0.75
+Android (Kotlin),Kotlin,移动开发,existing_skill_aliases_combo,0.75
+Kotlin,Kotlin,移动开发,seed,1.00
+Docker/Kubernetes,Kubernetes,云计算/运维,existing_skill_aliases_combo,0.75
+K8s,Kubernetes,云计算/运维,seed,0.98
+Kubernetes,Kubernetes,云计算/运维,seed,1.00
+容器编排,Kubernetes,云计算/运维,seed,0.90
+KVM,KVM,AI基础设施,seed,1.00
+LangChain,LangChain,数据与算法,seed,1.00
+LLM,Large Language Model,数据与算法,seed,0.95
+大模型,Large Language Model,数据与算法,seed,0.90
+大语言模型,Large Language Model,数据与算法,seed,0.90
+Linux,Linux,云计算/运维,seed,1.00
+LLVM,LLVM,AI基础设施,seed,1.00
+机器学习,Machine Learning,数据与算法,seed,0.90
+微服务,Microservices,后端技术,seed,0.90
+Midjourney,Midjourney,数据与算法,seed,1.00
+Milvus,Milvus,数据库,seed,1.00
+MLIR,MLIR,AI基础设施,seed,1.00
+MCP,Model Context Protocol,数据与算法,seed,0.85
+模型推理,Model Inference,AI基础设施,seed,0.90
+模型训练,Model Training,AI基础设施,seed,0.90
+MongoDB,MongoDB,数据库,seed,1.00
+MPI,MPI,AI基础设施,seed,1.00
+多模态,Multimodal AI,数据与算法,seed,0.90
+MyBatis,MyBatis,后端技术,seed,1.00
+MySQL,MySQL,数据库,seed,1.00
+NCCL,NCCL,AI基础设施,seed,1.00
+NLP,NLP,数据与算法,seed,1.00
+自然语言处理,NLP,数据与算法,seed,0.90
+Node.js,Node.js,后端技术,seed,1.00
+NodeJS,Node.js,后端技术,seed,0.95
+NPU,NPU,AI基础设施,seed,1.00
+Numpy,NumPy,数据与算法,seed,1.00
+Pandas/Numpy,NumPy,数据与算法,existing_skill_aliases_combo,0.75
+Oracle,Oracle,数据库,seed,1.00
+Pandas,Pandas,数据与算法,seed,1.00
+Pandas/Numpy,Pandas,数据与算法,existing_skill_aliases_combo,0.75
+PCIe,PCIe,AI基础设施,seed,1.00
+性能测试,Performance Testing,测试工具,seed,0.90
+PostgreSQL,PostgreSQL,数据库,seed,1.00
+Postman,Postman,测试工具,seed,1.00
+Power BI,Power BI,数据与算法,seed,1.00
+Tableau/Power BI/FineBI,Power BI,数据与算法,existing_skill_aliases_combo,0.75
+Prometheus,Prometheus,云计算/运维,seed,1.00
+Prompt,Prompt Engineering,数据与算法,seed,0.85
+System Prompt,Prompt Engineering,数据与算法,seed,0.95
+提示词,Prompt Engineering,数据与算法,seed,0.90
+Python,Python,编程语言,seed,1.00
+PyTorch,PyTorch,数据与算法,seed,1.00
+TensorFlow/PyTorch,PyTorch,数据与算法,existing_skill_aliases_combo,0.75
+QEMU,QEMU,AI基础设施,seed,1.00
+Kafka/RabbitMQ,RabbitMQ,后端技术,existing_skill_aliases_combo,0.75
+RabbitMQ,RabbitMQ,后端技术,seed,1.00
+RAG,RAG,数据与算法,seed,1.00
+RDMA,RDMA,AI基础设施,seed,1.00
+React,React,前端技术,seed,1.00
+React/Vue,React,前端技术,existing_skill_aliases_combo,0.75
+React Native,React Native,移动开发,seed,1.00
+React Native/Flutter,React Native,移动开发,existing_skill_aliases_combo,0.75
+Redis,Redis,数据库,seed,1.00
+Redux,Redux,未分类,existing_skill_aliases,1.00
+Redux/Vuex,Redux,未分类,existing_skill_aliases_combo,0.75
+Rust,Rust,编程语言,seed,1.00
+Scikit-learn,Scikit-learn,数据与算法,seed,1.00
+sklearn,Scikit-learn,数据与算法,seed,0.95
+安全测试,Security Testing,测试工具,seed,0.90
+Selenium,Selenium,测试工具,seed,1.00
+SGLang,SGLang,AI基础设施,seed,1.00
+Hadoop/Spark,Spark,数据与算法,existing_skill_aliases_combo,0.75
+Spark,Spark,数据与算法,seed,1.00
+SPDK,SPDK,AI基础设施,seed,1.00
+Spring Boot,Spring Boot,后端技术,seed,1.00
+SpringBoot,Spring Boot,后端技术,seed,0.95
+Spring Cloud,Spring Cloud,后端技术,seed,1.00
+SpringCloud,Spring Cloud,后端技术,seed,0.95
+SQL,SQL,编程语言,seed,1.00
+Stable Diffusion,Stable Diffusion,数据与算法,seed,1.00
+iOS (Swift),Swift,移动开发,existing_skill_aliases_combo,0.75
+Swift,Swift,移动开发,seed,1.00
+Tableau,Tableau,数据与算法,seed,1.00
+Tableau/Power BI/FineBI,Tableau,数据与算法,existing_skill_aliases_combo,0.75
+TensorFlow,TensorFlow,数据与算法,seed,1.00
+TensorFlow/PyTorch,TensorFlow,数据与算法,existing_skill_aliases_combo,0.75
+Terraform,Terraform,云计算/运维,seed,1.00
+Triton,Triton,AI基础设施,seed,0.95
+TypeScript,TypeScript,编程语言,seed,1.00
+Unity,Unity,游戏开发,seed,1.00
+UE5,Unreal Engine,游戏开发,seed,0.95
+Unreal Engine,Unreal Engine,游戏开发,seed,1.00
+向量数据库,Vector Database,数据库,seed,0.90
+虚拟化,Virtualization,AI基础设施,seed,0.90
+vLLM,vLLM,AI基础设施,seed,1.00
+React/Vue,Vue,前端技术,existing_skill_aliases_combo,0.75
+Vue,Vue,前端技术,seed,1.00
+Redux/Vuex,Vuex,未分类,existing_skill_aliases_combo,0.75
+Vuex,Vuex,未分类,existing_skill_aliases,1.00
+x86,x86,AI基础设施,seed,1.00

@@ -1,0 +1,16 @@
+{
+  "HTML/CSS": ["HTML", "CSS"],
+  "React/Vue": ["React", "Vue"],
+  "Redux/Vuex": ["Redux", "Vuex"],
+  "Django/Flask": ["Django", "Flask"],
+  "Kafka/RabbitMQ": ["Kafka", "RabbitMQ"],
+  "AWS/Azure": ["AWS", "Azure"],
+  "Docker/Kubernetes": ["Docker", "Kubernetes"],
+  "Pandas/Numpy": ["Pandas", "NumPy"],
+  "TensorFlow/PyTorch": ["TensorFlow", "PyTorch"],
+  "Hadoop/Spark": ["Hadoop", "Spark"],
+  "Tableau/Power BI/FineBI": ["Tableau", "Power BI", "FineBI"],
+  "Android (Kotlin)": ["Android", "Kotlin"],
+  "iOS (Swift)": ["iOS", "Swift"],
+  "React Native/Flutter": ["React Native", "Flutter"]
+}
