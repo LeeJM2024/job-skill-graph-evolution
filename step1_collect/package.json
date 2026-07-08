@@ -1,0 +1,15 @@
+{
+  "name": "step1-collect",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "collect:pilot": "node collect_mcp_jobs.js --pilot",
+    "collect": "node collect_mcp_jobs.js",
+    "summarize": "node summarize_raw.js"
+  },
+  "dependencies": {
+    "mcp-jobs": "1.4.0",
+    "yaml": "^2.8.1"
+  }
+}

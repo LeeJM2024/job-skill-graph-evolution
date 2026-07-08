@@ -1,4 +1,4 @@
-"""Anonymize and normalize the structured Chinese resume dataset."""
+"""Anonymize and normalize the detailed synthetic Chinese resume dataset."""
 
 from __future__ import annotations
 
@@ -12,29 +12,6 @@ from typing import Any
 
 import pandas as pd
 
-
-SKILL_GROUPS = (
-    ("编程语言", "编程语言熟练度", "programming_language"),
-    ("前端技术", "前端技术熟练度", "frontend"),
-    ("后端技术", "后端技术熟练度", "backend"),
-    ("数据库", "数据库熟练度", "database"),
-    ("云计算/运维", "云计算/运维熟练度", "cloud_devops"),
-    ("数据与算法", "数据与算法熟练度", "data_ai"),
-    ("移动开发", "移动开发熟练度", "mobile"),
-    ("测试工具", "测试工具熟练度", "testing"),
-)
-
-EXPERIENCE_FIELDS = (
-    ("小型企业工作经验", "small_company"),
-    ("中型企业工作经验", "medium_company"),
-    ("大型企业工作经验", "large_company"),
-)
-
-PROJECT_FIELDS = (
-    ("小规模项目", "small"),
-    ("中规模项目", "medium"),
-    ("大规模项目", "large"),
-)
 
 OUTPUT_COLUMNS = (
     "resume_id",
@@ -58,6 +35,26 @@ OUTPUT_COLUMNS = (
     "label_disagreement",
 )
 
+PUBLIC_SCHEMA_REQUIRED_COLUMNS = {
+    "resume_id",
+    "name",
+    "gender",
+    "age",
+    "phone",
+    "email",
+    "split",
+    "target_job_family",
+    "education",
+    "school_category",
+    "major",
+    "english_level",
+    "experience",
+    "projects",
+    "skills_normalized",
+    "skill_levels",
+    "profile_text",
+}
+
 
 def clean(value: Any) -> str:
     if pd.isna(value):
@@ -65,102 +62,14 @@ def clean(value: Any) -> str:
     return " ".join(str(value).strip().split())
 
 
-def split_values(value: Any) -> list[str]:
+def parse_json_cell(value: Any, column: str) -> Any:
     text = clean(value)
-    return [part.strip() for part in text.split(",") if part.strip()] if text else []
-
-
-def stable_id(original_id: Any) -> str:
-    digest = hashlib.sha256(f"chinese-resume-v1:{clean(original_id)}".encode()).hexdigest()
-    return f"resume_{digest[:16]}"
-
-
-def stable_bucket(group_key: str) -> int:
-    return int(hashlib.sha256(group_key.encode()).hexdigest()[:8], 16) % 100
-
-
-def split_name(group_key: str) -> str:
-    bucket = stable_bucket(group_key)
-    if bucket < 60:
-        return "train"
-    if bucket < 80:
-        return "dev"
-    return "test"
-
-
-def load_aliases(path: Path) -> dict[str, list[str]]:
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
-def extract_skills(
-    row: pd.Series, aliases: dict[str, list[str]]
-) -> tuple[dict[str, list[str]], list[str], dict[str, str], list[str]]:
-    raw_groups: dict[str, list[str]] = {}
-    normalized: list[str] = []
-    levels: dict[str, str] = {}
-    warnings: list[str] = []
-
-    for skill_column, level_column, group_name in SKILL_GROUPS:
-        raw_skills = split_values(row.get(skill_column))
-        raw_levels = split_values(row.get(level_column))
-        raw_groups[group_name] = raw_skills
-
-        if raw_skills and len(raw_skills) != len(raw_levels):
-            warnings.append(group_name)
-
-        for index, raw_skill in enumerate(raw_skills):
-            level = raw_levels[index] if index < len(raw_levels) else "未标注"
-            expanded = aliases.get(raw_skill, [raw_skill])
-            for skill in expanded:
-                if skill not in normalized:
-                    normalized.append(skill)
-                previous = levels.get(skill)
-                if not previous or previous == "未标注":
-                    levels[skill] = level
-
-    return raw_groups, normalized, levels, warnings
-
-
-def build_experience(row: pd.Series) -> list[dict[str, str]]:
-    return [
-        {"company_size": key, "duration": value}
-        for column, key in EXPERIENCE_FIELDS
-        if (value := clean(row.get(column)))
-    ]
-
-
-def build_projects(row: pd.Series) -> dict[str, int]:
-    projects: dict[str, int] = {}
-    for column, key in PROJECT_FIELDS:
-        value = clean(row.get(column))
-        projects[key] = int(float(value)) if value else 0
-    return projects
-
-
-def build_profile_text(record: dict[str, Any]) -> str:
-    skill_text = "、".join(
-        f"{skill}（{record['skill_levels'].get(skill, '未标注')}）"
-        for skill in record["skills_normalized"]
-    )
-    experience_text = "；".join(
-        f"{item['company_size']}企业经验：{item['duration']}"
-        for item in record["experience"]
-    )
-    projects = record["projects"]
-    project_text = (
-        f"小型项目{projects['small']}个，中型项目{projects['medium']}个，"
-        f"大型项目{projects['large']}个"
-    )
-    parts = (
-        f"意向岗位：{record['target_job_family']}",
-        f"学历：{record['education']}",
-        f"专业：{record['major']}",
-        f"英语水平：{record['english_level']}",
-        f"技能：{skill_text}",
-        f"工作经验：{experience_text or '未填写'}",
-        f"项目经验：{project_text}",
-    )
-    return "。".join(parts) + "。"
+    if not text:
+        raise ValueError(f"Column {column} contains an empty JSON value.")
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Column {column} contains invalid JSON: {text[:120]}") from exc
 
 
 def contains_pii(text: str) -> bool:
@@ -169,58 +78,57 @@ def contains_pii(text: str) -> bool:
     return bool(phone.search(text) or email.search(text))
 
 
-def process(
-    original_path: Path, revised_path: Path, aliases_path: Path
-) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    original = pd.read_csv(original_path, encoding="utf-8-sig")
-    revised = pd.read_csv(revised_path, encoding="utf-8-sig")
-    if list(original.columns) != list(revised.columns):
-        raise ValueError("Original and revised resume columns do not match")
-    if len(original) != len(revised):
-        raise ValueError("Original and revised resume row counts do not match")
+def process(path: Path) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    frame = pd.read_csv(path, encoding="utf-8-sig")
+    missing = sorted(PUBLIC_SCHEMA_REQUIRED_COLUMNS - set(frame.columns))
+    if missing:
+        raise ValueError(
+            "New resume CSV schema is missing required columns: "
+            + ", ".join(missing)
+        )
 
-    aliases = load_aliases(aliases_path)
     records: list[dict[str, Any]] = []
-    alignment_warnings: Counter[str] = Counter()
-
-    for index, row in revised.iterrows():
-        original_row = original.iloc[index]
-        if clean(row["简历编号"]) != clean(original_row["简历编号"]):
-            raise ValueError(f"Resume ID mismatch at row {index + 2}")
-
-        skills_raw, skills_normalized, skill_levels, warnings = extract_skills(row, aliases)
-        alignment_warnings.update(warnings)
-        original_label = clean(original_row["筛选结果"])
-        revised_label = clean(row["筛选结果"])
-        resume_id = stable_id(row["简历编号"])
-
-        record: dict[str, Any] = {
-            "resume_id": resume_id,
-            "profile_hash": "",
-            "dataset_version": "revised_with_original_label_audit",
-            "split": "",
-            "target_job_family": clean(row["意向岗位"]),
-            "education": clean(row["学历层次"]),
-            "school_category": clean(row["院校类别"]),
-            "major": clean(row["专业类别"]),
-            "english_level": clean(row["英语水平"]),
-            "experience": build_experience(row),
-            "projects": build_projects(row),
-            "skills_raw": skills_raw,
-            "skills_normalized": skills_normalized,
-            "skill_levels": skill_levels,
-            "screening_label": revised_label,
-            "screening_label_original": original_label,
-            "screening_label_revised": revised_label,
-            "label_disagreement": original_label != revised_label,
+    for _, row in frame.iterrows():
+        profile_text = clean(row["profile_text"])
+        skills_normalized = parse_json_cell(row.get("skills_normalized"), "skills_normalized")
+        skill_levels = parse_json_cell(row.get("skill_levels"), "skill_levels")
+        record = {
+            "resume_id": clean(row["resume_id"]),
+            "profile_hash": hashlib.sha256(profile_text.encode("utf-8")).hexdigest()[:20],
+            "dataset_version": "detailed_resume_v2_public_schema",
+            "split": clean(row["split"]),
+            "target_job_family": clean(row["target_job_family"]),
+            "education": clean(row["education"]),
+            "school_category": clean(row["school_category"]),
+            "major": clean(row["major"]),
+            "english_level": clean(row["english_level"]),
+            "experience": parse_json_cell(row.get("experience"), "experience"),
+            "projects": parse_json_cell(row.get("projects"), "projects"),
+            "skills_raw": {},
+            "skills_normalized": skills_normalized if isinstance(skills_normalized, list) else [],
+            "skill_levels": skill_levels if isinstance(skill_levels, dict) else {},
+            "profile_text": profile_text,
+            "screening_label": "",
+            "screening_label_original": "",
+            "screening_label_revised": "",
+            "label_disagreement": False,
         }
-        record["profile_text"] = build_profile_text(record)
-        record["profile_hash"] = hashlib.sha256(
-            record["profile_text"].encode("utf-8")
-        ).hexdigest()[:20]
-        record["split"] = split_name(record["profile_hash"])
         records.append(record)
 
+    return records, build_quality_report(
+        records,
+        input_rows=len(frame),
+        label_disagreements=0,
+        input_schema="detailed_resume_v2_public_schema",
+    )
+
+
+def build_quality_report(
+    records: list[dict[str, Any]],
+    input_rows: int,
+    label_disagreements: int,
+    input_schema: str,
+) -> dict[str, Any]:
     pii_count = 0
     for record in records:
         content_fields = {
@@ -239,8 +147,9 @@ def process(
     profile_splits: dict[str, set[str]] = {}
     for record in records:
         profile_splits.setdefault(record["profile_hash"], set()).add(record["split"])
-    quality = {
-        "input_rows": len(revised),
+    return {
+        "input_schema": input_schema,
+        "input_rows": input_rows,
         "output_rows": len(records),
         "unique_resume_ids": len({record["resume_id"] for record in records}),
         "pii_matches_in_output": pii_count,
@@ -251,15 +160,13 @@ def process(
         "cross_split_profile_leakage": sum(
             len(splits) > 1 for splits in profile_splits.values()
         ),
-        "label_disagreements": sum(record["label_disagreement"] for record in records),
+        "label_disagreements": label_disagreements,
         "split_counts": dict(split_counts),
         "screening_label_counts": dict(label_counts),
         "target_job_family_counts": dict(job_counts),
         "top_skills": skill_counts.most_common(30),
-        "skill_level_alignment_warnings": dict(alignment_warnings),
-        "excluded_sensitive_fields": ["姓名", "性别", "年龄", "电话", "邮箱"],
+        "excluded_sensitive_fields": ["name", "gender", "age", "phone", "email"],
     }
-    return records, quality
 
 
 def write_jsonl(path: Path, records: list[dict[str, Any]]) -> None:
@@ -335,13 +242,10 @@ def write_pilot_sample(output_dir: Path, records: list[dict[str, Any]]) -> None:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--original", type=Path, default=Path("resume/Chinese_resume_data.csv")
-    )
-    parser.add_argument(
-        "--revised", type=Path, default=Path("resume/revise_Chinese_resume_data.csv")
-    )
-    parser.add_argument(
-        "--aliases", type=Path, default=Path("config/skill_aliases.json")
+        "--input",
+        type=Path,
+        default=Path("resume/synthetic_detailed_resumes.csv"),
+        help="Public-schema detailed resume CSV.",
     )
     parser.add_argument("--output-dir", type=Path, default=Path("processed"))
     return parser.parse_args()
@@ -349,7 +253,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    records, quality = process(args.original, args.revised, args.aliases)
+    records, quality = process(args.input)
     jsonl_path = args.output_dir / "resumes_anonymized.jsonl"
     csv_path = args.output_dir / "resumes_anonymized.csv"
     quality_path = args.output_dir / "resume_quality_report.json"

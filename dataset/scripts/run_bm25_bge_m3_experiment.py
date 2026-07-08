@@ -27,7 +27,7 @@ from app.services.chinese_bm25_service import ChineseBM25Service  # noqa: E402
 DEFAULT_RESUMES = DATASET_DIR / "annotations" / "pilot_resumes_30.jsonl"
 DEFAULT_OUTPUT = DATASET_DIR / "retrieval" / "test_30"
 DEFAULT_FAMILY_KEYWORDS = DATASET_DIR / "config" / "job_family_keywords.json"
-DEFAULT_RESUME_MASTER = DATASET_DIR / "processed" / "resumes_anonymized.jsonl"
+DEFAULT_RESUME_MASTER = DATASET_DIR / "resume" / "synthetic_detailed_resumes.jsonl"
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:

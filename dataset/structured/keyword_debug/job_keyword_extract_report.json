@@ -1,0 +1,529 @@
+{
+  "input_jobs": 50,
+  "jobs_with_keywords": 50,
+  "job_keyword_coverage": 1.0,
+  "unique_keywords": 197,
+  "job_keyword_mentions": 859,
+  "min_auto_doc_count": 2,
+  "max_keywords_per_job": 220,
+  "category_counts": {
+    "岗位标签": 57,
+    "自动短语": 50,
+    "岗位角色": 31,
+    "AI与大模型": 20,
+    "数据与算法": 7,
+    "AI基础设施": 6,
+    "产品运营": 5,
+    "软件工程": 3,
+    "编程语言": 3,
+    "AI应用": 3,
+    "项目管理": 2,
+    "游戏开发": 2,
+    "数据分析": 1,
+    "游戏美术": 1,
+    "云原生与运维": 1,
+    "测试工具": 1,
+    "数据工程": 1,
+    "前端技术": 1,
+    "学历要求": 1,
+    "测试质量": 1
+  },
+  "keyword_type_counts": {
+    "title_or_tag": 87,
+    "auto_english": 51,
+    "technology": 42,
+    "auto_phrase": 8,
+    "business": 7,
+    "role": 1,
+    "constraint": 1
+  },
+  "top_keywords": [
+    {
+      "normalized_keyword": "AI",
+      "category": "AI与大模型",
+      "doc_count": 50,
+      "mention_count": 50
+    },
+    {
+      "normalized_keyword": "Large Language Model",
+      "category": "数据与算法",
+      "doc_count": 50,
+      "mention_count": 50
+    },
+    {
+      "normalized_keyword": "人工智能",
+      "category": "AI与大模型",
+      "doc_count": 50,
+      "mention_count": 50
+    },
+    {
+      "normalized_keyword": "人工智能与大模型",
+      "category": "AI与大模型",
+      "doc_count": 50,
+      "mention_count": 50
+    },
+    {
+      "normalized_keyword": "人工智能与大模型岗位群",
+      "category": "岗位标签",
+      "doc_count": 50,
+      "mention_count": 50
+    },
+    {
+      "normalized_keyword": "大模型",
+      "category": "AI与大模型",
+      "doc_count": 50,
+      "mention_count": 50
+    },
+    {
+      "normalized_keyword": "产品",
+      "category": "岗位标签",
+      "doc_count": 25,
+      "mention_count": 25
+    },
+    {
+      "normalized_keyword": "Agent",
+      "category": "AI与大模型",
+      "doc_count": 17,
+      "mention_count": 17
+    },
+    {
+      "normalized_keyword": "AI Agent",
+      "category": "AI与大模型",
+      "doc_count": 17,
+      "mention_count": 17
+    },
+    {
+      "normalized_keyword": "三年以上工作经验",
+      "category": "岗位标签",
+      "doc_count": 17,
+      "mention_count": 17
+    },
+    {
+      "normalized_keyword": "CSIG",
+      "category": "岗位标签",
+      "doc_count": 16,
+      "mention_count": 16
+    },
+    {
+      "normalized_keyword": "技术",
+      "category": "岗位标签",
+      "doc_count": 16,
+      "mention_count": 16
+    },
+    {
+      "normalized_keyword": "运营",
+      "category": "产品运营",
+      "doc_count": 15,
+      "mention_count": 15
+    },
+    {
+      "normalized_keyword": "IEG",
+      "category": "岗位标签",
+      "doc_count": 13,
+      "mention_count": 13
+    },
+    {
+      "normalized_keyword": "产品经理",
+      "category": "岗位角色",
+      "doc_count": 13,
+      "mention_count": 13
+    },
+    {
+      "normalized_keyword": "两年以上工作经验",
+      "category": "岗位标签",
+      "doc_count": 12,
+      "mention_count": 12
+    },
+    {
+      "normalized_keyword": "交付",
+      "category": "项目管理",
+      "doc_count": 11,
+      "mention_count": 11
+    },
+    {
+      "normalized_keyword": "PCG",
+      "category": "岗位标签",
+      "doc_count": 9,
+      "mention_count": 9
+    },
+    {
+      "normalized_keyword": "腾讯云",
+      "category": "岗位标签",
+      "doc_count": 9,
+      "mention_count": 9
+    },
+    {
+      "normalized_keyword": "Prompt Engineering",
+      "category": "AI与大模型",
+      "doc_count": 8,
+      "mention_count": 8
+    },
+    {
+      "normalized_keyword": "一年以上工作经验",
+      "category": "岗位标签",
+      "doc_count": 8,
+      "mention_count": 8
+    },
+    {
+      "normalized_keyword": "大语言模型",
+      "category": "AI与大模型",
+      "doc_count": 8,
+      "mention_count": 8
+    },
+    {
+      "normalized_keyword": "AIGC",
+      "category": "AI与大模型",
+      "doc_count": 7,
+      "mention_count": 7
+    },
+    {
+      "normalized_keyword": "LLM",
+      "category": "自动短语",
+      "doc_count": 7,
+      "mention_count": 7
+    },
+    {
+      "normalized_keyword": "RAG",
+      "category": "AI与大模型",
+      "doc_count": 7,
+      "mention_count": 7
+    },
+    {
+      "normalized_keyword": "Prompt",
+      "category": "AI与大模型",
+      "doc_count": 6,
+      "mention_count": 6
+    },
+    {
+      "normalized_keyword": "五年以上工作经验",
+      "category": "岗位标签",
+      "doc_count": 6,
+      "mention_count": 6
+    },
+    {
+      "normalized_keyword": "模型量化",
+      "category": "AI基础设施",
+      "doc_count": 6,
+      "mention_count": 6
+    },
+    {
+      "normalized_keyword": "CDG",
+      "category": "岗位标签",
+      "doc_count": 5,
+      "mention_count": 5
+    },
+    {
+      "normalized_keyword": "公共",
+      "category": "岗位标签",
+      "doc_count": 5,
+      "mention_count": 5
+    },
+    {
+      "normalized_keyword": "腾讯视频",
+      "category": "岗位标签",
+      "doc_count": 5,
+      "mention_count": 5
+    },
+    {
+      "normalized_keyword": "项目管理",
+      "category": "项目管理",
+      "doc_count": 5,
+      "mention_count": 5
+    },
+    {
+      "normalized_keyword": "Coding",
+      "category": "自动短语",
+      "doc_count": 4,
+      "mention_count": 4
+    },
+    {
+      "normalized_keyword": "MCP",
+      "category": "自动短语",
+      "doc_count": 4,
+      "mention_count": 4
+    },
+    {
+      "normalized_keyword": "Model Context Protocol",
+      "category": "数据与算法",
+      "doc_count": 4,
+      "mention_count": 4
+    },
+    {
+      "normalized_keyword": "WXG",
+      "category": "岗位标签",
+      "doc_count": 4,
+      "mention_count": 4
+    },
+    {
+      "normalized_keyword": "品牌",
+      "category": "产品运营",
+      "doc_count": 4,
+      "mention_count": 4
+    },
+    {
+      "normalized_keyword": "应用宝",
+      "category": "岗位标签",
+      "doc_count": 4,
+      "mention_count": 4
+    },
+    {
+      "normalized_keyword": "高并发",
+      "category": "软件工程",
+      "doc_count": 4,
+      "mention_count": 4
+    },
+    {
+      "normalized_keyword": "AI+",
+      "category": "AI与大模型",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "ClawPet",
+      "category": "自动短语",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "Clawpet-",
+      "category": "自动短语",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "Clawpet-端游",
+      "category": "岗位标签",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "Go",
+      "category": "编程语言",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "Memory",
+      "category": "自动短语",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "Model Inference",
+      "category": "AI基础设施",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "Multimodal AI",
+      "category": "数据与算法",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "PUBG",
+      "category": "自动短语",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "TEG",
+      "category": "岗位标签",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "Tools",
+      "category": "自动短语",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "Use",
+      "category": "自动短语",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "多模态AI",
+      "category": "AI与大模型",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "大模型推理",
+      "category": "AI与大模型",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "工作流",
+      "category": "自动短语",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "数据分析",
+      "category": "数据分析",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "架构设计",
+      "category": "软件工程",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "模型微调",
+      "category": "AI与大模型",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "模型推理",
+      "category": "AI基础设施",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "设计",
+      "category": "岗位标签",
+      "doc_count": 3,
+      "mention_count": 3
+    },
+    {
+      "normalized_keyword": "3D",
+      "category": "游戏美术",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "AI-",
+      "category": "AI与大模型",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "AI前线部署工程师FDE",
+      "category": "岗位角色",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "badcase",
+      "category": "自动短语",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "Builder",
+      "category": "自动短语",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "Calling",
+      "category": "自动短语",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "China-Shenzhen",
+      "category": "自动短语",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "CI/CD",
+      "category": "云原生与运维",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "DeepSeek",
+      "category": "自动短语",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "Demo",
+      "category": "自动短语",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "Diffusion",
+      "category": "自动短语",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "Facebook",
+      "category": "自动短语",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "Fatshark",
+      "category": "自动短语",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "FDE",
+      "category": "自动短语",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "Funcom",
+      "category": "自动短语",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "Function",
+      "category": "自动短语",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "Go/Python",
+      "category": "自动短语",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "Goddess",
+      "category": "自动短语",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "GPT/Claude",
+      "category": "自动短语",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "Harness",
+      "category": "自动短语",
+      "doc_count": 2,
+      "mention_count": 2
+    },
+    {
+      "normalized_keyword": "Honor",
+      "category": "自动短语",
+      "doc_count": 2,
+      "mention_count": 2
+    }
+  ],
+  "method": "seed_dictionary + regex_english + regex_chinese_phrase + title_tag_terms",
+  "outputs": {
+    "vocabulary_csv": "structured\\keyword_debug\\job_keyword_vocabulary.csv",
+    "mentions_jsonl": "structured\\keyword_debug\\job_keyword_mentions.jsonl",
+    "mentions_csv": "structured\\keyword_debug\\job_keyword_mentions.csv",
+    "report_json": "structured\\keyword_debug\\job_keyword_extract_report.json"
+  }
+}

@@ -17,8 +17,8 @@
     "pipeline": "npm run collect && npm run normalize",
     "graph:build": "python scripts/build_neo4j_job_skill_graph.py",
     "graph:import": "python scripts/build_neo4j_job_skill_graph.py --import-neo4j",
-    "graph:ui": "python -m http.server 8010"
-  },
-  "dependencies": {},
-  "devDependencies": {}
+    "graph:ui": "python -m http.server 8010",
+    "extract:job-keywords": "python scripts/extract_job_keywords.py",
+    "synthesize:resumes": "python scripts/synthesize_detailed_resumes.py"
+  }
 }

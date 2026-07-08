@@ -1,163 +1,162 @@
 {
-  "input_rows": 5000,
-  "output_rows": 5000,
-  "unique_resume_ids": 5000,
+  "input_schema": "detailed_resume_v2_public_schema",
+  "input_rows": 5500,
+  "output_rows": 5500,
+  "unique_resume_ids": 5500,
   "pii_matches_in_output": 0,
   "empty_profile_text": 0,
   "empty_skill_lists": 0,
-  "unique_profile_texts": 4998,
-  "duplicate_profile_rows": 2,
+  "unique_profile_texts": 5500,
+  "duplicate_profile_rows": 0,
   "cross_split_profile_leakage": 0,
-  "label_disagreements": 2033,
+  "label_disagreements": 0,
   "split_counts": {
-    "train": 2951,
-    "dev": 995,
-    "test": 1054
+    "train": 3303,
+    "test": 1073,
+    "dev": 1124
   },
   "screening_label_counts": {
-    "通过": 2500,
-    "不通过": 2500
+    "": 5500
   },
   "target_job_family_counts": {
-    "算法工程师": 456,
-    "测试工程师": 560,
-    "运维工程师": 443,
-    "移动开发工程师": 372,
-    "前端开发工程师": 655,
-    "后端开发工程师": 660,
-    "数据工程师": 461,
-    "云计算工程师": 377,
-    "全栈开发工程师": 354,
-    "数据分析师": 662
+    "算法工程师": 493,
+    "测试工程师": 616,
+    "运维工程师": 489,
+    "移动开发工程师": 411,
+    "前端开发工程师": 718,
+    "后端开发工程师": 725,
+    "数据工程师": 512,
+    "云计算工程师": 407,
+    "全栈开发工程师": 396,
+    "数据分析师": 733
   },
   "top_skills": [
     [
-      "Java",
-      3794
+      "Python",
+      4594
     ],
     [
-      "Python",
-      3712
+      "Java",
+      4403
     ],
     [
       "SQL",
-      3072
+      3456
     ],
     [
       "JavaScript",
-      2983
+      3284
     ],
     [
       "Go",
-      2464
+      2790
     ],
     [
       "MySQL",
-      2048
-    ],
-    [
-      "MongoDB",
-      1651
-    ],
-    [
-      "Tableau",
-      1123
-    ],
-    [
-      "Power BI",
-      1123
-    ],
-    [
-      "FineBI",
-      1123
-    ],
-    [
-      "Pandas",
-      1118
-    ],
-    [
-      "NumPy",
-      1118
+      2673
     ],
     [
       "Redis",
-      1079
+      2031
+    ],
+    [
+      "MongoDB",
+      1836
     ],
     [
       "PostgreSQL",
-      1050
-    ],
-    [
-      "TensorFlow",
-      1044
-    ],
-    [
-      "PyTorch",
-      1044
-    ],
-    [
-      "Spring Boot",
-      1014
-    ],
-    [
-      "Django",
-      1014
-    ],
-    [
-      "Flask",
-      1014
-    ],
-    [
-      "HTML",
-      1009
-    ],
-    [
-      "CSS",
-      1009
-    ],
-    [
-      "React",
-      1009
+      1819
     ],
     [
       "Vue",
-      1009
+      1525
     ],
     [
-      "Hadoop",
-      1004
-    ],
-    [
-      "Spark",
-      1004
-    ],
-    [
-      "Docker",
-      820
-    ],
-    [
-      "Kubernetes",
-      820
+      "React",
+      1525
     ],
     [
       "Linux",
-      643
+      1493
     ],
     [
-      "Terraform",
-      604
+      "Kubernetes",
+      1460
     ],
     [
-      "AWS",
-      594
+      "Docker",
+      1453
+    ],
+    [
+      "代码测试",
+      1412
+    ],
+    [
+      "架构设计",
+      1400
+    ],
+    [
+      "代码生成",
+      1369
+    ],
+    [
+      "Kafka",
+      1368
+    ],
+    [
+      "分布式系统",
+      1354
+    ],
+    [
+      "高并发",
+      1353
+    ],
+    [
+      "系统设计",
+      1299
+    ],
+    [
+      "云计算",
+      1285
+    ],
+    [
+      "Spark",
+      1275
+    ],
+    [
+      "FineBI",
+      1273
+    ],
+    [
+      "Tableau",
+      1243
+    ],
+    [
+      "Power BI",
+      1243
+    ],
+    [
+      "Pandas",
+      1239
+    ],
+    [
+      "NumPy",
+      1239
+    ],
+    [
+      "DevOps",
+      1169
+    ],
+    [
+      "CI/CD",
+      1167
     ]
   ],
-  "skill_level_alignment_warnings": {},
   "excluded_sensitive_fields": [
-    "姓名",
-    "性别",
-    "年龄",
-    "电话",
-    "邮箱"
+    "name",
+    "gender",
+    "age",
+    "phone",
+    "email"
   ]
 }

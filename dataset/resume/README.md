@@ -137,3 +137,59 @@ If you reference this dataset in academic work, please cite it as follows:
 ## More Information
 
 For further details on the dataset creation process and intended uses, please refer to our project documentation
+
+## 中文详细合成简历数据集
+
+新增文件：
+
+```text
+synthetic_detailed_resumes.jsonl
+synthetic_detailed_resumes.csv
+synthetic_detailed_resumes_sample_50.jsonl
+synthetic_detailed_resumes_report.json
+```
+
+运行命令：
+
+```powershell
+cd B:\揭榜挂帅\dataset
+npm run synthesize:resumes
+```
+
+该版本由 `scripts/synthesize_detailed_resumes.py` 生成，并使用 `structured/job_keyword_vocabulary_enterprise.csv` 的企业岗位聚合关键词增强。生成过程不使用任何具体 `job_id` 的 JD，因此不会把某个目标岗位的答案直接写进简历。
+
+学历分布被固定为：
+
+```text
+本科：3000
+硕士研究生：1500
+博士研究生：500
+专科：500
+```
+
+正式输出采用英文公开简历 schema，不保留生成继承关系字段。每条记录包含合成身份字段，核心字段包括：
+
+```text
+resume_id
+name
+gender
+age
+phone
+email
+split
+target_job_family
+education
+degree
+school_category
+major
+english_level
+years_experience
+experience
+projects
+skills_normalized
+skill_levels
+job_keywords_used
+profile_text
+```
+
+`phone` 和 `email` 是确定性生成的合成联系方式，不来自原始数据。下游匹配实验建议使用 `profile_text` 字段作为新的简历文本输入；运行 `npm run process:resumes` 后，`processed/resumes_anonymized.*` 会去掉 `name`、`gender`、`age`、`phone`、`email` 等个人字段。

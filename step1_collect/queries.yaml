@@ -1,0 +1,54 @@
+current_window: "2026"
+notes:
+  - "Step 1 only collects current job postings. Do not clean, deduplicate, extract skills, or infer trends here."
+  - "Use low frequency requests, cache every result, and follow platform terms. This file defines a fixed query plan for reproducibility."
+
+groups:
+  - group: emerging_agent
+    target_min_raw: 500
+    keywords:
+      - "AI Agent工程师"
+      - "智能体开发工程师"
+      - "Agent应用开发"
+      - "大模型应用工程师"
+      - "RAG工程师"
+      - "MCP开发工程师"
+    cities:
+      - "全国"
+      - "北京"
+      - "上海"
+      - "深圳"
+      - "杭州"
+      - "广州"
+
+  - group: existing_java
+    target_min_raw: 800
+    keywords:
+      - "Java开发工程师"
+      - "Java后端工程师"
+      - "高级Java工程师"
+      - "Java架构师"
+    cities:
+      - "全国"
+      - "北京"
+      - "上海"
+      - "深圳"
+      - "杭州"
+      - "广州"
+
+  - group: expansion_it
+    target_min_raw: 1700
+    keywords:
+      - "大数据工程师"
+      - "数据开发工程师"
+      - "物联网开发工程师"
+      - "智能系统工程师"
+      - "算法工程师"
+      - "机器学习工程师"
+    cities:
+      - "全国"
+      - "北京"
+      - "上海"
+      - "深圳"
+      - "杭州"
+      - "广州"
