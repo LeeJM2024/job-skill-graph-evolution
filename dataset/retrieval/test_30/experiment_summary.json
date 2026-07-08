@@ -2,53 +2,54 @@
   "experiment": "30_resume_bm25_bge_m3_v1",
   "resume_count": 30,
   "candidate_pairs": 6000,
-  "unique_candidate_jobs": 587,
+  "unique_candidate_jobs": 854,
   "bm25": {
     "candidate_pairs": 6000,
     "latency_ms": {
-      "min": 17,
-      "mean": 51.2,
-      "p50": 49.0,
-      "p95": 95.2,
-      "max": 144
+      "min": 235,
+      "mean": 304.8667,
+      "p50": 288.0,
+      "p95": 356.2,
+      "max": 684
     }
   },
   "model": {
-    "model_name": "BAAI/bge-m3",
+    "model_name": "D:\\silver_run\\models\\bge-m3",
+    "model_source": "D:\\silver_run\\models\\bge-m3",
     "device": "cuda",
     "dtype": "torch.float16",
     "max_length": 1024,
     "batch_size": 2,
     "embedding_dimension": 1024,
-    "encoded_texts": 617,
-    "wall_seconds": 21.654
+    "encoded_texts": 884,
+    "wall_seconds": 7.582
   },
   "semantic_score": {
-    "min": 0.4076,
-    "mean": 0.5514,
-    "p50": 0.5536,
-    "p95": 0.6172,
-    "max": 0.7212
+    "min": 0.449,
+    "mean": 0.5971,
+    "p50": 0.5991,
+    "p95": 0.6674,
+    "max": 0.7495
   },
   "absolute_rank_change": {
     "min": 0,
-    "mean": 60.3407,
-    "p50": 50.0,
-    "p95": 149.05,
+    "mean": 59.7603,
+    "p50": 51.0,
+    "p95": 146.0,
     "max": 199
   },
   "bm25_semantic_top10_overlap": {
     "min": 0.0,
-    "mean": 0.0267,
-    "p50": 0.0,
-    "p95": 0.155,
-    "max": 0.2
+    "mean": 0.1933,
+    "p50": 0.1,
+    "p95": 0.5,
+    "max": 0.6
   },
   "silver_grade_counts": {
-    "0": 3159,
-    "1": 2445,
-    "2": 378,
-    "3": 18
+    "0": 3034,
+    "1": 2140,
+    "2": 688,
+    "3": 138
   },
   "silver_formula": {
     "semantic_rank_percentile": 0.45,
@@ -62,5 +63,5 @@
     "1": "score>=0.35",
     "0": "otherwise"
   },
-  "total_wall_seconds": 31.218
+  "total_wall_seconds": 12.368
 }
