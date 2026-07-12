@@ -16,7 +16,7 @@
 
 脚本使用：
 
-- 你之前人工拍板的规则，例如 `大模型 -> LLM`、`提示词 -> prompt工程`、`多智能体 -> multi-agent`、`后训练 -> 大模型后训练`、`数据技术语境 -> 数据工程`、`编译器后端 CodeGen 不算后端开发`。
+- 人工拍板的规则，例如 `大模型 -> LLM`、`提示词 -> prompt工程`、`多智能体 -> multi-agent`、`后训练 -> 大模型后训练`、`数据技术语境 -> 数据工程`、`编译器后端 CodeGen 不算后端开发`。
 - 干净金标文件：`skill_extract/job_skill_gold/job_skill_gold_clean.csv`
 
 脚本会从金标 CSV 中读取已确认的 `normalized_skill` 和 `category`，作为 API 抽取时的优先技能本体。如果 clean 版不存在，会自动退回读取原始审稿表 `job_skill_gold_ai_reviewed_all.csv`。
@@ -36,7 +36,7 @@ $env:DEEPSEEK_API_KEY="你的 key"
 npm run extract:job-skills-deepseek -- --limit 20
 ```
 
-也可以写入本地 `dataset/.env`。该文件已经被 `.gitignore` 忽略，不应提交到 GitHub。
+也可以写入本地 `dataset/.env`
 
 GPT/OpenAI-compatible 版：
 
