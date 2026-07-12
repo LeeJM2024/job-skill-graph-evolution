@@ -71,6 +71,23 @@ BASE_FIELDS = [
     "match_method",
 ]
 
+JOB_SKILL_FIELDS = [
+    "job_id",
+    "job_title",
+    "source_type",
+    "source_name",
+    "normalized_skill",
+    "category",
+    "skill_type",
+    "mention_count",
+    "max_confidence",
+    "evidence_count",
+    "evidence_sentences",
+    "evidence_fields",
+    "span_texts",
+    "match_methods",
+]
+
 
 def load_env_file(path: Path | None = None) -> None:
     env_path = path or (DATASET_DIR / ".env")
@@ -324,6 +341,14 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8-sig", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=BASE_FIELDS, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def write_job_skill_csv(path: Path, rows: list[dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8-sig", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=JOB_SKILL_FIELDS, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)
 
@@ -863,6 +888,102 @@ def dedupe_mentions(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return result
 
 
+def aggregate_job_skills(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Merge sentence-level mentions into one Job-Skill row with traceable evidence."""
+    grouped: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in rows:
+        job_id = clean_text(row.get("job_id"))
+        skill = clean_text(row.get("normalized_skill"))
+        if not job_id or not skill:
+            continue
+        key = (job_id, skill)
+        item = grouped.setdefault(
+            key,
+            {
+                "job_id": job_id,
+                "job_title": clean_text(row.get("job_title")),
+                "source_type": clean_text(row.get("source_type")),
+                "source_name": clean_text(row.get("source_name")),
+                "normalized_skill": skill,
+                "category_counts": Counter(),
+                "skill_types": set(),
+                "mentions": [],
+                "evidence_seen": set(),
+            },
+        )
+        category = clean_text(row.get("category")) or "未分类"
+        item["category_counts"][category] += 1
+        item["skill_types"].add(clean_text(row.get("skill_type")) or "required")
+
+        evidence_key = (
+            clean_text(row.get("evidence_sentence")),
+            clean_text(row.get("evidence_field")),
+            clean_text(row.get("span_text")),
+            int(row.get("span_start") or 0),
+            int(row.get("span_end") or 0),
+        )
+        if evidence_key in item["evidence_seen"]:
+            continue
+        item["evidence_seen"].add(evidence_key)
+        item["mentions"].append(
+            {
+                "raw_skill": clean_text(row.get("raw_skill")),
+                "span_text": clean_text(row.get("span_text")),
+                "span_start": int(row.get("span_start") or 0),
+                "span_end": int(row.get("span_end") or 0),
+                "evidence_sentence": clean_text(row.get("evidence_sentence")),
+                "evidence_field": clean_text(row.get("evidence_field")),
+                "confidence": float(row.get("confidence") or 0.0),
+                "match_method": clean_text(row.get("match_method")),
+            }
+        )
+
+    aggregated: list[dict[str, Any]] = []
+    for item in grouped.values():
+        mentions = item["mentions"]
+        category_counts: Counter[str] = item["category_counts"]
+        skill_type = "required" if "required" in item["skill_types"] else "preferred"
+        evidence_sentences = list(dict.fromkeys(mention["evidence_sentence"] for mention in mentions))
+        evidence_fields = list(dict.fromkeys(mention["evidence_field"] for mention in mentions))
+        span_texts = list(dict.fromkeys(mention["span_text"] for mention in mentions))
+        match_methods = list(dict.fromkeys(mention["match_method"] for mention in mentions))
+        aggregated.append(
+            {
+                "job_id": item["job_id"],
+                "job_title": item["job_title"],
+                "source_type": item["source_type"],
+                "source_name": item["source_name"],
+                "normalized_skill": item["normalized_skill"],
+                "category": category_counts.most_common(1)[0][0],
+                "skill_type": skill_type,
+                "mention_count": len(mentions),
+                "max_confidence": max(mention["confidence"] for mention in mentions),
+                "evidence_count": len(evidence_sentences),
+                "evidence_sentences": evidence_sentences,
+                "evidence_fields": evidence_fields,
+                "span_texts": span_texts,
+                "match_methods": match_methods,
+                "evidence": mentions,
+            }
+        )
+    return sorted(aggregated, key=lambda item: (item["job_id"], item["normalized_skill"]))
+
+
+def flatten_job_skill_rows(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    flattened: list[dict[str, Any]] = []
+    for row in rows:
+        flattened.append(
+            {
+                **row,
+                "evidence_sentences": json.dumps(row["evidence_sentences"], ensure_ascii=False),
+                "evidence_fields": json.dumps(row["evidence_fields"], ensure_ascii=False),
+                "span_texts": json.dumps(row["span_texts"], ensure_ascii=False),
+                "match_methods": json.dumps(row["match_methods"], ensure_ascii=False),
+            }
+        )
+    return flattened
+
+
 def resolve_provider_config(args: argparse.Namespace) -> dict[str, str]:
     provider = PROVIDERS[args.provider]
     model = args.model or os.getenv(provider["model_env"], provider["default_model"])
@@ -1034,11 +1155,16 @@ def main() -> None:
             stats["accepted"] += 1
 
     mentions = dedupe_mentions(mentions)
+    job_skills = aggregate_job_skills(mentions)
     output_csv = args.output_dir / f"{provider_config['output_prefix']}.csv"
     output_jsonl = args.output_dir / f"{provider_config['output_prefix']}.jsonl"
+    job_skills_csv = args.output_dir / f"{provider_config['output_prefix']}_by_job.csv"
+    job_skills_jsonl = args.output_dir / f"{provider_config['output_prefix']}_by_job.jsonl"
     report_path = args.output_dir / f"{provider_config['output_prefix']}_report.json"
     write_csv(output_csv, mentions)
     write_jsonl(output_jsonl, mentions)
+    write_job_skill_csv(job_skills_csv, flatten_job_skill_rows(job_skills))
+    write_jsonl(job_skills_jsonl, job_skills)
     report = {
         "input": "direct_jd_text" if args.jd_text else str(args.input),
         "gold": str(args.gold),
@@ -1048,9 +1174,17 @@ def main() -> None:
         "prompt_version": PROMPT_VERSION,
         "jobs": len(jobs),
         "mentions": len(mentions),
+        "job_skill_pairs": len(job_skills),
+        "jobs_with_skills": len({item["job_id"] for item in job_skills}),
         "stats": dict(stats),
         "rejected_samples": rejects[:50],
-        "outputs": {"csv": str(output_csv), "jsonl": str(output_jsonl), "report": str(report_path)},
+        "outputs": {
+            "csv": str(output_csv),
+            "jsonl": str(output_jsonl),
+            "job_skills_csv": str(job_skills_csv),
+            "job_skills_jsonl": str(job_skills_jsonl),
+            "report": str(report_path),
+        },
     }
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(report, ensure_ascii=False, indent=2))

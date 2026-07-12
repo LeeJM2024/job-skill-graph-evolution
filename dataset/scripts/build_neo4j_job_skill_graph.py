@@ -104,6 +104,77 @@ def load_mentions(path: Path, jobs: dict[str, dict[str, Any]]) -> list[dict[str,
     return mentions
 
 
+def aggregate_job_skills(mentions: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Collapse repeated sentence evidence into one relationship per Job-Skill pair."""
+    grouped: dict[tuple[str, str], dict[str, Any]] = {}
+    for mention in mentions:
+        key = (mention["job_id"], mention["skill_name"])
+        item = grouped.setdefault(
+            key,
+            {
+                "job_id": mention["job_id"],
+                "skill_name": mention["skill_name"],
+                "category_counts": Counter(),
+                "skill_types": set(),
+                "evidence": [],
+                "evidence_seen": set(),
+            },
+        )
+        item["category_counts"][mention["category"]] += 1
+        item["skill_types"].add(mention["skill_type"])
+        evidence_key = (
+            mention["evidence_sentence"],
+            mention["evidence_field"],
+            mention["span_text"],
+            mention["span_start"],
+            mention["span_end"],
+        )
+        if evidence_key not in item["evidence_seen"]:
+            item["evidence_seen"].add(evidence_key)
+            item["evidence"].append(
+                {
+                    key: mention[key]
+                    for key in (
+                        "raw_skill",
+                        "evidence_sentence",
+                        "evidence_field",
+                        "span_text",
+                        "span_start",
+                        "span_end",
+                        "skillspan_label",
+                        "confidence",
+                        "match_method",
+                    )
+                }
+            )
+
+    aggregated: list[dict[str, Any]] = []
+    for item in grouped.values():
+        evidence = item["evidence"]
+        primary = max(evidence, key=lambda value: value["confidence"])
+        skill_type = "required" if "required" in item["skill_types"] else "preferred"
+        aggregated.append(
+            {
+                "job_id": item["job_id"],
+                "skill_name": item["skill_name"],
+                "relation_type": "REQUIRES_SKILL" if skill_type == "required" else "PREFERS_SKILL",
+                "category": item["category_counts"].most_common(1)[0][0],
+                "skill_type": skill_type,
+                **primary,
+                "mention_count": len(evidence),
+                "evidence_count": len({value["evidence_sentence"] for value in evidence}),
+                "evidence": evidence,
+                "evidence_sentences": list(
+                    dict.fromkeys(value["evidence_sentence"] for value in evidence)
+                ),
+                "evidence_fields": list(dict.fromkeys(value["evidence_field"] for value in evidence)),
+                "span_texts": list(dict.fromkeys(value["span_text"] for value in evidence)),
+                "match_methods": list(dict.fromkeys(value["match_method"] for value in evidence)),
+            }
+        )
+    return sorted(aggregated, key=lambda item: (item["job_id"], item["skill_name"]))
+
+
 def select_preview_jobs(
     jobs: dict[str, dict[str, Any]],
     mentions: list[dict[str, Any]],
@@ -118,11 +189,12 @@ def select_preview_jobs(
 
 def build_graph_json(
     jobs: dict[str, dict[str, Any]],
-    mentions: list[dict[str, Any]],
+    job_skills: list[dict[str, Any]],
     max_ui_jobs: int,
+    source_mention_count: int,
 ) -> dict[str, Any]:
-    selected_jobs = select_preview_jobs(jobs, mentions, max_ui_jobs)
-    selected_mentions = [item for item in mentions if item["job_id"] in selected_jobs]
+    selected_jobs = select_preview_jobs(jobs, job_skills, max_ui_jobs)
+    selected_job_skills = [item for item in job_skills if item["job_id"] in selected_jobs]
 
     nodes: list[dict[str, Any]] = []
     links: list[dict[str, Any]] = []
@@ -142,7 +214,7 @@ def build_graph_json(
             }
         )
 
-    for item in selected_mentions:
+    for item in selected_job_skills:
         skill_categories.setdefault(item["skill_name"], item["category"])
         skill_counts[item["skill_name"]] += 1
         relation_counts[item["relation_type"]] += 1
@@ -160,7 +232,7 @@ def build_graph_json(
             }
         )
 
-    for index, item in enumerate(selected_mentions, start=1):
+    for index, item in enumerate(selected_job_skills, start=1):
         links.append(
             {
                 "id": f"rel:{index}",
@@ -171,16 +243,17 @@ def build_graph_json(
             }
         )
 
-    all_jobs_with_skills = {item["job_id"] for item in mentions}
-    all_skills = {item["skill_name"] for item in mentions}
+    all_jobs_with_skills = {item["job_id"] for item in job_skills}
+    all_skills = {item["skill_name"] for item in job_skills}
     return {
         "meta": {
             "total_jobs": len(jobs),
             "jobs_with_skills": len(all_jobs_with_skills),
-            "total_skill_mentions": len(mentions),
+            "source_skill_mentions": source_mention_count,
+            "total_job_skill_pairs": len(job_skills),
             "unique_skills": len(all_skills),
             "ui_jobs": len(selected_jobs),
-            "ui_skill_mentions": len(selected_mentions),
+            "ui_job_skill_pairs": len(selected_job_skills),
             "ui_skills": len(skill_categories),
             "relation_counts": dict(relation_counts),
             "category_counts": dict(category_counts),
@@ -214,7 +287,7 @@ LIMIT 20;
 
 def import_to_neo4j(
     jobs: dict[str, dict[str, Any]],
-    mentions: list[dict[str, Any]],
+    job_skills: list[dict[str, Any]],
     uri: str,
     user: str,
     password: str,
@@ -229,7 +302,7 @@ def import_to_neo4j(
         ) from exc
 
     skill_category: dict[str, str] = {}
-    for item in mentions:
+    for item in job_skills:
         skill_category.setdefault(item["skill_name"], item["category"])
 
     job_rows = list(jobs.values())
@@ -262,8 +335,16 @@ def import_to_neo4j(
             """,
             rows=skill_rows,
         )
+        session.run(
+            """
+            UNWIND $rows AS row
+            MATCH (j:Job {job_id: row.job_id})-[r:REQUIRES_SKILL|PREFERS_SKILL]->(s:Skill {name: row.skill_name})
+            DELETE r
+            """,
+            rows=job_skills,
+        )
         for relation_type in ("REQUIRES_SKILL", "PREFERS_SKILL"):
-            rows = [item for item in mentions if item["relation_type"] == relation_type]
+            rows = [item for item in job_skills if item["relation_type"] == relation_type]
             if not rows:
                 continue
             session.run(
@@ -271,17 +352,22 @@ def import_to_neo4j(
                 UNWIND $rows AS row
                 MATCH (j:Job {{job_id: row.job_id}})
                 MATCH (s:Skill {{name: row.skill_name}})
-                MERGE (j)-[r:{relation_type} {{
-                    raw_skill: row.raw_skill,
-                    evidence_sentence: row.evidence_sentence,
-                    span_start: row.span_start,
-                    span_end: row.span_end
-                }}]->(s)
-                SET r.evidence_field = row.evidence_field,
+                MERGE (j)-[r:{relation_type}]->(s)
+                SET r.raw_skill = row.raw_skill,
+                    r.evidence_sentence = row.evidence_sentence,
+                    r.evidence_field = row.evidence_field,
                     r.span_text = row.span_text,
+                    r.span_start = row.span_start,
+                    r.span_end = row.span_end,
                     r.skillspan_label = row.skillspan_label,
                     r.confidence = row.confidence,
-                    r.match_method = row.match_method
+                    r.match_method = row.match_method,
+                    r.mention_count = row.mention_count,
+                    r.evidence_count = row.evidence_count,
+                    r.evidence_sentences = row.evidence_sentences,
+                    r.evidence_fields = row.evidence_fields,
+                    r.span_texts = row.span_texts,
+                    r.match_methods = row.match_methods
                 """,
                 rows=rows,
             )
@@ -308,7 +394,8 @@ def main() -> None:
 
     jobs = load_jobs(args.jobs)
     mentions = load_mentions(args.mentions, jobs)
-    graph = build_graph_json(jobs, mentions, args.max_ui_jobs)
+    job_skills = aggregate_job_skills(mentions)
+    graph = build_graph_json(jobs, job_skills, args.max_ui_jobs, source_mention_count=len(mentions))
 
     graph_path = args.output_dir / "job_skill_graph.json"
     cypher_path = args.output_dir / "neo4j_job_skill_constraints.cypher"
@@ -319,7 +406,8 @@ def main() -> None:
     report_path.write_text(json.dumps(graph["meta"], ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"Jobs: {len(jobs)}")
-    print(f"Skill mentions: {len(mentions)}")
+    print(f"Source skill mentions: {len(mentions)}")
+    print(f"Job-skill pairs: {len(job_skills)}")
     print(f"UI graph nodes: {len(graph['nodes'])}")
     print(f"UI graph links: {len(graph['links'])}")
     print(f"Graph JSON: {graph_path}")
@@ -329,7 +417,7 @@ def main() -> None:
     if args.import_neo4j:
         import_to_neo4j(
             jobs=jobs,
-            mentions=mentions,
+            job_skills=job_skills,
             uri=args.neo4j_uri,
             user=args.neo4j_user,
             password=args.neo4j_password,

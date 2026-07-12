@@ -451,9 +451,12 @@
           <div>证据字段</div><div>${escapeHtml(link.evidence_field)}</div>
           <div>置信度</div><div>${escapeHtml(link.confidence)}</div>
           <div>方法</div><div>${escapeHtml(link.match_method)}</div>
+          <div>合并证据</div><div>${escapeHtml(link.evidence_count || 1)} 条</div>
         </div>
         <h3>证据句</h3>
-        <div class="evidence">${escapeHtml(link.evidence_sentence)}</div>
+        ${(link.evidence_sentences || [link.evidence_sentence]).map(sentence =>
+          `<div class="evidence">${escapeHtml(sentence)}</div>`
+        ).join("")}
       `;
     }
 

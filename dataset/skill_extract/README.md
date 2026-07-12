@@ -9,6 +9,7 @@
  -> DeepSeek 或 GPT/OpenAI-compatible API 技能抽取
  -> skill_extract/output/job_skill_mentions_deepseek.csv/jsonl
  -> skill_extract/output/job_skill_mentions_gpt.csv/jsonl
+ -> 按岗位聚合的 *_by_job.csv/jsonl
  -> 后续可用于 Neo4j 岗位-技能图谱
 ```
 
@@ -124,12 +125,18 @@ npm run eval:job-skills-deepseek -- --split test --offset 40 --limit 20
 ```text
 skill_extract/output/job_skill_mentions_deepseek.csv
 skill_extract/output/job_skill_mentions_deepseek.jsonl
+skill_extract/output/job_skill_mentions_deepseek_by_job.csv
+skill_extract/output/job_skill_mentions_deepseek_by_job.jsonl
 skill_extract/output/job_skill_mentions_deepseek_report.json
 
 skill_extract/output/job_skill_mentions_gpt.csv
 skill_extract/output/job_skill_mentions_gpt.jsonl
+skill_extract/output/job_skill_mentions_gpt_by_job.csv
+skill_extract/output/job_skill_mentions_gpt_by_job.jsonl
 skill_extract/output/job_skill_mentions_gpt_report.json
 ```
+
+`job_skill_mentions_*.csv/jsonl` 是句子级技能证据：同一岗位中的同一技能可以有多条记录。每次抽取完成后，脚本会同时生成 `*_by_job.csv/jsonl`，以 `(job_id, normalized_skill)` 合并为一条岗位-技能关系。汇总记录保留 `mention_count`、`max_confidence` 和全部 `evidence`，其中 CSV 将证据列表序列化为 JSON 字符串。
 
 脚本会校验 API 返回的 `span_text` 必须真实出现在原句中，否则写入 report 的 `rejected_samples`，不进入正式 mentions。
 

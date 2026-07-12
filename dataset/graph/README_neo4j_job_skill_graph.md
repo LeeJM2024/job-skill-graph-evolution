@@ -62,6 +62,8 @@ graph/neo4j_job_skill_constraints.cypher
 
 `job_skill_graph.json` 给本地 UI 使用。默认只导出技能命中最多的 120 个岗位，避免浏览器节点太多卡顿。完整 Neo4j 导入不受这个限制。
 
+图谱会先将句子级抽取结果按 `(job_id, normalized_skill)` 聚合，因此每个岗位和技能在 UI 与 Neo4j 中最多只有一条关系。关系保留出现次数、证据句数量、全部证据句和字段列表；详情面板会显示该关系对应的所有证据句。
+
 如需调整 UI 预览规模：
 
 ```powershell
@@ -108,9 +110,11 @@ python scripts/build_neo4j_job_skill_graph.py --import-neo4j
 ```text
 (j:Job {job_id, job_title, source_type, source_name, company_name, location, source_url, tags})
 (s:Skill {name, category})
-(j)-[:REQUIRES_SKILL {raw_skill, evidence_sentence, span_text, span_start, span_end, confidence}]->(s)
-(j)-[:PREFERS_SKILL {raw_skill, evidence_sentence, span_text, span_start, span_end, confidence}]->(s)
+(j)-[:REQUIRES_SKILL {raw_skill, evidence_sentence, span_text, span_start, span_end, confidence, mention_count, evidence_count, evidence_sentences}]->(s)
+(j)-[:PREFERS_SKILL {raw_skill, evidence_sentence, span_text, span_start, span_end, confidence, mention_count, evidence_count, evidence_sentences}]->(s)
 ```
+
+重复导入时，脚本会先删除当前批次中相同岗位-技能对的旧关系，再按聚合后的数据写回，避免 `Job -> Skill` 出现重复关系。
 
 ## Neo4j 查询例子
 
