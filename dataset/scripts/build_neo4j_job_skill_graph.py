@@ -18,7 +18,7 @@ from typing import Any, Iterable
 
 DATASET_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_JOBS = DATASET_DIR / "cleaned" / "all_jobs_23714_normalized.jsonl"
-DEFAULT_MENTIONS = DATASET_DIR / "structured" / "job_skill_mentions.jsonl"
+DEFAULT_MENTIONS = DATASET_DIR / "skill_extract" / "output" / "job_skill_mentions_deepseek.jsonl"
 DEFAULT_OUTPUT_DIR = DATASET_DIR / "graph"
 
 
@@ -29,7 +29,13 @@ def clean_text(value: Any) -> str:
 
 
 def read_jsonl(path: Path) -> Iterable[dict[str, Any]]:
-    with path.open("r", encoding="utf-8") as handle:
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Input file not found: {path}. "
+            "Run `npm run extract:job-skills-deepseek -- --limit 0` first, "
+            "or pass --mentions to use another mentions jsonl file."
+        )
+    with path.open("r", encoding="utf-8-sig") as handle:
         for line_number, line in enumerate(handle, start=1):
             if not line.strip():
                 continue

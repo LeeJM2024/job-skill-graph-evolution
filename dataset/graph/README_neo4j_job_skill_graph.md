@@ -7,7 +7,7 @@
 ```text
 cleaned/all_jobs_23714_normalized.jsonl
         |
-structured/job_skill_mentions.jsonl
+skill_extract/output/job_skill_mentions_deepseek.jsonl
         |
         v
 graph/job_skill_graph.json
@@ -20,6 +20,12 @@ graph/job_skill_graph.json
 它不替换 BM25 和 embedding。BM25/embedding 负责召回和排序，Neo4j 图谱负责解释岗位需要哪些技能、后续做能力差距分析。
 
 ## 一键生成本地图谱数据
+
+先生成当前 API 技能抽取结果：
+
+```powershell
+npm run extract:job-skills-deepseek -- --limit 0
+```
 
 在 `dataset/` 目录执行：
 
@@ -37,7 +43,13 @@ python scripts/build_neo4j_job_skill_graph.py
 
 ```text
 cleaned/all_jobs_23714_normalized.jsonl
-structured/job_skill_mentions.jsonl
+skill_extract/output/job_skill_mentions_deepseek.jsonl
+```
+
+`skill_extract/output/job_skill_mentions_deepseek.jsonl` 是当前 API 技能抽取流程的正式输出。若要退回旧词典结果，可以显式指定归档中的旧文件：
+
+```powershell
+python scripts/build_neo4j_job_skill_graph.py --mentions 归档文件夹/旧词典和融合抽取/structured/job_skill_mentions.jsonl
 ```
 
 默认输出：

@@ -11,14 +11,18 @@
     "import:government": "python scripts/import_government_jobs.py",
     "merge:jobs": "python scripts/merge_job_datasets.py",
     "process:resumes": "python scripts/process_chinese_resumes.py",
-    "extract:job-skills": "python scripts/extract_job_skills.py",
+    "extract:job-skills-api": "python skill_extract/extract_job_skills_api.py",
+    "extract:job-skills-deepseek": "python skill_extract/extract_job_skills_api.py --provider deepseek",
+    "extract:job-skills-gpt": "python skill_extract/extract_job_skills_api.py --provider gpt",
+    "eval:job-skills-api": "python skill_extract/evaluate_job_skill_api.py",
+    "eval:job-skills-deepseek": "python skill_extract/evaluate_job_skill_api.py --provider deepseek",
+    "eval:job-skills-gpt": "python skill_extract/evaluate_job_skill_api.py --provider gpt",
     "experiment:test30": "python scripts/run_bm25_bge_m3_experiment.py",
     "normalize": "node scripts/normalize_jobs.mjs",
     "pipeline": "npm run collect && npm run normalize",
     "graph:build": "python scripts/build_neo4j_job_skill_graph.py",
     "graph:import": "python scripts/build_neo4j_job_skill_graph.py --import-neo4j",
     "graph:ui": "python -m http.server 8010",
-    "extract:job-keywords": "python scripts/extract_job_keywords.py",
     "synthesize:resumes": "python scripts/synthesize_detailed_resumes.py"
   }
 }
