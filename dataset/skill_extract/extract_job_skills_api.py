@@ -31,7 +31,7 @@ DEFAULT_GOLD = SKILL_EXTRACT_DIR / "job_skill_gold" / "job_skill_gold_clean.csv"
 FALLBACK_GOLD = SKILL_EXTRACT_DIR / "job_skill_gold" / "job_skill_gold_ai_reviewed_all.csv"
 DEFAULT_OUTPUT_DIR = SKILL_EXTRACT_DIR / "output"
 DEFAULT_CACHE = SKILL_EXTRACT_DIR / "cache" / "job_skill_extract_api_cache.jsonl"
-PROMPT_VERSION = "job_skill_api_v1_2026_07_12"
+PROMPT_VERSION = "job_skill_api_v2_2026_07_16_ai_prefix"
 
 PROVIDERS = {
     "deepseek": {
@@ -137,6 +137,8 @@ RULES = """
 27. C/C++ 这种并列表达中，如果 normalized_skill 是 C++，span_text 优先取原文里的 C++，不要取整个 C/C++。
 28. 疑难问题攻坚、问题定位、故障分析、缺陷分析等工程排障语境 -> bug分析。
 29. 优先使用 ontology 中已有 normalized_skill；只有原文出现明确新技术且 ontology 没有时才新增 normalized_skill。不要把同一类技能自由改名，例如 UE 不要改成 Unreal Engine，数据工程不要改成 Spark，模型服务化不要改成模型部署。
+30. AI 开头的泛化短语要按语义归一，不要原样新增成碎片技能：AI辅助代码生成/AI-Coding/AI for Coding/AI IDE/AI Copilot -> ai coding；AI Infra/AI基础架构/AI训练集群/AI云原生基础设施/AI系统/AI网络/AI计算系统 -> AI基础设施；AI网关/AI Serving/AI部署/AI平台/AI中台/AI模型集成/AI端侧落地 -> 模型服务化；AI推理 -> 模型推理，但 AI逻辑推理不抽；AI搜索/AI搜索算法/AI Ranking -> 检索排序算法；AI推荐 -> 推荐系统算法；AI测试/AI质量/AI评测工具质量门禁 -> AI质量工程；AI评测/AI效果偏差分析 -> 大模型评测；AI安全/AI Risk/AI攻防/AI护栏/AI治理/AI审计 -> 大模型安全；AI应用/AI问答/AI智能助手/AI客服/AI文档理解 -> AI应用开发；AI工程/AI工具链/AI开发框架/AI软件架构 -> AI工程化；AI模型开发/AI模型优化/AI算法开发/AI/ML -> Machine Learning；AI辅助仿真/AI辅助文档/AI绘画/AI翻译等应用工具语境 -> AI应用开发。AI、AI项目、AI转型、AI逻辑推理、AI基础、AI Skill、AI Core、AI DSL、AI DSA、AI AF、AI原生TDD 等泛词或不确定缩写不要抽。
+31. AIGC 相关短语统一归一为 AIGC；2D 开头的技术短语统一归一为“2D相关技术”，3A 开头统一归一为“3A相关技术”，3D/4D/5G/6D 等类似“数字+技术字母”独立前缀开头的短语按前缀归一为“前缀相关技术”。但 2G/3G/4G 射频技术优先统一归一为“射频技术”，不要归成 2G/3G/4G 相关技术。
 
 只返回 JSON 对象，格式必须是：
 {"mentions":[{"sentence_id":"...","span_text":"...","normalized_skill":"...","category":"...","skill_type":"required|preferred","confidence":0.0,"reason":"..."}]}
@@ -219,6 +221,8 @@ MANDATORY_LITERAL_RULES = [
     (r"SFT|微调|精调|蒸馏", "大模型微调"),
     (r"DPO|GRPO|强化学习|强化", "大模型强化"),
     (r"vibe\s+coding|AI\s+coding", "ai coding"),
+    (r"AIGC", "AIGC"),
+    (r"(?:2G|3G|4G)\s*射频(?:技术)?|射频技术", "射频技术"),
     (r"harness", "harness工程"),
     (r"AIOps", "AIops"),
     (r"bug分析", "bug分析"),
@@ -244,6 +248,122 @@ MANDATORY_LITERAL_RULES = [
 ]
 
 
+AI_PREFIX_DROP_SKILLS = {
+    "AI",
+    "AI转型",
+    "AI项目",
+    "AI辅助",
+    "AI业务落地",
+    "AI业务内核支持",
+    "AI AF",
+    "AI Core",
+    "AI DSA",
+    "AI DSL",
+    "AI Skill",
+    "AI原生TDD",
+}
+
+
+AI_PREFIX_ACRONYM_ALIASES = {
+    "aidl": "AIDL",
+    "aimet": "AIMET",
+    "aide": "AIDE",
+    "aigb": "AIGB",
+    "aigp": "AIGP",
+    "aidc": "AIDC",
+    "aidd": "AIDD",
+    "aios": "AIOS",
+    "aiot": "AIoT",
+}
+
+
+AI_PREFIX_NORMALIZATION_RULES = [
+    (r"multi[-\s]?agent|多\s*agent|多智能体|agent\s*group", "multi-agent"),
+    (r"agent.*(沙箱|安全|凭据|插件|skill|执行环境|攻击面)|智能体.*(沙箱|安全|凭据|插件|执行环境|攻击面)", "智能体安全"),
+    (r"agent|智能体", "agent"),
+    (r"\btest\b|testing|测试|质量|质效|门禁|写评|测评", "AI质量工程"),
+    (
+        r"coding|coder|copilot|code review|for code|for coding|for se\b|ai\+se|ai4se(?!c)|"
+        r"代码|编程|编码|开发工具|辅助开发|低代码|ide|集成开发环境|软件开发|驱动开发",
+        "ai coding",
+    ),
+    (r"aiops|ai ops|运维|故障诊断|问题分析|问题排查|AI监控", "AIops"),
+    (
+        r"safety|security|ai4sec|guardrail|red team|risk|风险|风控|资损|安全|漏洞|逆向|攻击|攻防|"
+        r"透明度|护栏|合规|伦理|审计|治理|对抗",
+        "大模型安全",
+    ),
+    (r"ranking|搜索|检索|排序", "检索排序算法"),
+    (r"推荐", "推荐系统算法"),
+    (
+        r"infra|infrastructure|ai/ml infra|云原生基础设施|基础设施|集群|算力|workload|workloads|"
+        r"compiler|编译|runtime|运行时|运行栈|stack|软件栈|工程平台|一体机|边缘计算设备|"
+        r"训练网络|训练通信|调度|软硬件|软硬件全栈|基础架构|服务器|工作负载|全链路|传输协议|"
+        r"内存带宽|存储需求|子系统|基础工具|框架内核|框架集成|框架开发|技术栈|AI云|AI网络|"
+        r"网络优化|网络故障定位|AI计算|计算单元|计算系统|AI虚拟化|通信策略|AI互联|分发机制|"
+        r"AI系统保护|组件攻防|AI/ML系统",
+        "AI基础设施",
+    ),
+    (r"accelerator|asic|soc|芯片|物理设计|ip验证|isp|codec|硬件|处理器|加速卡", "芯片"),
+    (r"加速|性能优化|访存|吞吐|延迟|画质提升|AI能效优化", "高性能计算"),
+    (
+        r"api|gateway|网关|serving|saas|服务化|部署|平台|studio|builder|function|中台|能力|"
+        r"在线推理|推理网关|服务落地|服务计费|模型路由|模型集成|模型落地|端侧落地",
+        "模型服务化",
+    ),
+    (r"推理", "模型推理"),
+    (r"训练数据|训练样本|数据管道|数据建设|训练数据管道", "数据工程"),
+    (r"训练|tuning|调优|模型调优|验证", "模型训练"),
+    (r"评测|评估|benchmark|测试集|评测集|效果评估|AI实验分析|AI效果偏差分析", "大模型评测"),
+    (r"for db|ai4db|数据库|数据|sql|schema|db|lakehouse|数据结构|数据开发|数据洞察|标注", "数据工程"),
+    (r"对齐", "模型对齐"),
+    (
+        r"native|应用开发|业务开发|应用|问答|chat|chatbot|bot|tutor|输入法|驱动ui|"
+        r"产品开发|产品功能|客服|客服系统|外呼|数字员工|办公|文档理解|知识库|知识管理|"
+        r"智能助手|助手|助理|协作|协同|建站|全栈开发|产品$|产品运营|AI智能化改造|AI智能辅助|"
+        r"AI绘画|AI翻译|AI辅助FMEA|AI辅助仿真|AI辅助文档|AI辅助校核|AI辅助生产",
+        "AI应用开发",
+    ),
+    (r"workflow|工作流|编排|自动化|任务|流程|AI规划", "AI工作流设计"),
+    (r"aigc|生成|音乐|音效|超分|超清|图像|视频|设计工具|设计|创作|影像|特效|插帧|显示功能|直播|AI色彩影调", "AIGC"),
+    (r"语音|音频", "音频信号处理"),
+    (r"harness", "harness工程"),
+    (r"AI算法|AI模型|算法开发|模型开发|模型优化|模型算法|AI/ML$", "Machine Learning"),
+    (r"AI Engineering|AI for Engineering|AI系统$|AI系统交互|AI系统优化|AI原生系统|AI组件库|AI优化流水线", "AI工程化"),
+    (r"工具|工具链|开发框架|技术框架|技术建设|技术生态|功能优化|功能调试|模块|软件平台|软件架构|软件工程|研发|工程|全栈分析|开发$|架构$|框架$|AI原生$", "AI工程化"),
+]
+
+
+AI_PREFIX_DROP_PATTERNS = [
+    r"银行核心项目|财务应用|面试|证书|论文复现|项目POC|项目落地|运营工具|转型|"
+    r"培训|基础知识|基础原理|技术原理|相关原理|理论|前沿技术研究|开源|实践|知识$|AI研究$|AI技术$",
+    r"逻辑推理|场景孵化|场景落地|企业落地|技术落地|AI落地|解决方案|营销|医疗器械|AI手机|AI眼镜|"
+    r"关卡编辑|AI基础$|AI总结$|AI提效$|AI预测$|AI项目搭建",
+]
+
+
+AI_PREFIX_MANDATORY_RULES = [
+    (r"AI\s*(?:Code Review|Coder|Copilot|Coding)|AI[-\s]?Coding|AI\s*(?:代码|编程|编码|辅助代码生成|辅助代码审查|辅助编程|IDE|集成开发环境|开发工具)", "ai coding"),
+    (r"AI\s*(?:Safety|Security|Risk|Guardrails?)|AI\s*(?:安全|风险|风控|资损|攻防|护栏|合规|审计|治理|对抗)", "大模型安全"),
+    (r"AI\s*(?:Infra|Infrastructure)|AI\s*(?:基础架构|基础设施|训练集群|集群|云原生基础设施|网络|计算系统|虚拟化|系统保护)", "AI基础设施"),
+    (r"AI\s*(?:Gateway|Serving|SaaS)|AI\s*(?:网关|部署|平台|中台|服务化|模型集成|端侧落地|在线推理|推理网关)", "模型服务化"),
+    (r"AI\s*推理(?!能力|总结)", "模型推理"),
+    (r"AI\s*(?:搜索|检索|Ranking|排序)", "检索排序算法"),
+    (r"AI\s*推荐", "推荐系统算法"),
+    (r"AI\s*(?:测试|Testing|质量|质效|门禁|测评)", "AI质量工程"),
+    (r"AI\s*(?:评测|评估|Benchmark|效果偏差分析|实验分析)", "大模型评测"),
+    (r"AI\s*(?:数据|数据库|SQL|标注|训练数据|数据管道)", "数据工程"),
+    (r"AI\s*(?:应用|问答|Chat|ChatBot|智能助手|客服|文档理解|知识库|协作|办公|绘画|翻译|辅助仿真|辅助文档)", "AI应用开发"),
+    (r"AI\s*(?:Workflow|工作流|编排|自动化|规划)", "AI工作流设计"),
+    (r"AI\s*(?:工程|工具链|开发框架|技术框架|软件架构|软件工程|系统优化|组件库)|AI\s+Engineering", "AI工程化"),
+    (r"AI\s*(?:模型开发|模型优化|模型算法|算法开发)|AI/ML", "Machine Learning"),
+    (r"AI\s*(?:加速|性能优化|能效优化|吞吐|延迟)", "高性能计算"),
+    (r"AI\s*(?:ASIC|SoC|芯片|处理器|加速卡)", "芯片"),
+    (r"AI\s*(?:生成|音乐|音效|超分|超清|图像|视频|设计|创作|影像|特效|插帧)", "AIGC"),
+    (r"AI\s*(?:语音|音频)", "音频信号处理"),
+]
+
+
 DATA_ENGINEERING_TRIGGER = re.compile(
     r"数据处理|数据分析|数据平台|数据集|数据治理|数据加工|数据清洗|数据流水线|数据仓库|数据科学|数据生产|数据质检|数据修复|"
     r"数据Pipeline|数据\s*Pipeline|数据ETL|样本构建|训练样本|样本生产|样本相关后台|(?<![A-Za-z])ETL(?![A-Za-z])|(?<![A-Za-z])Spark(?![A-Za-z])|"
@@ -255,6 +375,37 @@ def clean_text(value: Any) -> str:
     if value is None:
         return ""
     return " ".join(str(value).replace("\u3000", " ").split())
+
+
+def normalize_ai_prefixed_skill_name(skill: str) -> str:
+    value = clean_text(skill)
+    if not value.startswith("AI"):
+        return value
+    lowered = value.casefold()
+    if lowered in AI_PREFIX_ACRONYM_ALIASES:
+        return AI_PREFIX_ACRONYM_ALIASES[lowered]
+    if value in AI_PREFIX_DROP_SKILLS:
+        return ""
+    if any(re.search(pattern, value, flags=re.IGNORECASE) for pattern in AI_PREFIX_DROP_PATTERNS):
+        return ""
+    for pattern, normalized_skill in AI_PREFIX_NORMALIZATION_RULES:
+        if re.search(pattern, value, flags=re.IGNORECASE):
+            return normalized_skill
+    return value
+
+
+def normalize_project_skill_name(skill: str) -> str:
+    value = clean_text(skill)
+    if not value:
+        return ""
+    if re.search(r"AIGC", value, flags=re.IGNORECASE):
+        return "AIGC"
+    if re.search(r"(?:2G|3G|4G)\s*射频(?:技术)?|射频技术", value, flags=re.IGNORECASE):
+        return "射频技术"
+    tech_prefix = re.match(r"^([2-9][A-Z])(?![A-Za-z0-9])", value, flags=re.IGNORECASE)
+    if tech_prefix:
+        return f"{tech_prefix.group(1).upper()}相关技术"
+    return normalize_ai_prefixed_skill_name(value)
 
 
 def build_semantic_gold_rules(
@@ -549,7 +700,9 @@ def call_skill_extraction(
         prepared: list[dict[str, Any]] = []
         for mention in mentions:
             sid = str(mention.get("sentence_id", ""))
-            prepared.append(canonicalize_api_mention(mention, sentence_by_id.get(sid, "")))
+            prepared_mention = canonicalize_api_mention(mention, sentence_by_id.get(sid, ""))
+            if clean_text(prepared_mention.get("normalized_skill")):
+                prepared.append(prepared_mention)
         return prepared
 
     def mention_key(mention: dict[str, Any]) -> tuple[str, str, str]:
@@ -653,6 +806,7 @@ def canonicalize_api_mention(mention: dict[str, Any], sentence: str) -> dict[str
     span = clean_text(result.get("span_text"))
     skill = clean_text(result.get("normalized_skill"))
     skill = SKILL_ALIASES.get(skill, skill)
+    skill = normalize_project_skill_name(skill)
 
     lower_span = span.lower()
     if skill == "agent" and any(token in lower_span for token in ["multi-agent", "multi agent", "多智能体", "多 agent"]):
@@ -765,6 +919,16 @@ def build_mandatory_rule_mentions(
             add_mention(sentence_id, match, "agent")
 
         for pattern, skill in MANDATORY_LITERAL_RULES:
+            for match in re.finditer(pattern, sentence, flags=re.IGNORECASE):
+                add_mention(sentence_id, match, skill)
+
+        for match in re.finditer(r"(?<![A-Za-z0-9])([2-9][A-Z])(?![A-Za-z0-9])(?:[^\s，。；、,;和及与]{0,24})", sentence, flags=re.IGNORECASE):
+            prefix = match.group(1).upper()
+            if prefix in {"2G", "3G", "4G"} and re.match(rf"{prefix}\s*射频", match.group(0), flags=re.IGNORECASE):
+                continue
+            add_mention(sentence_id, match, f"{prefix}相关技术")
+
+        for pattern, skill in AI_PREFIX_MANDATORY_RULES:
             for match in re.finditer(pattern, sentence, flags=re.IGNORECASE):
                 add_mention(sentence_id, match, skill)
 
