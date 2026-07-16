@@ -1,0 +1,28 @@
+{
+  "seed": 20260716,
+  "month_start": "2024-12",
+  "month_end": "2026-07",
+  "target_total_jd_min": 2000,
+  "target_total_jd_max": 3000,
+  "standard_job_file": "data/input/standard_job_title_dictionary.csv",
+  "source_job_file": "data/input/job_bigcompany_final.csv",
+  "new_skill_file": "data/input/new_skills_current_dictionary.csv",
+  "output_event_stream_file": "outputs/job_update_event_stream_generated.csv",
+  "output_job_trend_file": "outputs/job_demand_trend_design.csv",
+  "output_skill_trend_file": "outputs/skill_trend_design.csv",
+  "output_skill_frequency_answer_file": "outputs/job_skill_monthly_frequency_answer.csv",
+  "event_stream_fields": [
+    "job_id",
+    "month",
+    "standard_job",
+    "job_title",
+    "job_responsibility",
+    "job_requirement",
+    "skills"
+  ],
+  "excluded_event_stream_fields": [
+    "traditional_skills",
+    "new_skills"
+  ]
+}
+

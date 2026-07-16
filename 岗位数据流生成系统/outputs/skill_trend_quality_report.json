@@ -1,0 +1,30 @@
+{
+  "config_seed": 20260716,
+  "skill_plan_seed": 20260719,
+  "month_start": "2024-12",
+  "month_end": "2026-07",
+  "month_count": 20,
+  "jobs_in_demand_plan": 71,
+  "jobs_with_skill_plan": 69,
+  "jobs_without_skill_plan": [
+    "大数据开发工程师",
+    "FPGA工程师"
+  ],
+  "selected_job_skill_pairs": 4569,
+  "skill_probability_rows": 91380,
+  "skill_stage_counts": {
+    "new": 1051,
+    "traditional": 3518
+  },
+  "skill_trend_type_counts": {
+    "先上升后稳定": 680,
+    "持续上升": 643,
+    "先上升后下降": 422,
+    "后期突增": 310,
+    "持续下降": 741,
+    "稳定型": 1296,
+    "间歇出现": 477
+  },
+  "min_selected_skills_per_generated_job": 24,
+  "max_selected_skills_per_generated_job": 90
+}

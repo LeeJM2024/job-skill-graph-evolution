@@ -1,0 +1,23 @@
+{
+  "standard_job_count": 71,
+  "duplicate_standard_jobs": [],
+  "source_row_count": 12675,
+  "source_rows_used": 12675,
+  "source_rows_without_standard_job": 0,
+  "source_rows_outside_standard_dictionary": 0,
+  "source_rows_without_any_skill": 405,
+  "jobs_with_source_jd": 69,
+  "jobs_without_source_jd": [
+    "大数据开发工程师",
+    "FPGA工程师"
+  ],
+  "jobs_with_skill_pool": 69,
+  "jobs_without_skill_pool": [
+    "大数据开发工程师",
+    "FPGA工程师"
+  ],
+  "total_job_skill_pairs": 57184,
+  "unique_skills_across_jobs": 27550,
+  "new_skill_dictionary_count": 3028,
+  "config_seed": 20260716
+}
