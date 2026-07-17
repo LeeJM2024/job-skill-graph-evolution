@@ -19,11 +19,7 @@ from typing import Any, Iterable
 from . import extract_job_skills_api as extract_api
 
 
-DATASET_DICT_DIR = (
-    Path("C:/Users/LeeJM/Desktop")
-    / "\u63ed\u699c\u6302\u5e05"
-    / "\u5c97\u4f4d\u6570\u636e\u96c6"
-)
+DATASET_DICT_DIR = extract_api.SKILL_EXTRACT_DIR
 DEFAULT_EXTRACTION_DICTIONARY = DATASET_DICT_DIR / "\u6cdb\u62bd\u53d6\u7ea7\u8bcd\u5178.csv"
 DEFAULT_NORMALIZED_DICTIONARY = DATASET_DICT_DIR / "\u5f52\u4e00\u5316\u7ea7\u8bcd\u5178.csv"
 DEFAULT_DISPLAY_DICTIONARY = DATASET_DICT_DIR / "\u5c55\u793a\u7ea7\u8bcd\u5178.csv"

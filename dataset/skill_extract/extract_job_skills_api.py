@@ -25,12 +25,7 @@ from typing import Any, Iterable
 DATASET_DIR = Path(__file__).resolve().parents[1]
 SKILL_EXTRACT_DIR = Path(__file__).resolve().parent
 DEFAULT_INPUT = DATASET_DIR / "cleaned" / "all_jobs_23714_normalized.jsonl"
-DEFAULT_EXTRACTION_DICTIONARY = (
-    Path("C:/Users/LeeJM/Desktop")
-    / "\u63ed\u699c\u6302\u5e05"
-    / "\u5c97\u4f4d\u6570\u636e\u96c6"
-    / "\u6cdb\u62bd\u53d6\u7ea7\u8bcd\u5178.csv"
-)
+DEFAULT_EXTRACTION_DICTIONARY = SKILL_EXTRACT_DIR / "\u6cdb\u62bd\u53d6\u7ea7\u8bcd\u5178.csv"
 DEFAULT_GOLD = DEFAULT_EXTRACTION_DICTIONARY
 DEFAULT_OUTPUT_DIR = SKILL_EXTRACT_DIR / "output"
 DEFAULT_CACHE = SKILL_EXTRACT_DIR / "cache" / "job_skill_extract_api_cache.jsonl"
