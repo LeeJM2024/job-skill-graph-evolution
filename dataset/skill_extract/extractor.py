@@ -9,6 +9,12 @@ from pathlib import Path
 from typing import Any
 
 from . import extract_job_skills_api as api
+from .normalizer import (
+    DEFAULT_DISPLAY_DICTIONARY,
+    DEFAULT_EXTRACTION_DICTIONARY,
+    DEFAULT_NORMALIZED_DICTIONARY,
+    SkillNormalizer,
+)
 
 
 @dataclass(slots=True)
@@ -26,6 +32,13 @@ class SkillExtractionConfig:
     retries: int = 2
     temperature: float = 0.0
     load_env: bool = True
+    extraction_dictionary: Path = DEFAULT_EXTRACTION_DICTIONARY
+    normalized_dictionary: Path = DEFAULT_NORMALIZED_DICTIONARY
+    display_dictionary: Path = DEFAULT_DISPLAY_DICTIONARY
+    normalize_unknowns_with_api: bool = True
+    normalization_cache_path: Path | None = None
+    allow_new_skills: bool = True
+    normalization_batch_size: int = 80
 
 
 @dataclass(slots=True)
@@ -43,11 +56,12 @@ class SkillExtractionResult:
 
 
 class JobSkillExtractor:
-    """Programmatic interface over the existing API-based skill extraction pipeline.
+    """Programmatic interface over the API-based skill extraction pipeline.
 
     This class intentionally reuses the functions in extract_job_skills_api.py
-    instead of duplicating prompt, cache, ontology, normalization, and aggregation
-    behavior. job_update should depend on this class rather than on the CLI.
+    instead of duplicating prompt, cache, dictionary matching, and aggregation
+    behavior. The extractor returns final normalized_skill + kg_display_skill
+    rows, which are the only fields downstream systems should consume.
     """
 
     def __init__(self, config: SkillExtractionConfig | None = None) -> None:
@@ -65,13 +79,17 @@ class JobSkillExtractor:
 
         self.ontology = api.load_gold_ontology(
             self.config.gold_path,
-            max_examples=self.config.max_gold_examples,
         )
         self.ontology_digest = hashlib.sha256(
-            json.dumps(self.ontology, ensure_ascii=False, sort_keys=True).encode("utf-8")
+            json.dumps(self.ontology["skills"], ensure_ascii=False, sort_keys=True).encode("utf-8")
         ).hexdigest()[:16]
         self.system_prompt = api.build_system_prompt(self.ontology, self.config.max_ontology_skills)
         self.cache = api.load_cache(self.config.cache_path)
+        self.normalizer = SkillNormalizer(
+            extraction_dictionary=self.config.extraction_dictionary,
+            normalized_dictionary=self.config.normalized_dictionary,
+            display_dictionary=self.config.display_dictionary,
+        )
 
     def extract(
         self,
@@ -108,9 +126,9 @@ class JobSkillExtractor:
         result = self._call_or_load_cache(job, units, stats)
         pipeline_stats = result.get("pipeline_stats", {})
         stats["first_pass_mentions"] += int(pipeline_stats.get("first_pass_mentions", 0))
+        stats["llm_first_pass_mentions"] += int(pipeline_stats.get("llm_first_pass_mentions", 0))
         stats["pipeline_net_new_mentions"] += int(pipeline_stats.get("net_new_mentions", 0))
-        stats["mandatory_rule_new_mentions"] += int(pipeline_stats.get("mandatory_rule_new_mentions", 0))
-        stats["boundary_filtered_mentions"] += int(pipeline_stats.get("boundary_filtered_mentions", 0))
+        stats["dictionary_literal_mentions"] += int(pipeline_stats.get("dictionary_literal_mentions", 0))
 
         unit_by_id = {unit["sentence_id"]: unit for unit in units}
         for mention in result.get("mentions", []):
@@ -130,10 +148,48 @@ class JobSkillExtractor:
             stats["accepted"] += 1
 
         mentions = api.dedupe_mentions(mentions)
-        job_skills = api.aggregate_job_skills(mentions)
+        candidate_job_skills = api.aggregate_job_skills(mentions)
+        job_skills, normalization_stats = self._normalize_job_skills(candidate_job_skills)
+        stats.update({f"normalization_{key}": value for key, value in normalization_stats.items()})
         stats["mentions"] = len(mentions)
         stats["job_skill_pairs"] = len(job_skills)
         return self._result(job, mentions, job_skills, rejected, stats)
+
+    def _normalize_job_skills(self, rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], Counter[str]]:
+        normalized_rows, stats = self.normalizer.normalize_rows(rows)
+        if self.config.normalize_unknowns_with_api:
+            cache_path = self.config.normalization_cache_path
+            if cache_path is None:
+                from .normalizer import DEFAULT_CACHE
+
+                cache_path = DEFAULT_CACHE
+            normalized_rows, api_stats = self.normalizer.normalize_unknowns_with_api(
+                normalized_rows,
+                provider=self.provider,
+                model=self.model,
+                base_url=self.base_url,
+                api_key_env=self.api_key_env,
+                cache_path=cache_path,
+                timeout=self.config.timeout,
+                retries=self.config.retries,
+                temperature=self.config.temperature,
+                batch_size=self.config.normalization_batch_size,
+                allow_new_skills=self.config.allow_new_skills,
+            )
+            stats.update({f"api_{key}": value for key, value in api_stats.items()})
+
+        invalid_rows = [
+            row
+            for row in normalized_rows
+            if not api.clean_text(row.get("normalized_skill")) or not api.clean_text(row.get("kg_display_skill"))
+        ]
+        if invalid_rows:
+            sample = invalid_rows[:3]
+            raise RuntimeError(
+                "Skill normalization did not produce normalized_skill and kg_display_skill "
+                f"for {len(invalid_rows)} rows. Sample: {sample}"
+            )
+        return normalized_rows, stats
 
     def _call_or_load_cache(
         self,
@@ -168,7 +224,7 @@ class JobSkillExtractor:
             timeout=self.config.timeout,
             retries=self.config.retries,
             temperature=self.config.temperature,
-            literal_skills=(item["normalized_skill"] for item in self.ontology["skills"]),
+            extraction_dictionary=self.ontology,
         )
         cache_item = {
             "cache_key": key,
