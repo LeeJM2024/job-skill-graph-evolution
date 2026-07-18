@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -18,7 +19,8 @@ from .frequency_store import FrequencyStore, rebuild_frequency_table
 from .models import JobPosting, SkillMention
 from .output_runs import PROJECT_ROOT, resolve_run_output_dir, write_current_run_marker
 from .service import JobUpdateSystem
-from .skill_extraction import ExistingSkillExtractAdapter
+from .skill_extraction import ExistingSkillExtractAdapter, ManualSkillKeywordExtractor, ManualSkillNormalizeAdapter
+from .skill_pool_store import SkillPoolStore
 from .similarity import Text2VecSimilarity
 from .taxonomy import JobTaxonomy
 from .text import clean_text
@@ -135,27 +137,35 @@ def main() -> None:
     add_routing_args(process)
     process.add_argument("--event-stream", required=True, type=Path)
     process.add_argument("--frequency-output", required=True, type=Path)
+    process.add_argument(
+        "--skill-pool",
+        type=Path,
+        default=None,
+        help="Skill pool CSV. Defaults to skill_pool.csv beside --frequency-output.",
+    )
     process.add_argument("--job-id", required=True)
     process.add_argument("--month", required=True)
     process.add_argument("--job-title", required=True)
     process.add_argument("--responsibility", default="")
     process.add_argument("--requirement", default="")
+    process.add_argument("--source", default="manual_cli", help="Source label written to skill_pool.")
     process.add_argument(
         "--skills-json",
         default="[]",
-        help="JSON list of extracted skill objects. Each item needs raw_skill or normalized_skill.",
+        help="Debug-only JSON list. Each item must include normalized_skill and kg_display_skill.",
+    )
+    process.add_argument(
+        "--skills-json-file",
+        type=Path,
+        default=None,
+        help="Debug-only JSON file. Same schema as --skills-json.",
     )
     process.add_argument(
         "--skills",
         default="",
-        help="Semicolon-separated skills, used when --skills-json is omitted.",
+        help="Semicolon-separated raw skill keywords. They are normalized via skill_extract before use.",
     )
     process.add_argument("--dry-run", action="store_true")
-    process.add_argument(
-        "--extract-skills",
-        action="store_true",
-        help="Use dataset/skill_extract when --skills-json and --skills are empty.",
-    )
     process.add_argument("--skill-provider", choices=["deepseek", "gpt"], default="deepseek")
     process.add_argument("--skill-model", default=None)
     process.add_argument("--skill-base-url", default=None)
@@ -166,6 +176,7 @@ def main() -> None:
     process.add_argument("--skill-retries", type=int, default=2)
 
     args = parser.parse_args()
+    progress = build_progress_logger(args)
     if args.command == "rebuild-frequency":
         events = pd.read_csv(args.event_stream, dtype=str).fillna("")
         frequency = rebuild_frequency_table(events)
@@ -374,10 +385,18 @@ def main() -> None:
         )
         return
 
+    progress(f"taxonomy: loading title dictionary from {args.title_dictionary}")
     taxonomy = JobTaxonomy.from_csv(args.title_dictionary)
+    progress(
+        f"taxonomy: loaded {len(taxonomy.jobs)} standard jobs in "
+        f"{len(taxonomy.jobs_by_category)} categories"
+    )
+    progress(f"text2vec: loading model {args.text2vec_model}")
     similarity = build_similarity(args)
+    progress("text2vec: model ready")
 
     if args.command == "route":
+        progress(f"routing: job_title={args.job_title}")
         result = taxonomy.route(
             args.job_title,
             similarity=similarity,
@@ -385,22 +404,41 @@ def main() -> None:
             job_threshold=args.job_threshold,
             tie_delta=args.tie_delta,
         )
+        progress(f"done: route status={result.status}")
         print(json.dumps(serialize_route(result), ensure_ascii=False, indent=2))
         return
 
     if args.command == "process-one":
-        skills = parse_skills(args.skills_json, args.skills)
+        progress(f"input: job_id={args.job_id}, month={args.month}, job_title={args.job_title}")
+        skill_pool_path = resolve_skill_pool_path(args)
+        progress(f"skill_pool: target={skill_pool_path}")
+        skills = parse_skills(read_skills_json_arg(args))
+        raw_skill_keywords = parse_skill_keywords(args.skills)
+        if skills and raw_skill_keywords:
+            raise ValueError("Use either --skills-json/--skills-json-file or --skills, not both.")
+        progress(f"skills: parsed {len(skills)} supplied final normalized skills")
+        progress(f"skills: parsed {len(raw_skill_keywords)} supplied raw skill keywords")
         skill_extractor = None
-        if args.extract_skills and not skills:
+        if raw_skill_keywords:
+            progress("skills: raw skill keywords will be normalized after existing-job routing")
+            skill_extractor = ManualSkillKeywordExtractor(
+                build_manual_skill_normalizer(args),
+                raw_skill_keywords,
+            )
+        elif not skills:
+            progress(f"skills: initializing skill_extract adapter provider={args.skill_provider}")
             skill_extractor = build_skill_extractor(args)
+            progress("skills: skill_extract adapter ready")
         system = JobUpdateSystem(
             taxonomy=taxonomy,
             frequency_store=FrequencyStore(args.event_stream, args.frequency_output),
+            skill_pool_store=SkillPoolStore(skill_pool_path),
             similarity=similarity,
             skill_extractor=skill_extractor,
             category_threshold=args.category_threshold,
             job_threshold=args.job_threshold,
             tie_delta=args.tie_delta,
+            progress=progress,
         )
         posting = JobPosting(
             job_id=args.job_id,
@@ -409,8 +447,11 @@ def main() -> None:
             job_responsibility=args.responsibility,
             job_requirement=args.requirement,
             skills=skills,
+            metadata={"source": args.source},
         )
+        progress(f"process: dry_run={args.dry_run}")
         result = system.process(posting, write=not args.dry_run)
+        progress("done: process-one completed")
         print(json.dumps(serialize_process_result(result), ensure_ascii=False, indent=2))
         return
 
@@ -421,10 +462,21 @@ def add_routing_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--job-threshold", type=float, default=0.85)
     parser.add_argument("--tie-delta", type=float, default=0.03)
     parser.add_argument("--text2vec-model", default="shibing624/text2vec-base-chinese")
+    parser.add_argument("--quiet", action="store_true", help="Only print the final JSON result.")
 
 
 def build_similarity(args: argparse.Namespace):
     return Text2VecSimilarity(args.text2vec_model)
+
+
+def build_progress_logger(args: argparse.Namespace):
+    if getattr(args, "quiet", False):
+        return lambda message: None
+
+    def progress(message: str) -> None:
+        print(f"[job_update] {message}", file=sys.stderr, flush=True)
+
+    return progress
 
 
 def build_skill_extractor(args: argparse.Namespace) -> ExistingSkillExtractAdapter:
@@ -445,28 +497,52 @@ def build_skill_extractor(args: argparse.Namespace) -> ExistingSkillExtractAdapt
     return ExistingSkillExtractAdapter(provider=args.skill_provider, **overrides)
 
 
-def parse_skills(skills_json: str, skills_text: str) -> list[SkillMention]:
+def build_manual_skill_normalizer(args: argparse.Namespace) -> ManualSkillNormalizeAdapter:
+    return ManualSkillNormalizeAdapter(
+        provider=args.skill_provider,
+        model=args.skill_model,
+        base_url=args.skill_base_url,
+        api_key_env=args.skill_api_key_env,
+        timeout=args.skill_timeout,
+        retries=args.skill_retries,
+    )
+
+
+def resolve_skill_pool_path(args: argparse.Namespace) -> Path:
+    if args.skill_pool is not None:
+        return args.skill_pool
+    return args.frequency_output.parent / "skill_pool.csv"
+
+
+def read_skills_json_arg(args: argparse.Namespace) -> str:
+    if args.skills_json_file is not None:
+        return args.skills_json_file.read_text(encoding="utf-8-sig")
+    return args.skills_json
+
+
+def parse_skill_keywords(skills_text: str) -> list[str]:
+    return [item.strip() for item in str(skills_text or "").split(";") if item.strip()]
+
+
+def parse_skills(skills_json: str) -> list[SkillMention]:
     parsed: Any = json.loads(skills_json)
-    if parsed:
-        if not isinstance(parsed, list):
-            raise ValueError("--skills-json must be a JSON list")
-        return [skill_from_dict(item) for item in parsed]
-    return [SkillMention(raw_skill=item.strip()) for item in skills_text.split(";") if item.strip()]
+    if not parsed:
+        return []
+    if not isinstance(parsed, list):
+        raise ValueError("--skills-json must be a JSON list")
+    return [skill_from_dict(item) for item in parsed]
 
 
 def skill_from_dict(item: Any) -> SkillMention:
-    if isinstance(item, str):
-        return SkillMention(raw_skill=item)
     if not isinstance(item, dict):
-        raise ValueError("Each skill item must be a string or object")
-    raw_skill = clean_text(item.get("raw_skill") or item.get("skill") or item.get("name"))
-    normalized_skill = clean_text(item.get("normalized_skill")) or None
-    if not raw_skill and not normalized_skill:
-        raise ValueError("Each skill object needs raw_skill, skill, name, or normalized_skill")
+        raise ValueError("Each --skills-json item must be an object")
+    normalized_skill = clean_text(item.get("normalized_skill"))
+    kg_display_skill = clean_text(item.get("kg_display_skill"))
+    if not normalized_skill or not kg_display_skill:
+        raise ValueError("Each --skills-json item must include normalized_skill and kg_display_skill")
     return SkillMention(
-        raw_skill=raw_skill or normalized_skill or "",
         normalized_skill=normalized_skill,
-        category=clean_text(item.get("category")) or None,
+        kg_display_skill=kg_display_skill,
         skill_type=clean_text(item.get("skill_type")) or None,
         confidence=_optional_float(item.get("confidence")),
         evidence_field=clean_text(item.get("evidence_field")) or None,
@@ -498,11 +574,19 @@ def serialize_process_result(result) -> dict[str, Any]:
         payload["update"] = {
             "standard_job": result.update.standard_job,
             "month": result.update.month,
-            "normalized_skills": [skill.normalized_skill for skill in result.update.normalized_skills],
+            "skills": [
+                {
+                    "normalized_skill": skill.normalized_skill,
+                    "kg_display_skill": skill.kg_display_skill,
+                }
+                for skill in result.update.normalized_skills
+            ],
             "monthly_rows": result.update.monthly_rows,
             "frequency_rows": result.update.frequency_rows,
+            "skill_pool_rows": result.update.skill_pool_rows,
             "event_stream_path": result.update.event_stream_path,
             "frequency_path": result.update.frequency_path,
+            "skill_pool_path": result.update.skill_pool_path,
         }
     return payload
 

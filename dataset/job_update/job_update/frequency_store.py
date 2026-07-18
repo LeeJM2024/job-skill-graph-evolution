@@ -68,12 +68,15 @@ class FrequencyStore:
         events = pd.concat([events, pd.DataFrame([row])], ignore_index=True)
         frequency = rebuild_frequency_table(events)
         if write:
-            self.event_stream_path.parent.mkdir(parents=True, exist_ok=True)
-            events.to_csv(self.event_stream_path, index=False, encoding="utf-8-sig")
-            if self.frequency_path is not None:
-                self.frequency_path.parent.mkdir(parents=True, exist_ok=True)
-                frequency.to_csv(self.frequency_path, index=False, encoding="utf-8-sig")
+            self.write_tables(events, frequency)
         return events, frequency
+
+    def write_tables(self, events: pd.DataFrame, frequency: pd.DataFrame) -> None:
+        self.event_stream_path.parent.mkdir(parents=True, exist_ok=True)
+        events.to_csv(self.event_stream_path, index=False, encoding="utf-8-sig")
+        if self.frequency_path is not None:
+            self.frequency_path.parent.mkdir(parents=True, exist_ok=True)
+            frequency.to_csv(self.frequency_path, index=False, encoding="utf-8-sig")
 
 
 def rebuild_frequency_table(events: pd.DataFrame) -> pd.DataFrame:
@@ -172,4 +175,3 @@ def _ratio(numerator: int, denominator: int) -> float:
     if denominator <= 0:
         return 0.0
     return round(numerator / denominator, 6)
-

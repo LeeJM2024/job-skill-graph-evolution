@@ -9,7 +9,8 @@ from .models import (
     SkillMention,
 )
 from .service import JobUpdateSystem
-from .skill_extraction import ExistingSkillExtractAdapter
+from .skill_extraction import ExistingSkillExtractAdapter, ManualSkillKeywordExtractor, ManualSkillNormalizeAdapter
+from .skill_pool_store import SkillPoolStore
 
 __all__ = [
     "ExistingJobUpdate",
@@ -17,7 +18,10 @@ __all__ = [
     "JobRoute",
     "JobUpdateSystem",
     "ExistingSkillExtractAdapter",
+    "ManualSkillKeywordExtractor",
+    "ManualSkillNormalizeAdapter",
     "NormalizedSkill",
     "ProcessResult",
     "SkillMention",
+    "SkillPoolStore",
 ]
