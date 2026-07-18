@@ -11,16 +11,11 @@ import json
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from run_context import get_current_run_dir, relative_to_project
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = PROJECT_ROOT / "config" / "generation_config.json"
-JOB_DEMAND_PLAN_PATH = PROJECT_ROOT / "outputs" / "job_demand_monthly_plan.csv"
-JOB_DEMAND_TREND_PATH = PROJECT_ROOT / "outputs" / "job_demand_trend_design.csv"
-SKILL_TREND_PATH = PROJECT_ROOT / "outputs" / "skill_trend_design.csv"
-EVENT_QUALITY_PATH = PROJECT_ROOT / "outputs" / "event_stream_quality_report.json"
-OUTPUT_JOB_DEMAND_ANSWER = PROJECT_ROOT / "outputs" / "job_demand_monthly_answer.csv"
-OUTPUT_FINAL_REPORT = PROJECT_ROOT / "outputs" / "final_quality_report.json"
-OUTPUT_RUN_SUMMARY = PROJECT_ROOT / "outputs" / "run_summary.txt"
 
 
 def read_config() -> dict:
@@ -98,15 +93,15 @@ def load_json(path: Path) -> dict:
         return json.load(f)
 
 
-def build_answers() -> tuple[list[dict], list[dict], dict, str]:
+def build_answers(run_dir: Path) -> tuple[list[dict], list[dict], dict, str]:
     config = read_config()
-    event_path = resolve_project_path(config["output_event_stream_file"])
-    skill_answer_path = resolve_project_path(config["output_skill_frequency_answer_file"])
+    event_path = run_dir / Path(config["output_event_stream_file"]).name
+    skill_answer_path = run_dir / Path(config["output_skill_frequency_answer_file"]).name
 
     months = month_sequence(config["month_start"], config["month_end"])
-    demand_plan_rows = read_csv_dicts(JOB_DEMAND_PLAN_PATH)
-    job_trend_rows = read_csv_dicts(JOB_DEMAND_TREND_PATH)
-    skill_trend_rows = read_csv_dicts(SKILL_TREND_PATH)
+    demand_plan_rows = read_csv_dicts(run_dir / "job_demand_monthly_plan.csv")
+    job_trend_rows = read_csv_dicts(run_dir / "job_demand_trend_design.csv")
+    skill_trend_rows = read_csv_dicts(run_dir / "skill_trend_design.csv")
     event_rows = read_csv_dicts(event_path)
 
     job_trend_by_job = {
@@ -222,14 +217,15 @@ def build_answers() -> tuple[list[dict], list[dict], dict, str]:
         row["skill_trend_type"] for row in skill_trend_rows
     )
 
-    event_quality = load_json(EVENT_QUALITY_PATH)
+    event_quality = load_json(run_dir / "event_stream_quality_report.json")
     final_report = {
         "config_seed": config["seed"],
+        "run_dir": relative_to_project(PROJECT_ROOT, run_dir),
         "month_start": config["month_start"],
         "month_end": config["month_end"],
         "month_count": len(months),
         "standard_job_count": len(standard_jobs),
-        "event_stream_file": str(event_path.relative_to(PROJECT_ROOT)),
+        "event_stream_file": relative_to_project(PROJECT_ROOT, event_path),
         "event_stream_rows": len(event_rows),
         "event_stream_fields": event_fields,
         "expected_event_stream_fields": expected_event_fields,
@@ -238,8 +234,8 @@ def build_answers() -> tuple[list[dict], list[dict], dict, str]:
         "unique_generated_jobs": len({row["standard_job"] for row in event_rows}),
         "unique_generated_months": len({row["month"] for row in event_rows}),
         "job_demand_answer_rows": len(job_answer_rows),
-        "skill_frequency_answer_file": str(
-            skill_answer_path.relative_to(PROJECT_ROOT)
+        "skill_frequency_answer_file": relative_to_project(
+            PROJECT_ROOT, skill_answer_path
         ),
         "skill_frequency_answer_rows": len(skill_answer_rows),
         "skill_trend_design_rows": len(skill_trend_rows),
@@ -287,11 +283,12 @@ def build_summary(report: dict) -> str:
 
 def main() -> None:
     config = read_config()
-    skill_answer_path = resolve_project_path(config["output_skill_frequency_answer_file"])
-    job_answer_rows, skill_answer_rows, final_report, summary = build_answers()
+    run_dir = get_current_run_dir(PROJECT_ROOT)
+    skill_answer_path = run_dir / Path(config["output_skill_frequency_answer_file"]).name
+    job_answer_rows, skill_answer_rows, final_report, summary = build_answers(run_dir)
 
     write_csv(
-        OUTPUT_JOB_DEMAND_ANSWER,
+        run_dir / "job_demand_monthly_answer.csv",
         [
             "standard_job",
             "standard_category",
@@ -325,10 +322,10 @@ def main() -> None:
         skill_answer_rows,
     )
 
-    with OUTPUT_FINAL_REPORT.open("w", encoding="utf-8") as f:
+    with (run_dir / "final_quality_report.json").open("w", encoding="utf-8") as f:
         json.dump(final_report, f, ensure_ascii=False, indent=2)
         f.write("\n")
-    with OUTPUT_RUN_SUMMARY.open("w", encoding="utf-8") as f:
+    with (run_dir / "run_summary.txt").open("w", encoding="utf-8") as f:
         f.write(summary)
 
     print(json.dumps(final_report, ensure_ascii=False, indent=2))

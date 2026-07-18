@@ -9,10 +9,19 @@ RouteStatus = Literal["existing_job", "potential_new_job", "new_family"]
 
 @dataclass(slots=True)
 class SkillMention:
-    """Final normalized skill emitted by skill_extract."""
+    """Skill extraction input before project-level normalization.
 
-    normalized_skill: str
-    kg_display_skill: str
+    Required field:
+    - raw_skill: the extracted skill keyword/span.
+
+    Optional fields are preserved for later normalization, audit, and graph import.
+    If normalized_skill is already supplied by an upstream extractor, the default
+    normalizer will use it directly.
+    """
+
+    raw_skill: str
+    normalized_skill: str | None = None
+    category: str | None = None
     skill_type: str | None = None
     confidence: float | None = None
     evidence_field: str | None = None
@@ -23,10 +32,11 @@ class SkillMention:
 
 @dataclass(slots=True)
 class NormalizedSkill:
-    """Final skill used by the frequency updater and carried to graph layers."""
+    """Project-level normalized skill used by the frequency updater."""
 
     normalized_skill: str
-    kg_display_skill: str
+    raw_skill: str | None = None
+    category: str | None = None
     skill_type: str | None = None
     confidence: float | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -76,3 +86,4 @@ class ProcessResult:
     route: JobRoute
     posting: JobPosting
     update: ExistingJobUpdate | None = None
+

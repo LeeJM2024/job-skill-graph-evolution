@@ -14,15 +14,11 @@ from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
+from run_context import get_current_run_dir, relative_to_project
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = PROJECT_ROOT / "config" / "generation_config.json"
-SKILL_POOL_PATH = PROJECT_ROOT / "outputs" / "skill_pool_by_job.csv"
-JOB_DEMAND_PLAN_PATH = PROJECT_ROOT / "outputs" / "job_demand_monthly_plan.csv"
-JOB_TREND_PATH = PROJECT_ROOT / "outputs" / "job_demand_trend_design.csv"
-OUTPUT_SKILL_TREND = PROJECT_ROOT / "outputs" / "skill_trend_design.csv"
-OUTPUT_SKILL_PROBABILITY = PROJECT_ROOT / "outputs" / "skill_monthly_probability_plan.csv"
-OUTPUT_QUALITY_REPORT = PROJECT_ROOT / "outputs" / "skill_trend_quality_report.json"
 
 SKILL_TRENDS = [
     "稳定型",
@@ -94,8 +90,8 @@ def month_sequence(start: str, end: str) -> list[str]:
     return months
 
 
-def load_skill_pool() -> dict[str, list[SkillItem]]:
-    rows = read_csv_dicts(SKILL_POOL_PATH)
+def load_skill_pool(run_dir: Path) -> dict[str, list[SkillItem]]:
+    rows = read_csv_dicts(run_dir / "skill_pool_by_job.csv")
     skills_by_job: dict[str, list[SkillItem]] = defaultdict(list)
     for row in rows:
         skill = (row.get("skill") or "").strip()
@@ -119,9 +115,9 @@ def load_skill_pool() -> dict[str, list[SkillItem]]:
     return skills_by_job
 
 
-def load_job_plan() -> tuple[dict[str, dict[str, int]], dict[str, dict]]:
-    monthly_rows = read_csv_dicts(JOB_DEMAND_PLAN_PATH)
-    trend_rows = read_csv_dicts(JOB_TREND_PATH)
+def load_job_plan(run_dir: Path) -> tuple[dict[str, dict[str, int]], dict[str, dict]]:
+    monthly_rows = read_csv_dicts(run_dir / "job_demand_monthly_plan.csv")
+    trend_rows = read_csv_dicts(run_dir / "job_demand_trend_design.csv")
 
     monthly_plan: dict[str, dict[str, int]] = defaultdict(dict)
     for row in monthly_rows:
@@ -299,12 +295,12 @@ def expected_skill_count(probability: float, planned_jd_count: int) -> int:
     return int(round(probability * planned_jd_count))
 
 
-def generate_skill_plan() -> tuple[list[dict], list[dict], dict]:
+def generate_skill_plan(run_dir: Path) -> tuple[list[dict], list[dict], dict]:
     config = read_config()
     rng = random.Random(config["seed"] + 3)
     months = month_sequence(config["month_start"], config["month_end"])
-    skills_by_job = load_skill_pool()
-    monthly_plan, trend_by_job = load_job_plan()
+    skills_by_job = load_skill_pool(run_dir)
+    monthly_plan, trend_by_job = load_job_plan(run_dir)
 
     trend_rows: list[dict] = []
     probability_rows: list[dict] = []
@@ -404,6 +400,7 @@ def generate_skill_plan() -> tuple[list[dict], list[dict], dict]:
     quality_report = {
         "config_seed": config["seed"],
         "skill_plan_seed": config["seed"] + 3,
+        "run_dir": relative_to_project(PROJECT_ROOT, run_dir),
         "month_start": config["month_start"],
         "month_end": config["month_end"],
         "month_count": len(months),
@@ -429,10 +426,11 @@ def generate_skill_plan() -> tuple[list[dict], list[dict], dict]:
 
 
 def main() -> None:
-    trend_rows, probability_rows, quality_report = generate_skill_plan()
+    run_dir = get_current_run_dir(PROJECT_ROOT)
+    trend_rows, probability_rows, quality_report = generate_skill_plan(run_dir)
 
     write_csv(
-        OUTPUT_SKILL_TREND,
+        run_dir / "skill_trend_design.csv",
         [
             "standard_job",
             "standard_category",
@@ -450,7 +448,7 @@ def main() -> None:
         trend_rows,
     )
     write_csv(
-        OUTPUT_SKILL_PROBABILITY,
+        run_dir / "skill_monthly_probability_plan.csv",
         [
             "standard_job",
             "standard_category",
@@ -466,7 +464,7 @@ def main() -> None:
         probability_rows,
     )
 
-    with OUTPUT_QUALITY_REPORT.open("w", encoding="utf-8") as f:
+    with (run_dir / "skill_trend_quality_report.json").open("w", encoding="utf-8") as f:
         json.dump(quality_report, f, ensure_ascii=False, indent=2)
         f.write("\n")
 

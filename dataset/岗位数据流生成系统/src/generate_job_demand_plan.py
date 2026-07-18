@@ -13,13 +13,11 @@ import random
 from dataclasses import dataclass
 from pathlib import Path
 
+from run_context import get_current_run_dir, relative_to_project
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = PROJECT_ROOT / "config" / "generation_config.json"
-PROFILE_PATH = PROJECT_ROOT / "outputs" / "input_profile.csv"
-OUTPUT_MONTHLY_PLAN = PROJECT_ROOT / "outputs" / "job_demand_monthly_plan.csv"
-OUTPUT_TREND_DESIGN = PROJECT_ROOT / "outputs" / "job_demand_trend_design.csv"
-OUTPUT_QUALITY_REPORT = PROJECT_ROOT / "outputs" / "job_demand_quality_report.json"
 
 TREND_TYPES = [
     "持续上升",
@@ -131,8 +129,8 @@ def month_sequence(start: str, end: str) -> list[str]:
     return months
 
 
-def load_profiles() -> list[JobProfile]:
-    rows = read_csv_dicts(PROFILE_PATH)
+def load_profiles(run_dir: Path) -> list[JobProfile]:
+    rows = read_csv_dicts(run_dir / "input_profile.csv")
     profiles: list[JobProfile] = []
     for row in rows:
         profiles.append(
@@ -385,11 +383,11 @@ def active_month_summary(months: list[str], counts: list[int]) -> dict[str, str 
     }
 
 
-def generate_plan() -> tuple[list[dict], list[dict], dict]:
+def generate_plan(run_dir: Path) -> tuple[list[dict], list[dict], dict]:
     config = read_config()
     rng = random.Random(config["seed"] + 2)
     months = month_sequence(config["month_start"], config["month_end"])
-    profiles = load_profiles()
+    profiles = load_profiles(run_dir)
 
     target_total = rng.randint(
         int(config["target_total_jd_min"]), int(config["target_total_jd_max"])
@@ -479,6 +477,7 @@ def generate_plan() -> tuple[list[dict], list[dict], dict]:
     quality_report = {
         "config_seed": config["seed"],
         "plan_seed": config["seed"] + 2,
+        "run_dir": relative_to_project(PROJECT_ROOT, run_dir),
         "month_start": config["month_start"],
         "month_end": config["month_end"],
         "month_count": len(months),
@@ -521,10 +520,11 @@ def generate_plan() -> tuple[list[dict], list[dict], dict]:
 
 
 def main() -> None:
-    monthly_rows, trend_rows, quality_report = generate_plan()
+    run_dir = get_current_run_dir(PROJECT_ROOT)
+    monthly_rows, trend_rows, quality_report = generate_plan(run_dir)
 
     write_csv(
-        OUTPUT_MONTHLY_PLAN,
+        run_dir / "job_demand_monthly_plan.csv",
         [
             "standard_job",
             "standard_category",
@@ -537,7 +537,7 @@ def main() -> None:
         monthly_rows,
     )
     write_csv(
-        OUTPUT_TREND_DESIGN,
+        run_dir / "job_demand_trend_design.csv",
         [
             "standard_job",
             "standard_category",
@@ -560,7 +560,7 @@ def main() -> None:
         trend_rows,
     )
 
-    with OUTPUT_QUALITY_REPORT.open("w", encoding="utf-8") as f:
+    with (run_dir / "job_demand_quality_report.json").open("w", encoding="utf-8") as f:
         json.dump(quality_report, f, ensure_ascii=False, indent=2)
         f.write("\n")
 

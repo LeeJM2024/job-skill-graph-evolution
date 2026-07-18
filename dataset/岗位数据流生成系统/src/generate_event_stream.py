@@ -14,13 +14,11 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
+from run_context import get_current_run_dir, relative_to_project
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = PROJECT_ROOT / "config" / "generation_config.json"
-JOB_DEMAND_PLAN_PATH = PROJECT_ROOT / "outputs" / "job_demand_monthly_plan.csv"
-SKILL_PROBABILITY_PATH = PROJECT_ROOT / "outputs" / "skill_monthly_probability_plan.csv"
-SKILL_TREND_PATH = PROJECT_ROOT / "outputs" / "skill_trend_design.csv"
-OUTPUT_QUALITY_REPORT = PROJECT_ROOT / "outputs" / "event_stream_quality_report.json"
 
 
 @dataclass(frozen=True)
@@ -119,12 +117,14 @@ def load_source_jds(source_path: Path) -> dict[str, list[SourceJD]]:
     return source_by_job
 
 
-def load_demand_plan() -> list[dict[str, str]]:
-    return read_csv_dicts(JOB_DEMAND_PLAN_PATH)
+def load_demand_plan(run_dir: Path) -> list[dict[str, str]]:
+    return read_csv_dicts(run_dir / "job_demand_monthly_plan.csv")
 
 
-def load_skill_probability_plan() -> dict[tuple[str, str], list[SkillProbability]]:
-    rows = read_csv_dicts(SKILL_PROBABILITY_PATH)
+def load_skill_probability_plan(
+    run_dir: Path,
+) -> dict[tuple[str, str], list[SkillProbability]]:
+    rows = read_csv_dicts(run_dir / "skill_monthly_probability_plan.csv")
     probability_by_job_month: dict[tuple[str, str], list[SkillProbability]] = defaultdict(list)
     for row in rows:
         planned_jd_count = parse_int(row.get("planned_jd_count"))
@@ -147,8 +147,8 @@ def load_skill_probability_plan() -> dict[tuple[str, str], list[SkillProbability
     return probability_by_job_month
 
 
-def load_allowed_job_skills() -> set[tuple[str, str]]:
-    rows = read_csv_dicts(SKILL_TREND_PATH)
+def load_allowed_job_skills(run_dir: Path) -> set[tuple[str, str]]:
+    rows = read_csv_dicts(run_dir / "skill_trend_design.csv")
     return {
         ((row.get("standard_job") or "").strip(), (row.get("skill") or "").strip())
         for row in rows
@@ -269,16 +269,16 @@ def source_jd_sample(
     return source_jds[picked_idx], picked_idx
 
 
-def generate_event_stream() -> tuple[list[dict], dict]:
+def generate_event_stream(run_dir: Path) -> tuple[list[dict], dict]:
     config = read_config()
     rng = random.Random(config["seed"] + 4)
     source_path = resolve_project_path(config["source_job_file"])
-    output_path = resolve_project_path(config["output_event_stream_file"])
+    output_path = run_dir / Path(config["output_event_stream_file"]).name
 
     source_by_job = load_source_jds(source_path)
-    demand_rows = load_demand_plan()
-    skill_probability_by_job_month = load_skill_probability_plan()
-    allowed_job_skills = load_allowed_job_skills()
+    demand_rows = load_demand_plan(run_dir)
+    skill_probability_by_job_month = load_skill_probability_plan(run_dir)
+    allowed_job_skills = load_allowed_job_skills(run_dir)
 
     event_rows: list[dict] = []
     source_usage_by_job: dict[str, Counter[int]] = defaultdict(Counter)
@@ -339,7 +339,8 @@ def generate_event_stream() -> tuple[list[dict], dict]:
     quality_report = {
         "config_seed": config["seed"],
         "event_stream_seed": config["seed"] + 4,
-        "output_event_stream_file": str(output_path.relative_to(PROJECT_ROOT)),
+        "run_dir": relative_to_project(PROJECT_ROOT, run_dir),
+        "output_event_stream_file": relative_to_project(PROJECT_ROOT, output_path),
         "generated_event_rows": len(event_rows),
         "unique_generated_jobs": len({row["standard_job"] for row in event_rows}),
         "unique_generated_months": len({row["month"] for row in event_rows}),
@@ -360,13 +361,14 @@ def generate_event_stream() -> tuple[list[dict], dict]:
 
 def main() -> None:
     config = read_config()
-    output_path = resolve_project_path(config["output_event_stream_file"])
+    run_dir = get_current_run_dir(PROJECT_ROOT)
+    output_path = run_dir / Path(config["output_event_stream_file"]).name
     event_fields = config["event_stream_fields"]
 
-    event_rows, quality_report = generate_event_stream()
+    event_rows, quality_report = generate_event_stream(run_dir)
     write_csv(output_path, event_fields, event_rows)
 
-    with OUTPUT_QUALITY_REPORT.open("w", encoding="utf-8") as f:
+    with (run_dir / "event_stream_quality_report.json").open("w", encoding="utf-8") as f:
         json.dump(quality_report, f, ensure_ascii=False, indent=2)
         f.write("\n")
 

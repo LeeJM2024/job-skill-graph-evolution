@@ -2,18 +2,32 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
+from .analysis import (
+    analyze_event_stream,
+    read_events,
+    read_skill_universe,
+    write_analysis_outputs,
+)
+from .comparison import compare_answer_tables, write_comparison_outputs
 from .frequency_store import FrequencyStore, rebuild_frequency_table
 from .models import JobPosting, SkillMention
+from .output_runs import PROJECT_ROOT, resolve_run_output_dir, write_current_run_marker
 from .service import JobUpdateSystem
-from .skill_extraction import ExistingSkillExtractAdapter, ManualSkillKeywordExtractor, ManualSkillNormalizeAdapter
+from .skill_extraction import ExistingSkillExtractAdapter
 from .similarity import Text2VecSimilarity
 from .taxonomy import JobTaxonomy
+from .text import clean_text
+from .work_modes import (
+    create_manual_workspace,
+    resolve_data_stream_inputs,
+    resolve_manual_inputs,
+    write_manifest,
+)
 
 
 def main() -> None:
@@ -23,7 +37,95 @@ def main() -> None:
     rebuild = subparsers.add_parser("rebuild-frequency", help="Rebuild monthly/cumulative skill frequency CSV.")
     rebuild.add_argument("--event-stream", required=True, type=Path)
     rebuild.add_argument("--output", required=True, type=Path)
-    rebuild.add_argument("--quiet", action="store_true", help="Only print the final JSON result.")
+
+    analyze = subparsers.add_parser(
+        "analyze-event-stream",
+        help="Analyze job demand and skill frequencies from an event stream.",
+    )
+    analyze.add_argument("--event-stream", required=True, type=Path)
+    analyze.add_argument("--title-dictionary", required=True, type=Path)
+    analyze.add_argument(
+        "--output-dir",
+        type=Path,
+        default=None,
+        help="Defaults to outputs/analysis_runs/<run_id> when omitted.",
+    )
+    analyze.add_argument(
+        "--run-id",
+        default=None,
+        help="Optional run id used for the default output directory.",
+    )
+    analyze.add_argument("--month-start", default=None)
+    analyze.add_argument("--month-end", default=None)
+    analyze.add_argument(
+        "--skill-universe",
+        type=Path,
+        default=None,
+        help="Optional CSV with standard_job and skill columns; used to include zero-only skills.",
+    )
+
+    compare = subparsers.add_parser(
+        "compare-answer",
+        help="Compare analysis CSVs against generated answer CSVs.",
+    )
+    compare.add_argument("--actual-job-demand", required=True, type=Path)
+    compare.add_argument("--expected-job-demand", required=True, type=Path)
+    compare.add_argument("--actual-skill-frequency", required=True, type=Path)
+    compare.add_argument("--expected-skill-frequency", required=True, type=Path)
+    compare.add_argument(
+        "--output-dir",
+        type=Path,
+        default=None,
+        help="Defaults to outputs/comparison_runs/<run_id> when omitted.",
+    )
+    compare.add_argument(
+        "--run-id",
+        default=None,
+        help="Optional run id used for the default output directory.",
+    )
+    compare.add_argument("--frequency-tolerance", type=float, default=0.0001)
+    compare.add_argument(
+        "--pass-threshold",
+        type=float,
+        default=0.9,
+        help="Row match rate must be greater than this value for both tables. Default: 0.9.",
+    )
+
+    data_stream = subparsers.add_parser(
+        "run-data-stream",
+        help="Run analysis and optional answer comparison for a generated data-stream run.",
+    )
+    data_stream.add_argument("--run-dir", required=True, type=Path)
+    data_stream.add_argument("--title-dictionary", type=Path, default=None)
+    data_stream.add_argument("--month-start", default="2024-12")
+    data_stream.add_argument("--month-end", default="2026-07")
+    data_stream.add_argument("--skip-compare", action="store_true")
+    data_stream.add_argument(
+        "--pass-threshold",
+        type=float,
+        default=0.9,
+        help="Row match rate must be greater than this value for both tables. Default: 0.9.",
+    )
+
+    init_manual = subparsers.add_parser(
+        "init-manual-workspace",
+        help="Create folders for manual input files.",
+    )
+    init_manual.add_argument("--workspace", required=True, type=Path)
+
+    manual = subparsers.add_parser(
+        "run-manual",
+        help="Run analysis and optional comparison from a manual input workspace.",
+    )
+    manual.add_argument("--workspace", required=True, type=Path)
+    manual.add_argument("--month-start", default=None)
+    manual.add_argument("--month-end", default=None)
+    manual.add_argument(
+        "--pass-threshold",
+        type=float,
+        default=0.9,
+        help="Row match rate must be greater than this value for both tables. Default: 0.9.",
+    )
 
     route = subparsers.add_parser("route", help="Route a job title to family and standard job.")
     add_routing_args(route)
@@ -39,22 +141,21 @@ def main() -> None:
     process.add_argument("--responsibility", default="")
     process.add_argument("--requirement", default="")
     process.add_argument(
-        "--skills",
-        default="",
-        help="Semicolon-separated raw skill keywords. They are normalized via skill_extract before use.",
-    )
-    process.add_argument(
         "--skills-json",
         default="[]",
-        help="Debug-only JSON list. Each item must include normalized_skill and kg_display_skill.",
+        help="JSON list of extracted skill objects. Each item needs raw_skill or normalized_skill.",
     )
     process.add_argument(
-        "--skills-json-file",
-        type=Path,
-        default=None,
-        help="Debug-only JSON file. Same schema as --skills-json.",
+        "--skills",
+        default="",
+        help="Semicolon-separated skills, used when --skills-json is omitted.",
     )
     process.add_argument("--dry-run", action="store_true")
+    process.add_argument(
+        "--extract-skills",
+        action="store_true",
+        help="Use dataset/skill_extract when --skills-json and --skills are empty.",
+    )
     process.add_argument("--skill-provider", choices=["deepseek", "gpt"], default="deepseek")
     process.add_argument("--skill-model", default=None)
     process.add_argument("--skill-base-url", default=None)
@@ -65,34 +166,218 @@ def main() -> None:
     process.add_argument("--skill-retries", type=int, default=2)
 
     args = parser.parse_args()
-    progress = build_progress_logger(args)
     if args.command == "rebuild-frequency":
-        progress(f"start: rebuild-frequency event_stream={args.event_stream}")
-        progress("frequency: loading event stream")
         events = pd.read_csv(args.event_stream, dtype=str).fillna("")
-        progress(f"frequency: loaded {len(events)} event rows")
-        progress("frequency: rebuilding monthly and cumulative skill frequencies")
         frequency = rebuild_frequency_table(events)
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        progress(f"frequency: writing {len(frequency)} rows to {args.output}")
         frequency.to_csv(args.output, index=False, encoding="utf-8-sig")
-        progress("done: rebuild-frequency completed")
         print(json.dumps({"rows": len(frequency), "output": str(args.output)}, ensure_ascii=False, indent=2))
         return
 
-    progress(f"start: {args.command}")
-    progress(f"taxonomy: loading title dictionary from {args.title_dictionary}")
+    if args.command == "analyze-event-stream":
+        taxonomy = JobTaxonomy.from_csv(args.title_dictionary)
+        skill_universe = (
+            read_skill_universe(args.skill_universe)
+            if args.skill_universe is not None
+            else None
+        )
+        result = analyze_event_stream(
+            read_events(args.event_stream),
+            taxonomy=taxonomy,
+            month_start=args.month_start,
+            month_end=args.month_end,
+            skill_universe=skill_universe,
+        )
+        output_dir, output_run_id = resolve_run_output_dir(
+            explicit_output_dir=args.output_dir,
+            run_id=args.run_id,
+            source_paths=[args.event_stream],
+            run_group="analysis_runs",
+        )
+        write_current_run_marker("analysis_runs", output_run_id)
+        outputs = write_analysis_outputs(result, output_dir)
+        print(
+            json.dumps(
+                {
+                    **result.quality_report,
+                    "output_run_id": output_run_id,
+                    "outputs": outputs,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+
+    if args.command == "compare-answer":
+        result = compare_answer_tables(
+            actual_job_demand_path=args.actual_job_demand,
+            expected_job_demand_path=args.expected_job_demand,
+            actual_skill_frequency_path=args.actual_skill_frequency,
+            expected_skill_frequency_path=args.expected_skill_frequency,
+            frequency_tolerance=args.frequency_tolerance,
+            pass_threshold=args.pass_threshold,
+        )
+        output_dir, output_run_id = resolve_run_output_dir(
+            explicit_output_dir=args.output_dir,
+            run_id=args.run_id,
+            source_paths=[
+                args.expected_job_demand,
+                args.expected_skill_frequency,
+                args.actual_job_demand,
+                args.actual_skill_frequency,
+            ],
+            run_group="comparison_runs",
+        )
+        write_current_run_marker("comparison_runs", output_run_id)
+        outputs = write_comparison_outputs(result, output_dir)
+        print(
+            json.dumps(
+                {
+                    **result.report,
+                    "output_run_id": output_run_id,
+                    "outputs": outputs,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+
+    if args.command == "run-data-stream":
+        inputs = resolve_data_stream_inputs(
+            run_dir=args.run_dir,
+            title_dictionary=args.title_dictionary,
+        )
+        analysis_result = analyze_event_stream(
+            read_events(inputs.event_stream),
+            taxonomy=JobTaxonomy.from_csv(inputs.title_dictionary),
+            month_start=args.month_start,
+            month_end=args.month_end,
+            skill_universe=read_skill_universe(inputs.skill_universe),
+        )
+        analysis_dir = PROJECT_ROOT / "outputs" / "analysis_runs" / inputs.run_id
+        write_current_run_marker("analysis_runs", inputs.run_id)
+        analysis_outputs = write_analysis_outputs(analysis_result, analysis_dir)
+        comparison_outputs = None
+        comparison_report = None
+        if (
+            not args.skip_compare
+            and inputs.expected_job_demand is not None
+            and inputs.expected_skill_frequency is not None
+        ):
+            comparison_result = compare_answer_tables(
+                actual_job_demand_path=analysis_outputs["job_demand"],
+                expected_job_demand_path=inputs.expected_job_demand,
+                actual_skill_frequency_path=analysis_outputs["skill_frequency"],
+                expected_skill_frequency_path=inputs.expected_skill_frequency,
+                pass_threshold=args.pass_threshold,
+            )
+            write_current_run_marker("comparison_runs", inputs.run_id)
+            comparison_outputs = write_comparison_outputs(
+                comparison_result,
+                PROJECT_ROOT / "outputs" / "comparison_runs" / inputs.run_id,
+            )
+            comparison_report = comparison_result.report
+        print(
+            json.dumps(
+                {
+                    "mode": "data_stream",
+                    "run_id": inputs.run_id,
+                    "analysis": analysis_result.quality_report,
+                    "analysis_outputs": analysis_outputs,
+                    "comparison": comparison_report,
+                    "comparison_outputs": comparison_outputs,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+
+    if args.command == "init-manual-workspace":
+        folders = create_manual_workspace(args.workspace)
+        print(json.dumps({"workspace": str(args.workspace), "folders": folders}, ensure_ascii=False, indent=2))
+        return
+
+    if args.command == "run-manual":
+        inputs = resolve_manual_inputs(args.workspace)
+        analysis_result = analyze_event_stream(
+            read_events(inputs.event_stream),
+            taxonomy=JobTaxonomy.from_csv(inputs.title_dictionary),
+            month_start=args.month_start,
+            month_end=args.month_end,
+            skill_universe=read_skill_universe(inputs.skill_universe)
+            if inputs.skill_universe is not None
+            else None,
+        )
+        analysis_dir = inputs.output_dir / "analysis"
+        comparison_dir = inputs.output_dir / "comparison"
+        analysis_outputs = write_analysis_outputs(analysis_result, analysis_dir)
+        comparison_outputs = None
+        comparison_report = None
+        if (
+            inputs.expected_job_demand is not None
+            and inputs.expected_skill_frequency is not None
+        ):
+            comparison_result = compare_answer_tables(
+                actual_job_demand_path=analysis_outputs["job_demand"],
+                expected_job_demand_path=inputs.expected_job_demand,
+                actual_skill_frequency_path=analysis_outputs["skill_frequency"],
+                expected_skill_frequency_path=inputs.expected_skill_frequency,
+                pass_threshold=args.pass_threshold,
+            )
+            comparison_outputs = write_comparison_outputs(
+                comparison_result,
+                comparison_dir,
+            )
+            comparison_report = comparison_result.report
+        manifest_path = write_manifest(
+            inputs.output_dir,
+            {
+                "mode": "manual",
+                "manual_run_id": inputs.manual_run_id,
+                "workspace": str(inputs.workspace),
+                "event_stream": str(inputs.event_stream),
+                "title_dictionary": str(inputs.title_dictionary),
+                "skill_universe": str(inputs.skill_universe)
+                if inputs.skill_universe is not None
+                else None,
+                "expected_job_demand": str(inputs.expected_job_demand)
+                if inputs.expected_job_demand is not None
+                else None,
+                "expected_skill_frequency": str(inputs.expected_skill_frequency)
+                if inputs.expected_skill_frequency is not None
+                else None,
+                "analysis_outputs": analysis_outputs,
+                "comparison_outputs": comparison_outputs,
+            },
+        )
+        manual_marker_path = PROJECT_ROOT / "outputs" / "current_manual_run_id.txt"
+        manual_marker_path.parent.mkdir(parents=True, exist_ok=True)
+        manual_marker_path.write_text(inputs.manual_run_id + "\n", encoding="utf-8")
+        print(
+            json.dumps(
+                {
+                    "mode": "manual",
+                    "manual_run_id": inputs.manual_run_id,
+                    "output_dir": str(inputs.output_dir),
+                    "manifest": str(manifest_path),
+                    "analysis": analysis_result.quality_report,
+                    "analysis_outputs": analysis_outputs,
+                    "comparison": comparison_report,
+                    "comparison_outputs": comparison_outputs,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+
     taxonomy = JobTaxonomy.from_csv(args.title_dictionary)
-    progress(
-        f"taxonomy: loaded {len(taxonomy.jobs)} standard jobs in "
-        f"{len(taxonomy.jobs_by_category)} categories"
-    )
-    progress(f"text2vec: loading model {args.text2vec_model}")
     similarity = build_similarity(args)
-    progress("text2vec: model ready")
 
     if args.command == "route":
-        progress(f"routing: job_title={args.job_title}")
         result = taxonomy.route(
             args.job_title,
             similarity=similarity,
@@ -100,29 +385,14 @@ def main() -> None:
             job_threshold=args.job_threshold,
             tie_delta=args.tie_delta,
         )
-        progress(f"done: route status={result.status}")
         print(json.dumps(serialize_route(result), ensure_ascii=False, indent=2))
         return
 
     if args.command == "process-one":
-        progress(f"input: job_id={args.job_id}, month={args.month}, job_title={args.job_title}")
-        skills = parse_skills(read_skills_json_arg(args))
-        raw_skill_keywords = parse_skill_keywords(args.skills)
-        if skills and raw_skill_keywords:
-            raise ValueError("Use either --skills-json/--skills-json-file or --skills, not both.")
-        progress(f"skills: parsed {len(skills)} supplied final normalized skills")
-        progress(f"skills: parsed {len(raw_skill_keywords)} supplied raw skill keywords")
+        skills = parse_skills(args.skills_json, args.skills)
         skill_extractor = None
-        if raw_skill_keywords:
-            progress("skills: raw skill keywords will be normalized after existing-job routing")
-            skill_extractor = ManualSkillKeywordExtractor(
-                build_manual_skill_normalizer(args),
-                raw_skill_keywords,
-            )
-        elif not skills:
-            progress(f"skills: initializing skill_extract adapter provider={args.skill_provider}")
+        if args.extract_skills and not skills:
             skill_extractor = build_skill_extractor(args)
-            progress("skills: skill_extract adapter ready")
         system = JobUpdateSystem(
             taxonomy=taxonomy,
             frequency_store=FrequencyStore(args.event_stream, args.frequency_output),
@@ -131,7 +401,6 @@ def main() -> None:
             category_threshold=args.category_threshold,
             job_threshold=args.job_threshold,
             tie_delta=args.tie_delta,
-            progress=progress,
         )
         posting = JobPosting(
             job_id=args.job_id,
@@ -141,9 +410,7 @@ def main() -> None:
             job_requirement=args.requirement,
             skills=skills,
         )
-        progress(f"process: dry_run={args.dry_run}")
         result = system.process(posting, write=not args.dry_run)
-        progress("done: process-one completed")
         print(json.dumps(serialize_process_result(result), ensure_ascii=False, indent=2))
         return
 
@@ -154,21 +421,10 @@ def add_routing_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--job-threshold", type=float, default=0.85)
     parser.add_argument("--tie-delta", type=float, default=0.03)
     parser.add_argument("--text2vec-model", default="shibing624/text2vec-base-chinese")
-    parser.add_argument("--quiet", action="store_true", help="Only print the final JSON result.")
 
 
 def build_similarity(args: argparse.Namespace):
     return Text2VecSimilarity(args.text2vec_model)
-
-
-def build_progress_logger(args: argparse.Namespace):
-    if getattr(args, "quiet", False):
-        return lambda message: None
-
-    def progress(message: str) -> None:
-        print(f"[job_update] {message}", file=sys.stderr, flush=True)
-
-    return progress
 
 
 def build_skill_extractor(args: argparse.Namespace) -> ExistingSkillExtractAdapter:
@@ -189,51 +445,33 @@ def build_skill_extractor(args: argparse.Namespace) -> ExistingSkillExtractAdapt
     return ExistingSkillExtractAdapter(provider=args.skill_provider, **overrides)
 
 
-def build_manual_skill_normalizer(args: argparse.Namespace) -> ManualSkillNormalizeAdapter:
-    return ManualSkillNormalizeAdapter(
-        provider=args.skill_provider,
-        model=args.skill_model,
-        base_url=args.skill_base_url,
-        api_key_env=args.skill_api_key_env,
-        timeout=args.skill_timeout,
-        retries=args.skill_retries,
-    )
-
-
-def read_skills_json_arg(args: argparse.Namespace) -> str:
-    if args.skills_json_file is not None:
-        return args.skills_json_file.read_text(encoding="utf-8-sig")
-    return args.skills_json
-
-
-def parse_skill_keywords(skills_text: str) -> list[str]:
-    return [item.strip() for item in str(skills_text or "").split(";") if item.strip()]
-
-
-def parse_skills(skills_json: str) -> list[SkillMention]:
+def parse_skills(skills_json: str, skills_text: str) -> list[SkillMention]:
     parsed: Any = json.loads(skills_json)
-    if not parsed:
-        return []
-    if not isinstance(parsed, list):
-        raise ValueError("--skills-json must be a JSON list")
-    return [skill_from_dict(item) for item in parsed]
+    if parsed:
+        if not isinstance(parsed, list):
+            raise ValueError("--skills-json must be a JSON list")
+        return [skill_from_dict(item) for item in parsed]
+    return [SkillMention(raw_skill=item.strip()) for item in skills_text.split(";") if item.strip()]
 
 
 def skill_from_dict(item: Any) -> SkillMention:
+    if isinstance(item, str):
+        return SkillMention(raw_skill=item)
     if not isinstance(item, dict):
-        raise ValueError("Each --skills-json item must be an object")
-    normalized_skill = str(item.get("normalized_skill") or "").strip()
-    kg_display_skill = str(item.get("kg_display_skill") or "").strip()
-    if not normalized_skill or not kg_display_skill:
-        raise ValueError("Each --skills-json item must include normalized_skill and kg_display_skill")
+        raise ValueError("Each skill item must be a string or object")
+    raw_skill = clean_text(item.get("raw_skill") or item.get("skill") or item.get("name"))
+    normalized_skill = clean_text(item.get("normalized_skill")) or None
+    if not raw_skill and not normalized_skill:
+        raise ValueError("Each skill object needs raw_skill, skill, name, or normalized_skill")
     return SkillMention(
+        raw_skill=raw_skill or normalized_skill or "",
         normalized_skill=normalized_skill,
-        kg_display_skill=kg_display_skill,
-        skill_type=str(item.get("skill_type") or "").strip() or None,
+        category=clean_text(item.get("category")) or None,
+        skill_type=clean_text(item.get("skill_type")) or None,
         confidence=_optional_float(item.get("confidence")),
-        evidence_field=str(item.get("evidence_field") or "").strip() or None,
-        evidence_sentence=str(item.get("evidence_sentence") or "").strip() or None,
-        span_text=str(item.get("span_text") or "").strip() or None,
+        evidence_field=clean_text(item.get("evidence_field")) or None,
+        evidence_sentence=clean_text(item.get("evidence_sentence")) or None,
+        span_text=clean_text(item.get("span_text")) or None,
         metadata=item.get("metadata") if isinstance(item.get("metadata"), dict) else {},
     )
 
@@ -260,13 +498,7 @@ def serialize_process_result(result) -> dict[str, Any]:
         payload["update"] = {
             "standard_job": result.update.standard_job,
             "month": result.update.month,
-            "skills": [
-                {
-                    "normalized_skill": skill.normalized_skill,
-                    "kg_display_skill": skill.kg_display_skill,
-                }
-                for skill in result.update.normalized_skills
-            ],
+            "normalized_skills": [skill.normalized_skill for skill in result.update.normalized_skills],
             "monthly_rows": result.update.monthly_rows,
             "frequency_rows": result.update.frequency_rows,
             "event_stream_path": result.update.event_stream_path,

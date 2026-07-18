@@ -13,6 +13,8 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Iterable
 
+from run_context import relative_to_project, start_new_run
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = PROJECT_ROOT / "config" / "generation_config.json"
@@ -261,8 +263,7 @@ def build_profile() -> tuple[list[dict], list[dict], dict]:
 
 def main() -> None:
     config = read_config()
-    output_dir = PROJECT_ROOT / "outputs"
-    output_dir.mkdir(parents=True, exist_ok=True)
+    output_dir = start_new_run(PROJECT_ROOT, config)
 
     input_profile_rows, skill_pool_rows, quality_report = build_profile()
 
@@ -303,6 +304,7 @@ def main() -> None:
     )
 
     quality_report["config_seed"] = config.get("seed")
+    quality_report["run_dir"] = relative_to_project(PROJECT_ROOT, output_dir)
     quality_report_path = output_dir / "input_quality_report.json"
     with quality_report_path.open("w", encoding="utf-8") as f:
         json.dump(quality_report, f, ensure_ascii=False, indent=2)
