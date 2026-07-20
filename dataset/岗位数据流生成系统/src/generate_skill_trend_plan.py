@@ -36,11 +36,11 @@ class SkillItem:
     standard_job: str
     standard_category: str
     skill: str
+    kg_display_skill: str
     skill_stage: str
     source_row_count: int
     traditional_source_row_count: int
     new_source_row_count: int
-    in_new_skill_dictionary: bool
 
 
 def read_config() -> dict:
@@ -70,12 +70,6 @@ def parse_int(value: str | int | None) -> int:
         return 0
 
 
-def parse_bool(value: str | bool | None) -> bool:
-    if isinstance(value, bool):
-        return value
-    return (value or "").strip().lower() in {"yes", "true", "1"}
-
-
 def month_sequence(start: str, end: str) -> list[str]:
     start_year, start_month = [int(part) for part in start.split("-")]
     end_year, end_month = [int(part) for part in end.split("-")]
@@ -103,13 +97,13 @@ def load_skill_pool(run_dir: Path) -> dict[str, list[SkillItem]]:
                 standard_job=job,
                 standard_category=(row.get("standard_category") or "").strip(),
                 skill=skill,
+                kg_display_skill=(row.get("kg_display_skill") or "").strip(),
                 skill_stage=(row.get("skill_stage") or "uncategorized").strip(),
                 source_row_count=parse_int(row.get("source_row_count")),
                 traditional_source_row_count=parse_int(
                     row.get("traditional_source_row_count")
                 ),
                 new_source_row_count=parse_int(row.get("new_source_row_count")),
-                in_new_skill_dictionary=parse_bool(row.get("in_new_skill_dictionary")),
             )
         )
     return skills_by_job
@@ -346,6 +340,7 @@ def generate_skill_plan(run_dir: Path) -> tuple[list[dict], list[dict], dict]:
                     "standard_job": job,
                     "standard_category": skill_item.standard_category,
                     "skill": skill_item.skill,
+                    "kg_display_skill": skill_item.kg_display_skill,
                     "skill_stage": skill_stage,
                     "skill_trend_type": skill_trend,
                     "job_demand_trend_type": job_demand_trend,
@@ -354,9 +349,6 @@ def generate_skill_plan(run_dir: Path) -> tuple[list[dict], list[dict], dict]:
                     "planned_job_jd_count": total_planned,
                     "average_active_month_probability": average_probability,
                     "max_active_month_probability": max_probability,
-                    "in_new_skill_dictionary": "yes"
-                    if skill_item.in_new_skill_dictionary
-                    else "no",
                 }
             )
 
@@ -373,6 +365,7 @@ def generate_skill_plan(run_dir: Path) -> tuple[list[dict], list[dict], dict]:
                         "month": month,
                         "month_index": idx,
                         "skill": skill_item.skill,
+                        "kg_display_skill": skill_item.kg_display_skill,
                         "skill_stage": skill_stage,
                         "skill_trend_type": skill_trend,
                         "planned_jd_count": planned_jd_count,
@@ -435,6 +428,7 @@ def main() -> None:
             "standard_job",
             "standard_category",
             "skill",
+            "kg_display_skill",
             "skill_stage",
             "skill_trend_type",
             "job_demand_trend_type",
@@ -443,7 +437,6 @@ def main() -> None:
             "planned_job_jd_count",
             "average_active_month_probability",
             "max_active_month_probability",
-            "in_new_skill_dictionary",
         ],
         trend_rows,
     )
@@ -455,6 +448,7 @@ def main() -> None:
             "month",
             "month_index",
             "skill",
+            "kg_display_skill",
             "skill_stage",
             "skill_trend_type",
             "planned_jd_count",

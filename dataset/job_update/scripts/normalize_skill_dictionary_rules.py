@@ -28,6 +28,271 @@ class NormalizedItem:
     rule_id: str
 
 
+SHORT_ACRONYM_KEEP = {
+    ".net",
+    "api",
+    "app",
+    "sdk",
+    "sql",
+    "cpu",
+    "gpu",
+    "npu",
+    "tpu",
+    "dpu",
+    "cuda",
+    "ocr",
+    "nlp",
+    "cv",
+    "asr",
+    "tts",
+    "ue",
+    "ar",
+    "vr",
+    "ide",
+    "sre",
+    "etl",
+    "aes",
+    "rsa",
+    "ssl",
+    "tls",
+    "ssh",
+    "http",
+    "grpc",
+    "rest",
+    "json",
+    "yaml",
+    "xml",
+    "html",
+    "css",
+    "js",
+    "ts",
+    "c",
+    "c#",
+    "c++",
+    "go",
+    "php",
+    "lua",
+    "r",
+    "rust",
+    "java",
+    "bash",
+    "awk",
+    "git",
+    "svn",
+    "linux",
+    "unix",
+    "ios",
+    "ue4",
+    "ue5",
+    "arm",
+    "x86",
+    "risc",
+    "simd",
+    "avx",
+    "sse",
+    "fpga",
+    "asic",
+    "soc",
+    "pcie",
+    "nvme",
+    "bios",
+    "uefi",
+    "cmos",
+    "can",
+    "lin",
+    "ble",
+    "wifi",
+    "5g",
+    "4g",
+    "3g",
+    "3gpp",
+    "tcp",
+    "udp",
+    "ip",
+    "dns",
+    "cdn",
+    "vpn",
+    "nat",
+    "bgp",
+    "ospf",
+    "vlan",
+    "mqtt",
+    "rtsp",
+    "rtmp",
+    "webrtc",
+    "hls",
+    "dash",
+    "flv",
+    "mp4",
+    "h264",
+    "h265",
+    "av1",
+    "jpeg",
+    "png",
+    "yuv",
+    "rgb",
+    "cnn",
+    "rnn",
+    "gan",
+    "gcn",
+    "bert",
+    "gpt",
+    "llm",
+    "vlm",
+    "rag",
+    "bm25",
+    "dpo",
+    "sft",
+    "ppo",
+    "rlhf",
+    "grpo",
+    "rl",
+    "mcp",
+    "k8s",
+    "kafka",
+    "redis",
+    "mysql",
+    "aigc",
+    "anc",
+    "ajax",
+    "aosp",
+    "apm",
+    "apu",
+    "aws",
+    "axi",
+    "bf16",
+    "blas",
+    "bpf",
+    "brpc",
+    "bsp",
+    "cann",
+    "cmdb",
+    "cni",
+    "llvm",
+    "mlir",
+    "onnx",
+    "wasm",
+}
+
+ACRONYM_EXACT_DROP = {
+    "acqua",
+    "ag-ui",
+    "aimet",
+    "aloha",
+    "aquca",
+    "asplos",
+    "asscc",
+    "ast2500",
+    "ast2600",
+    "audioworx",
+    "avrcp",
+    "av_sbus",
+    "avsbus",
+    "bagel",
+    "best-rq",
+    "bq79xxx",
+    "caips",
+    "caisp",
+    "calvin",
+    "cfg++",
+    "cipp/e",
+    "cisp-pip",
+    "coling",
+    "coppa",
+    "ctcvr",
+    "dirac",
+    "dnsmos",
+    "dover",
+    "e-ncap",
+    "emnlp",
+    "fcbga",
+    "fmeda",
+    "gaia-1",
+    "gb/t32960",
+    "gb/t35273",
+    "gb/t51314",
+    "gb18384",
+    "gb50174",
+    "grade",
+    "gsm8k",
+    "h3cie",
+    "hipaa",
+    "iatf16949",
+    "icassp",
+    "icdar",
+    "ijcai",
+    "ijtag",
+    "ip69k",
+    "ipc-9592",
+    "ipdrr",
+    "iq-fmea",
+    "isolar",
+    "isscc",
+    "istqb",
+    "ivista",
+    "jedec",
+    "jncie",
+    "kwp2000",
+    "meosi",
+    "misra-c",
+    "mosfet",
+    "naacl",
+    "nisqa",
+    "oasys",
+    "pci-dss",
+    "pdsch",
+    "polqa",
+    "pucch",
+    "pusch",
+    "rhsc-et",
+    "robocoin",
+    "s-iov",
+    "sfmea",
+    "shram",
+    "siggraph",
+    "sigir",
+    "spec2006",
+    "tcl/tk",
+    "tia-942",
+    "tisax",
+    "togaf",
+    "tpami",
+    "ts16949",
+    "tzbsp",
+    "v93000",
+    "vda-rga",
+    "vda6.3",
+    "6-sigma",
+    "aon-mcu",
+    "aspice",
+    "behavior-1k",
+    "c-ncap",
+    "ci/ct",
+    "cissp",
+    "cnnvd",
+    "cobit",
+    "dfmea",
+    "driver/tia",
+    "g.722",
+    "h.323",
+    "iso/iec",
+    "it/cad",
+    "itu-t",
+    "micro",
+    "timer",
+    "uitars",
+}
+
+ACRONYM_DROP_PREFIXES = (
+    "gb/t",
+    "gb",
+    "iec",
+    "ieee",
+    "iso",
+    "iso/iec",
+)
+
+
 def clean_text(value: object) -> str:
     if value is None:
         return ""
@@ -48,6 +313,155 @@ def exact(text: str, *values: str) -> bool:
     return lowered in {value.casefold() for value in values}
 
 
+def high_priority_normalization(raw: str) -> list[NormalizedItem]:
+    items: list[NormalizedItem] = []
+
+    def add(skill: str, category: str, rule_id: str) -> None:
+        if skill and skill not in [item.skill for item in items]:
+            items.append(NormalizedItem(skill=skill, category=category, rule_id=rule_id))
+
+    if has(r"^C\+\+\d{2}$", raw):
+        add("C++", "编程语言", "cpp_version")
+        return items
+
+    if has(r"^ARM(?:32|64|v\d+)?$", raw):
+        add("ARM", "硬件架构", "arm_family")
+        return items
+
+    if has(r"^RISC[-\s]?V$", raw):
+        add("RISC-V", "硬件架构", "riscv")
+        return items
+
+    if has(r"^(?:HTTP|HTTPS)(?:[-/]?FLV|/?[23])?$", raw):
+        add("HTTP", "网络协议", "http_family")
+        return items
+
+    if has(r"^(?:H\.?26[456]|AV1|SVT-AV1)$", raw):
+        add("视频编码", "音视频技术", "video_codec")
+        return items
+
+    if has(r"^(?:JPEG(?:-AI|-XL)?|PNG|YUV|RGB)$", raw):
+        add("图像编码", "音视频技术", "image_codec")
+        return items
+
+    if has(r"^(?:RS[-\s]?(?:232|485)|RS232|RS485|USART)$", raw):
+        add("串口通信", "通信技术", "serial_communication")
+        return items
+
+    if has(r"^USB(?:3\.0|4\.0)?$", raw):
+        add("USB", "通信接口", "usb")
+        return items
+
+    if has(r"^(?:LPDDR(?:5X?|6)?|RDIMM|MRDIMM)$", raw):
+        add("内存技术", "硬件", "memory_technology")
+        return items
+
+    if has(r"^GPT(?:[-\s]?\d[V]?)?$|^ChatGPT$", raw):
+        add("LLM", "大模型", "gpt_family")
+        return items
+
+    if has(r"^RAGAS$", raw):
+        add("RAG", "检索增强生成", "rag_family")
+        return items
+
+    if has(r"^(?:AR|VR|AR/VR)$", raw):
+        add("AR/VR技术", "XR技术", "ar_vr_family")
+        return items
+
+    if has(r"^(?:CAN(?:-FD|FD)?|CANopen)$", raw):
+        add("CAN总线", "通信技术", "can_bus")
+        return items
+
+    if has(r"^(?:CI/CD)$", raw):
+        add("CI/CD", "运维", "cicd_explicit")
+        return items
+
+    if has(r"^(?:DROID-SLAM|ORB-SLAM3?|LIO-SAM|VSLAM)$", raw):
+        add("SLAM", "机器人与定位", "slam_family")
+        return items
+
+    if has(r"^(?:PL/SQL|MSSQL|TDSQL|NL2SQL|DSL2SQL)$", raw):
+        add("SQL", "数据库", "sql_family")
+        return items
+
+    if has(r"^(?:RTMP|RTSP|HLS|DASH|MPEG-DASH|HTTP-FLV|FLV|MP4)$", raw):
+        add("音视频流媒体", "音视频技术", "streaming_media")
+        return items
+
+    if has(r"^(?:TCP/IP|TCP|UDP|QUIC|MP-TCP|MPTCP|MPQUIC|IP|DNS|BGP|OSPF|NAT|VXLAN|VLAN|NETCONF|SD-WAN|SR-TE|L3VPN|P2P-CDN)$", raw):
+        add("网络协议", "网络技术", "network_protocol")
+        return items
+
+    if has(r"^(?:SSLVPN|VPN)$", raw):
+        add("VPN", "网络安全", "vpn_family")
+        return items
+
+    if has(r"^(?:DMA-BUF|DMABUF|DMA2D)$", raw):
+        add("DMA", "底层系统", "dma_family")
+        return items
+
+    if has(r"^(?:RNN-T)$", raw):
+        add("RNN", "AI算法", "rnn_family")
+        return items
+
+    if has(r"^(?:RLAIF|REINFORCE)$", raw):
+        add("RL", "强化学习", "rl_family")
+        return items
+
+    if has(r"^(?:VQ-GAN|VQGAN|RQ-VAE|RQVAE)$", raw):
+        add("生成模型", "AI算法", "generative_model_family")
+        return items
+
+    if has(r"AIGC", raw):
+        add("AIGC", "AIGC", "aigc")
+        return items
+
+    if has(r"(?:2G|3G|4G)\s*射频(?:技术|协议)?|射频技术|射频协议", raw):
+        add("射频技术", "通信技术", "radio_frequency")
+        return items
+
+    if re.match(r"^3D", raw, flags=re.IGNORECASE):
+        add("3D相关技术", "数字前缀技术", "3d_prefix")
+        return items
+
+    if re.match(r"^2D", raw, flags=re.IGNORECASE):
+        add("2D相关技术", "数字前缀技术", "2d_prefix")
+        return items
+
+    tech_prefix = re.match(r"^([3-9][A-Z])(?:$|[^A-Za-z0-9])", raw, flags=re.IGNORECASE)
+    if tech_prefix:
+        prefix = tech_prefix.group(1).upper()
+        add(f"{prefix}相关技术", "数字前缀技术", "independent_numeric_alpha_prefix")
+        return items
+
+    return items
+
+
+def drop_acronym_noise(raw: str, low: str) -> str | None:
+    compact = raw.strip()
+    compact_low = compact.casefold()
+
+    if compact_low in ACRONYM_EXACT_DROP:
+        return "drop_noisy_acronym_exact"
+
+    if any(compact_low.startswith(prefix) for prefix in ACRONYM_DROP_PREFIXES) and has(r"\d", compact):
+        return "drop_standard_code"
+
+    if has(r"^(?:ISO|ISO/IEC|IEC|IEEE|GB/T|GB|IATF|TS|VDA|IPC|TIA|ECMA|ITU)[-/]?\d", compact):
+        return "drop_standard_code"
+
+    if has(r"^(?:AST|BQ|CMW|ESP|STM|V)\d{2,}", compact):
+        return "drop_part_or_instrument_model"
+
+    if has(r"^[A-Z]{2,5}[-_/]?(?:FMEA|NCAP|RGA)$", compact):
+        return "drop_quality_or_compliance_acronym"
+
+    if has(r"^[A-Z]{2,4}\d{2,}$", compact) and compact_low not in SHORT_ACRONYM_KEEP:
+        return "drop_model_like_acronym"
+
+    return None
+
+
 def normalize_keyword(keyword: str) -> tuple[list[NormalizedItem], str]:
     raw = clean_text(keyword)
     low = norm_text(raw)
@@ -59,6 +473,10 @@ def normalize_keyword(keyword: str) -> tuple[list[NormalizedItem], str]:
 
     if not raw:
         return [], "drop_empty"
+
+    priority_items = high_priority_normalization(raw)
+    if priority_items:
+        return priority_items, "keep"
 
     drop_reason = drop_keyword(raw, low)
     if drop_reason:
@@ -96,18 +514,74 @@ def normalize_keyword(keyword: str) -> tuple[list[NormalizedItem], str]:
         add("C++", "编程语言", "cpp_from_c_cpp")
         return items, "keep"
 
-    if has(r"AIGC", raw):
-        add("AIGC", "AIGC", "aigc")
+    if has(r"^C\+\+\d{2}$", raw):
+        add("C++", "编程语言", "cpp_version")
         return items, "keep"
 
-    if has(r"(?:2G|3G|4G)\s*射频(?:技术|协议)?|射频技术|射频协议", raw):
-        add("射频技术", "通信技术", "radio_frequency")
+    if has(r"^ARM(?:32|64|v\d+)?$", raw):
+        add("ARM", "硬件架构", "arm_family")
         return items, "keep"
 
-    tech_prefix = re.match(r"^([2-9][A-Z])(?![A-Za-z0-9])", raw, flags=re.IGNORECASE)
-    if tech_prefix:
-        prefix = tech_prefix.group(1).upper()
-        add(f"{prefix}相关技术", "数字前缀技术", "independent_numeric_alpha_prefix")
+    if has(r"^RISC[-\s]?V$", raw):
+        add("RISC-V", "硬件架构", "riscv")
+        return items, "keep"
+
+    if has(r"^(?:HTTP|HTTPS)(?:[-/]?FLV|/?[23])?$", raw):
+        add("HTTP", "网络协议", "http_family")
+        return items, "keep"
+
+    if has(r"^(?:H\.?26[456]|AV1|SVT-AV1)$", raw):
+        add("视频编码", "音视频技术", "video_codec")
+        return items, "keep"
+
+    if has(r"^(?:JPEG(?:-AI|-XL)?|PNG|YUV|RGB)$", raw):
+        add("图像编码", "音视频技术", "image_codec")
+        return items, "keep"
+
+    if has(r"^(?:RS[-\s]?(?:232|485)|RS232|RS485|USART)$", raw):
+        add("串口通信", "通信技术", "serial_communication")
+        return items, "keep"
+
+    if has(r"^USB(?:3\.0|4\.0)?$", raw):
+        add("USB", "通信接口", "usb")
+        return items, "keep"
+
+    if has(r"^(?:LPDDR(?:5X?|6)?|RDIMM|MRDIMM)$", raw):
+        add("内存技术", "硬件", "memory_technology")
+        return items, "keep"
+
+    if has(r"^GPT(?:[-\s]?\d[V]?)?$|^ChatGPT$", raw):
+        add("LLM", "大模型", "gpt_family")
+        return items, "keep"
+
+    if has(r"^RAGAS$", raw):
+        add("RAG", "检索增强生成", "rag_family")
+        return items, "keep"
+
+    app_skill = has(
+        r"^APP(?:$|[\u4e00-\u9fff])|^App(?:$|[\u4e00-\u9fff\s])|Android\s+App|iOS\s+App|iPhone\s+App|"
+        r"HarmonyOS\s+App|鸿蒙App|WebApp|uni-?App|UniApp|Hybrid\s+App|客户端App|移动App|大型App|影像App|VR\s+App",
+        raw,
+    )
+    if app_skill and not has(r"Appium|AppArmor|AppKit|AppBuilder|AppContainer|Append|Application|Applied|Approximate|Kappa|Mapping|MAPPO|overlapping|WhatsApp", raw):
+        if has(r"安全|漏洞|逆向|反编译|混淆|隐私|风控|加固|个人信息保护", raw):
+            add("移动应用安全", "移动开发", "app_security")
+        elif has(r"测试|自动化测试|质量", raw):
+            add("APP测试", "移动开发", "app_testing")
+        else:
+            add("APP开发", "移动开发", "app_development")
+        return items, "keep"
+
+    api_skill = has(r"(?<![A-Za-z])API(?![A-Za-z])|OpenAPI|FastAPI|RESTful\s+API|REST\s+API|HTTP\s+API|RPC\s+API|Web\s+API|云API|开放API|推理API|大模型API", raw)
+    if api_skill and not has(r"Mapillary|Xapian|SAPIEN|WAAPI|WASAPI", raw):
+        if has(r"Gateway|网关|APISIX", raw):
+            add("API网关", "API", "api_gateway")
+        elif has(r"安全|Key|鉴权|权限|漏洞|攻击|防护", raw):
+            add("API安全", "API", "api_security")
+        elif has(r"测试|自动化测试|稳定性|成功率", raw):
+            add("API测试", "API", "api_testing")
+        else:
+            add("API开发", "API", "api_development")
         return items, "keep"
 
     # Multi-concept terms.
@@ -328,6 +802,18 @@ def normalize_keyword(keyword: str) -> tuple[list[NormalizedItem], str]:
 
 
 def drop_keyword(raw: str, low: str) -> str | None:
+    if raw in {"#NAME?", "#VALUE!", "#REF!", "#DIV/0!"}:
+        return "drop_excel_error"
+
+    compact = raw.strip()
+    if re.fullmatch(r"[A-Za-z0-9+#./-]{1,4}", compact):
+        if compact.casefold() not in SHORT_ACRONYM_KEEP:
+            return "drop_ambiguous_short_acronym"
+
+    acronym_noise_reason = drop_acronym_noise(raw, low)
+    if acronym_noise_reason:
+        return acronym_noise_reason
+
     if has(r"用户数据|业务数据|业务对象|岗位愿景|行业方向|产品场景枚举|产品场景|业务场景|场景举例", raw):
         return "drop_business_or_scene"
 

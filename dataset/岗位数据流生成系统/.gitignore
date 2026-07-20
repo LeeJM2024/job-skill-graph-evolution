@@ -5,4 +5,5 @@ __pycache__/
 .DS_Store
 Thumbs.db
 outputs/current_run_id.txt
-outputs/runs/
+outputs/runs/*
+!outputs/runs/.gitkeep

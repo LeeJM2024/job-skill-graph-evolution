@@ -14,6 +14,7 @@
     "extract:job-skills-api": "python skill_extract/extract_job_skills_api.py",
     "extract:job-skills-deepseek": "python skill_extract/extract_job_skills_api.py --provider deepseek",
     "extract:job-skills-gpt": "python skill_extract/extract_job_skills_api.py --provider gpt",
+    "normalize:job-skills": "python skill_extract/normalize_extracted_skills.py",
     "eval:job-skills-api": "python skill_extract/evaluate_job_skill_api.py",
     "eval:job-skills-deepseek": "python skill_extract/evaluate_job_skill_api.py --provider deepseek",
     "eval:job-skills-gpt": "python skill_extract/evaluate_job_skill_api.py --provider gpt",

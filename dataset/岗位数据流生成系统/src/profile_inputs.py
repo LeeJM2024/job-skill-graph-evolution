@@ -1,6 +1,7 @@
 """Profile input data for the job event stream generator.
 
-Step 1 only reads and validates source files. It does not generate synthetic
+Step 1 reads source files, normalizes skill names with the supplied skill
+dictionary, and builds per-job skill pools. It does not generate synthetic
 events or trend plans.
 """
 
@@ -10,6 +11,7 @@ import csv
 import json
 import re
 from collections import Counter, defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
@@ -20,6 +22,13 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = PROJECT_ROOT / "config" / "generation_config.json"
 
 SKILL_SPLIT_RE = re.compile(r"[;；\n\r、,，]+")
+
+
+@dataclass(frozen=True)
+class SkillDictionaryItem:
+    normalized_skill: str
+    kg_display_skill: str
+    skill_stage: str
 
 
 def read_config() -> dict:
@@ -61,6 +70,55 @@ def split_skills(value: str | None) -> list[str]:
     return skills
 
 
+def clean_stage(value: str | None) -> str:
+    text = (value or "").strip()
+    if text == "新兴技能":
+        return "new"
+    if text == "传统技能":
+        return "traditional"
+    if text in {"new", "traditional", "both", "uncategorized"}:
+        return text
+    return ""
+
+
+def load_skill_dictionary(rows: list[dict[str, str]]) -> tuple[dict[str, SkillDictionaryItem], dict[str, SkillDictionaryItem]]:
+    by_keyword: dict[str, SkillDictionaryItem] = {}
+    by_normalized: dict[str, SkillDictionaryItem] = {}
+
+    for row in rows:
+        keyword = (row.get("skill_keyword") or "").strip()
+        normalized = (row.get("normalized_skill") or "").strip()
+        display = (row.get("kg_display_skill") or "").strip()
+        stage = clean_stage(row.get("技能类型"))
+        if not normalized:
+            continue
+        item = SkillDictionaryItem(
+            normalized_skill=normalized,
+            kg_display_skill=display,
+            skill_stage=stage,
+        )
+        by_normalized.setdefault(normalized.casefold(), item)
+        if keyword:
+            by_keyword.setdefault(keyword.casefold(), item)
+        by_keyword.setdefault(normalized.casefold(), item)
+
+    return by_keyword, by_normalized
+
+
+def normalize_skill(
+    skill: str,
+    dictionary_by_keyword: dict[str, SkillDictionaryItem],
+    dictionary_by_normalized: dict[str, SkillDictionaryItem],
+) -> SkillDictionaryItem:
+    text = (skill or "").strip()
+    if not text:
+        return SkillDictionaryItem("", "", "")
+    item = dictionary_by_keyword.get(text.casefold()) or dictionary_by_normalized.get(text.casefold())
+    if item is not None:
+        return item
+    return SkillDictionaryItem(text, "", "")
+
+
 def joined_sample(values: Iterable[str], limit: int = 5) -> str:
     cleaned: list[str] = []
     seen: set[str] = set()
@@ -79,11 +137,12 @@ def build_profile() -> tuple[list[dict], list[dict], dict]:
     config = read_config()
     standard_path = resolve_project_path(config["standard_job_file"])
     source_path = resolve_project_path(config["source_job_file"])
-    new_skill_path = resolve_project_path(config["new_skill_file"])
+    skill_dictionary_path = resolve_project_path(config["skill_dictionary_file"])
 
     standard_rows = read_csv_dicts(standard_path)
     source_rows = read_csv_dicts(source_path)
-    new_skill_rows = read_csv_dicts(new_skill_path)
+    skill_dictionary_rows = read_csv_dicts(skill_dictionary_path)
+    dictionary_by_keyword, dictionary_by_normalized = load_skill_dictionary(skill_dictionary_rows)
 
     standard_jobs: list[str] = []
     standard_categories: dict[str, str] = {}
@@ -102,11 +161,6 @@ def build_profile() -> tuple[list[dict], list[dict], dict]:
         standard_categories[job] = (row.get("standard_category") or "").strip()
 
     allowed_jobs = set(standard_jobs)
-    new_skill_dictionary = {
-        (row.get("new_skill") or "").strip()
-        for row in new_skill_rows
-        if (row.get("new_skill") or "").strip()
-    }
 
     jd_count_by_job: Counter[str] = Counter()
     row_with_skills_by_job: Counter[str] = Counter()
@@ -114,10 +168,32 @@ def build_profile() -> tuple[list[dict], list[dict], dict]:
     skill_counter_by_job: dict[str, Counter[str]] = defaultdict(Counter)
     traditional_counter_by_job: dict[str, Counter[str]] = defaultdict(Counter)
     new_counter_by_job: dict[str, Counter[str]] = defaultdict(Counter)
+    dictionary_stage_by_skill: dict[str, str] = {}
+    display_by_skill: dict[str, str] = {}
 
     rows_outside_dictionary = 0
     rows_without_standard_job = 0
     rows_without_skills = 0
+    raw_skill_mentions = 0
+    normalized_skill_mentions = 0
+    unmapped_skill_mentions = 0
+    unmapped_skill_counter: Counter[str] = Counter()
+
+    def normalize_and_record(raw_skill: str) -> SkillDictionaryItem:
+        nonlocal raw_skill_mentions, normalized_skill_mentions, unmapped_skill_mentions
+        raw_skill_mentions += 1
+        item = normalize_skill(raw_skill, dictionary_by_keyword, dictionary_by_normalized)
+        if item.kg_display_skill:
+            normalized_skill_mentions += 1
+        else:
+            unmapped_skill_mentions += 1
+            unmapped_skill_counter[raw_skill] += 1
+        if item.normalized_skill:
+            if item.kg_display_skill:
+                display_by_skill.setdefault(item.normalized_skill, item.kg_display_skill)
+            if item.skill_stage:
+                dictionary_stage_by_skill.setdefault(item.normalized_skill, item.skill_stage)
+        return item
 
     for row in source_rows:
         standard_job = (row.get("standard_job") or "").strip()
@@ -142,14 +218,20 @@ def build_profile() -> tuple[list[dict], list[dict], dict]:
         else:
             rows_without_skills += 1
 
-        for skill in row_skills:
-            skill_counter_by_job[standard_job][skill] += 1
-        for skill in row_traditional_skills:
-            traditional_counter_by_job[standard_job][skill] += 1
-            skill_counter_by_job[standard_job][skill] += 0
-        for skill in row_new_skills:
-            new_counter_by_job[standard_job][skill] += 1
-            skill_counter_by_job[standard_job][skill] += 0
+        for raw_skill in row_skills:
+            item = normalize_and_record(raw_skill)
+            if item.normalized_skill and item.kg_display_skill:
+                skill_counter_by_job[standard_job][item.normalized_skill] += 1
+        for raw_skill in row_traditional_skills:
+            item = normalize_and_record(raw_skill)
+            if item.normalized_skill and item.kg_display_skill:
+                traditional_counter_by_job[standard_job][item.normalized_skill] += 1
+                skill_counter_by_job[standard_job][item.normalized_skill] += 0
+        for raw_skill in row_new_skills:
+            item = normalize_and_record(raw_skill)
+            if item.normalized_skill and item.kg_display_skill:
+                new_counter_by_job[standard_job][item.normalized_skill] += 1
+                skill_counter_by_job[standard_job][item.normalized_skill] += 0
 
     input_profile_rows: list[dict] = []
     skill_pool_rows: list[dict] = []
@@ -158,7 +240,13 @@ def build_profile() -> tuple[list[dict], list[dict], dict]:
         all_skills = set(skill_counter_by_job[job])
         traditional_skills = set(traditional_counter_by_job[job])
         new_skills = set(new_counter_by_job[job])
-        staged_skills = traditional_skills | new_skills
+        dictionary_new_skills = {
+            skill for skill in all_skills if dictionary_stage_by_skill.get(skill) == "new"
+        }
+        dictionary_traditional_skills = {
+            skill for skill in all_skills if dictionary_stage_by_skill.get(skill) == "traditional"
+        }
+        staged_skills = traditional_skills | new_skills | dictionary_new_skills | dictionary_traditional_skills
         overlap_skills = traditional_skills & new_skills
         unstaged_skills = all_skills - staged_skills
 
@@ -187,9 +275,9 @@ def build_profile() -> tuple[list[dict], list[dict], dict]:
                 "source_jd_count": jd_count,
                 "unique_job_title_count": len(job_title_by_job[job]),
                 "unique_skill_count": len(all_skills),
-                "traditional_skill_count": len(traditional_skills),
-                "new_skill_count": len(new_skills),
-                "dictionary_new_skill_count": len(all_skills & new_skill_dictionary),
+                "traditional_skill_count": len(dictionary_traditional_skills | traditional_skills),
+                "new_skill_count": len(dictionary_new_skills | new_skills),
+                "dictionary_new_skill_count": len(dictionary_new_skills),
                 "overlap_skill_stage_count": len(overlap_skills),
                 "skills_without_stage_count": len(unstaged_skills),
                 "source_rows_with_skills": rows_with_skills,
@@ -207,14 +295,15 @@ def build_profile() -> tuple[list[dict], list[dict], dict]:
         ):
             in_traditional = traditional_counter_by_job[job][skill]
             in_new = new_counter_by_job[job][skill]
-            if in_traditional and in_new:
+            dictionary_stage = dictionary_stage_by_skill.get(skill, "")
+            if dictionary_stage:
+                stage = dictionary_stage
+            elif in_traditional and in_new:
                 stage = "both"
             elif in_new:
                 stage = "new"
             elif in_traditional:
                 stage = "traditional"
-            elif skill in new_skill_dictionary:
-                stage = "new_dictionary_only"
             else:
                 stage = "uncategorized"
 
@@ -223,13 +312,11 @@ def build_profile() -> tuple[list[dict], list[dict], dict]:
                     "standard_job": job,
                     "standard_category": standard_categories.get(job, ""),
                     "skill": skill,
+                    "kg_display_skill": display_by_skill.get(skill, ""),
                     "skill_stage": stage,
                     "source_row_count": count,
                     "traditional_source_row_count": in_traditional,
                     "new_source_row_count": in_new,
-                    "in_new_skill_dictionary": "yes"
-                    if skill in new_skill_dictionary
-                    else "no",
                 }
             )
 
@@ -255,7 +342,23 @@ def build_profile() -> tuple[list[dict], list[dict], dict]:
         "unique_skills_across_jobs": len(
             {row["skill"] for row in skill_pool_rows if row.get("skill")}
         ),
-        "new_skill_dictionary_count": len(new_skill_dictionary),
+        "skill_dictionary_keyword_count": len(dictionary_by_keyword),
+        "skill_dictionary_normalized_count": len(dictionary_by_normalized),
+        "dictionary_new_skill_count": sum(
+            1 for item in dictionary_by_normalized.values() if item.skill_stage == "new"
+        ),
+        "raw_skill_mentions": raw_skill_mentions,
+        "normalized_skill_mentions": normalized_skill_mentions,
+        "ignored_unmapped_skill_mentions": unmapped_skill_mentions,
+        "ignored_unmapped_skill_coverage": round(
+            unmapped_skill_mentions / raw_skill_mentions, 6
+        )
+        if raw_skill_mentions
+        else 0.0,
+        "top_unmapped_skills": [
+            {"skill": skill, "count": count}
+            for skill, count in unmapped_skill_counter.most_common(20)
+        ],
     }
 
     return input_profile_rows, skill_pool_rows, quality_report
@@ -294,11 +397,11 @@ def main() -> None:
             "standard_job",
             "standard_category",
             "skill",
+            "kg_display_skill",
             "skill_stage",
             "source_row_count",
             "traditional_source_row_count",
             "new_source_row_count",
-            "in_new_skill_dictionary",
         ],
         skill_pool_rows,
     )
@@ -315,4 +418,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

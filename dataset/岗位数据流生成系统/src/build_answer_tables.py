@@ -185,6 +185,7 @@ def build_answers(run_dir: Path) -> tuple[list[dict], list[dict], dict, str]:
                     "standard_job": job,
                     "standard_category": meta.get("standard_category", ""),
                     "skill": skill,
+                    "kg_display_skill": meta.get("kg_display_skill", ""),
                     "monthly_jd_count": monthly_jd_count,
                     "monthly_skill_count": monthly_skill_count,
                     "monthly_skill_frequency": ratio(
@@ -309,6 +310,7 @@ def main() -> None:
             "standard_job",
             "standard_category",
             "skill",
+            "kg_display_skill",
             "monthly_jd_count",
             "monthly_skill_count",
             "monthly_skill_frequency",

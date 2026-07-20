@@ -1,7 +1,7 @@
 {
   "config_seed": 20260716,
   "plan_seed": 20260718,
-  "run_dir": "outputs/runs/run_20260720_110415_seed_20260716",
+  "run_dir": "outputs/runs/run_20260720_140441_seed_20260716",
   "month_start": "2024-12",
   "month_end": "2026-07",
   "month_count": 20,
@@ -29,6 +29,6 @@
     "间歇出现": 9,
     "无样本不生成": 2
   },
-  "planned_monthly_total_min": 93,
-  "planned_monthly_total_max": 137
+  "planned_monthly_total_min": 91,
+  "planned_monthly_total_max": 136
 }

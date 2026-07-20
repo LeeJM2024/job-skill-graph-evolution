@@ -7,7 +7,7 @@
 - 时间范围：2024-12 至 2026-07。
 - 标准岗位：使用 `data/input/standard_job_title_dictionary.csv` 中的全部 71 个标准岗位。
 - 岗位与技能来源：以 `data/input/job_bigcompany_final.csv` 为准。
-- 技能阶段辅助：`data/input/new_skills_current_dictionary.csv` 可用于辅助识别新兴技能。
+- 技能阶段辅助：`data/input/泛抽取级词典_传统新兴分类.csv` 可用于辅助识别新兴技能。
 - 最终事件流不输出 `traditional_skills` 与 `new_skills` 字段。
 
 ## 目录结构

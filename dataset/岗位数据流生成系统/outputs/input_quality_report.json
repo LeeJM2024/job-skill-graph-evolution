@@ -5,7 +5,7 @@
   "source_rows_used": 12675,
   "source_rows_without_standard_job": 0,
   "source_rows_outside_standard_dictionary": 0,
-  "source_rows_without_any_skill": 405,
+  "source_rows_without_any_skill": 415,
   "jobs_with_source_jd": 69,
   "jobs_without_source_jd": [
     "大数据开发工程师",
@@ -16,9 +16,97 @@
     "大数据开发工程师",
     "FPGA工程师"
   ],
-  "total_job_skill_pairs": 57184,
-  "unique_skills_across_jobs": 27550,
-  "new_skill_dictionary_count": 242,
+  "total_job_skill_pairs": 5952,
+  "unique_skills_across_jobs": 326,
+  "skill_dictionary_keyword_count": 2545,
+  "skill_dictionary_normalized_count": 333,
+  "dictionary_new_skill_count": 136,
+  "raw_skill_mentions": 327113,
+  "normalized_skill_mentions": 159337,
+  "ignored_unmapped_skill_mentions": 167776,
+  "ignored_unmapped_skill_coverage": 0.512899,
+  "top_unmapped_skills": [
+    {
+      "skill": "搜索引擎",
+      "count": 360
+    },
+    {
+      "skill": "ARM",
+      "count": 344
+    },
+    {
+      "skill": "RPC",
+      "count": 338
+    },
+    {
+      "skill": "Cursor",
+      "count": 336
+    },
+    {
+      "skill": "视频生成",
+      "count": 326
+    },
+    {
+      "skill": "前端工程化",
+      "count": 324
+    },
+    {
+      "skill": "存储",
+      "count": 324
+    },
+    {
+      "skill": "测试开发",
+      "count": 302
+    },
+    {
+      "skill": "前端性能优化",
+      "count": 280
+    },
+    {
+      "skill": "中间件",
+      "count": 270
+    },
+    {
+      "skill": "工具调用",
+      "count": 268
+    },
+    {
+      "skill": "服务端开发",
+      "count": 258
+    },
+    {
+      "skill": "数据处理",
+      "count": 248
+    },
+    {
+      "skill": "数据建模",
+      "count": 234
+    },
+    {
+      "skill": "多线程编程",
+      "count": 218
+    },
+    {
+      "skill": "SystemVerilog",
+      "count": 216
+    },
+    {
+      "skill": "数据清洗",
+      "count": 214
+    },
+    {
+      "skill": "面向对象设计",
+      "count": 214
+    },
+    {
+      "skill": "负载均衡",
+      "count": 214
+    },
+    {
+      "skill": "预训练",
+      "count": 214
+    }
+  ],
   "config_seed": 20260716,
-  "run_dir": "outputs/runs/run_20260720_110415_seed_20260716"
+  "run_dir": "outputs/runs/run_20260720_140441_seed_20260716"
 }
