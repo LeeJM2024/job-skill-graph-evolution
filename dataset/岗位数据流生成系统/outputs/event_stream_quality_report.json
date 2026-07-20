@@ -1,7 +1,8 @@
 {
   "config_seed": 20260716,
   "event_stream_seed": 20260720,
-  "output_event_stream_file": "outputs\\job_update_event_stream_generated.csv",
+  "run_dir": "outputs/runs/run_20260720_110415_seed_20260716",
+  "output_event_stream_file": "outputs/runs/run_20260720_110415_seed_20260716/job_update_event_stream_generated.csv",
   "generated_event_rows": 2335,
   "unique_generated_jobs": 69,
   "unique_generated_months": 20,
@@ -11,19 +12,19 @@
   "min_skills_per_jd": 4,
   "max_skills_per_jd": 10,
   "skill_count_distribution": {
-    "4": 38,
-    "5": 235,
-    "6": 530,
-    "7": 739,
-    "8": 498,
-    "9": 261,
-    "10": 34
+    "4": 32,
+    "5": 261,
+    "6": 496,
+    "7": 699,
+    "8": 516,
+    "9": 295,
+    "10": 36
   },
   "text_adaptation_distribution": {
-    "none": 1103,
-    "requirement_skill_hint": 524,
-    "responsibility_skill_hint": 450,
-    "responsibility_skill_hint+requirement_skill_hint": 258
+    "none": 1063,
+    "requirement_skill_hint": 515,
+    "responsibility_skill_hint": 465,
+    "responsibility_skill_hint+requirement_skill_hint": 292
   },
   "excluded_fields": [
     "traditional_skills",

@@ -18,6 +18,7 @@
   ],
   "total_job_skill_pairs": 57184,
   "unique_skills_across_jobs": 27550,
-  "new_skill_dictionary_count": 3028,
-  "config_seed": 20260716
+  "new_skill_dictionary_count": 242,
+  "config_seed": 20260716,
+  "run_dir": "outputs/runs/run_20260720_110415_seed_20260716"
 }

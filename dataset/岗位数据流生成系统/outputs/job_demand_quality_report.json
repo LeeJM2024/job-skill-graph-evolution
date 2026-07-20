@@ -1,6 +1,7 @@
 {
   "config_seed": 20260716,
   "plan_seed": 20260718,
+  "run_dir": "outputs/runs/run_20260720_110415_seed_20260716",
   "month_start": "2024-12",
   "month_end": "2026-07",
   "month_count": 20,
@@ -16,18 +17,18 @@
     "大数据开发工程师",
     "FPGA工程师"
   ],
-  "jobs_with_zero_months_count": 53,
-  "jobs_with_reappearance_count": 48,
+  "jobs_with_zero_months_count": 57,
+  "jobs_with_reappearance_count": 53,
   "trend_type_counts": {
-    "持续上升": 10,
-    "稳定波动": 17,
-    "消失后再出现": 9,
-    "持续下降": 7,
-    "先上升后下降": 6,
-    "先上升后稳定": 13,
-    "间歇出现": 7,
+    "持续上升": 8,
+    "稳定波动": 23,
+    "消失后再出现": 8,
+    "持续下降": 4,
+    "先上升后下降": 8,
+    "先上升后稳定": 9,
+    "间歇出现": 9,
     "无样本不生成": 2
   },
-  "planned_monthly_total_min": 98,
+  "planned_monthly_total_min": 93,
   "planned_monthly_total_max": 137
 }

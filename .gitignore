@@ -6,6 +6,13 @@ node_modules/
 .env
 .env.*
 !.env.example
+dataset/.env
+dataset/.env.*
+!dataset/.env.example
+dataset/skill_extract/cache/
+dataset/skill_extract/tmp_smoke/
+dataset/job_update/outputs/*
+!dataset/job_update/outputs/.gitkeep
 
 # Logs
 *.log
@@ -34,6 +41,8 @@ data/report/
 
 # Local unpacked/reference packages
 tmp_mcp_jobs/
+旧文件夹/
+dataset/归档文件夹/
 
 # Neo4j and database artifacts
 neo4j_dump/
