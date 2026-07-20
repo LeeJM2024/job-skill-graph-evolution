@@ -37,6 +37,7 @@ class JobPosting:
     job_id: str
     month: str
     job_title: str
+    routing_job_title: str = ""
     job_responsibility: str = ""
     job_requirement: str = ""
     skills: list[SkillMention] = field(default_factory=list)

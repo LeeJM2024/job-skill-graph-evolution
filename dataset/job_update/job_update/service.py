@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import threading
+import time
 from typing import Callable
 
 from .frequency_store import FrequencyStore
@@ -10,6 +12,7 @@ from .skill_extraction import SkillExtractor
 from .skill_normalizer import PassthroughSkillNormalizer, SkillNormalizer
 from .skill_pool_store import SkillPoolStore
 from .taxonomy import JobTaxonomy
+from .title_cleaning import TitleCleaner
 
 
 @dataclass(slots=True)
@@ -18,6 +21,7 @@ class JobUpdateSystem:
     frequency_store: FrequencyStore
     skill_pool_store: SkillPoolStore | None = None
     similarity: SimilarityBackend | None = None
+    title_cleaner: TitleCleaner | None = None
     skill_extractor: SkillExtractor | None = None
     skill_normalizer: SkillNormalizer | None = None
     category_threshold: float = 0.6
@@ -28,9 +32,18 @@ class JobUpdateSystem:
     def process(self, posting: JobPosting, write: bool = True) -> ProcessResult:
         similarity = self.similarity or Text2VecSimilarity()
         normalizer = self.skill_normalizer or PassthroughSkillNormalizer()
-        self._progress("routing: comparing job title with standard categories and jobs")
+        routing_job_title = posting.routing_job_title.strip() or posting.job_title
+        if self.title_cleaner is not None and not posting.routing_job_title.strip():
+            self._progress("title_cleaning: calling configured LLM title cleaner")
+            routing_job_title = self._run_with_heartbeat(
+                "title_cleaning",
+                lambda: self.title_cleaner.clean(posting.job_title),
+            )
+            self._progress(f"title_cleaning: raw={posting.job_title}, cleaned={routing_job_title}")
+        posting.routing_job_title = routing_job_title
+        self._progress("routing: comparing cleaned job title with standard categories and jobs")
         route = self.taxonomy.route(
-            posting.job_title,
+            routing_job_title,
             similarity=similarity,
             category_threshold=self.category_threshold,
             job_threshold=self.job_threshold,
@@ -53,7 +66,12 @@ class JobUpdateSystem:
             if self.skill_extractor is None:
                 raise ValueError("process-one requires skill_extract output; no skill_extractor was configured")
             self._progress("skills: calling configured skill provider")
-            posting.skills.extend(self.skill_extractor.extract(posting))
+            posting.skills.extend(
+                self._run_with_heartbeat(
+                    "skills",
+                    lambda: self.skill_extractor.extract(posting),
+                )
+            )
             self._progress(f"skills: extracted {len(posting.skills)} final normalized skills")
         else:
             self._progress(f"skills: using {len(posting.skills)} supplied final normalized skills")
@@ -125,3 +143,26 @@ class JobUpdateSystem:
     def _progress(self, message: str) -> None:
         if self.progress is not None:
             self.progress(message)
+
+    def _run_with_heartbeat(self, stage: str, action):
+        if self.progress is None:
+            return action()
+
+        done = threading.Event()
+
+        def heartbeat() -> None:
+            waited_seconds = 0
+            while not done.wait(10):
+                waited_seconds += 10
+                self._progress(f"{stage}: still waiting for API/model response ({waited_seconds}s elapsed)")
+
+        thread = threading.Thread(target=heartbeat, daemon=True)
+        thread.start()
+        started_at = time.perf_counter()
+        try:
+            return action()
+        finally:
+            done.set()
+            elapsed = time.perf_counter() - started_at
+            if elapsed >= 1:
+                self._progress(f"{stage}: stage finished in {elapsed:.1f}s")

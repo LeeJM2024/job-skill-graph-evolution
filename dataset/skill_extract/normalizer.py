@@ -11,6 +11,7 @@ from __future__ import annotations
 import csv
 import json
 import os
+import re
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
@@ -24,6 +25,61 @@ DEFAULT_EXTRACTION_DICTIONARY = DATASET_DICT_DIR / "\u6cdb\u62bd\u53d6\u7ea7\u8b
 DEFAULT_NORMALIZED_DICTIONARY = DATASET_DICT_DIR / "\u5f52\u4e00\u5316\u7ea7\u8bcd\u5178.csv"
 DEFAULT_DISPLAY_DICTIONARY = DATASET_DICT_DIR / "\u5c55\u793a\u7ea7\u8bcd\u5178.csv"
 DEFAULT_CACHE = extract_api.SKILL_EXTRACT_DIR / "cache" / "skill_normalization_api_cache.jsonl"
+
+NEW_SKILL_ALLOWED_ANCHORS = (
+    "模型",
+    "算法",
+    "框架",
+    "引擎",
+    "平台",
+    "协议",
+    "架构",
+    "数据库",
+    "中间件",
+    "编译器",
+    "操作系统",
+    "芯片",
+    "机器人",
+    "仿真",
+    "图谱",
+    "向量",
+    "检索",
+    "推理",
+    "训练",
+    "部署",
+    "容器",
+    "编排",
+    "调度",
+    "流式",
+    "视觉",
+    "语音",
+    "多模态",
+    "安全",
+)
+
+NEW_SKILL_REJECT_EXACT = {
+    "请求合并",
+    "资源压缩",
+    "权限校验",
+    "防注入",
+    "接口安全性",
+    "缓存设计",
+    "懒加载",
+    "模块化",
+    "高兼容性",
+    "视觉一致性",
+    "用户体验流畅性",
+}
+
+NEW_SKILL_REJECT_PATTERNS = [
+    re.compile(pattern)
+    for pattern in (
+        r"^(高性能|高并发|高可用|高兼容|稳定性|可用性|可靠性|安全性|一致性)$",
+        r".*(经验|能力|意识|思维|热情|抗压|沟通|协作)$",
+        r".*(设计|封装|调试|联调|维护|迭代|落地|实现|保障)$",
+        r".*(优化策略|适配方案|缓存策略|调试工具)$",
+    )
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -241,8 +297,9 @@ class SkillNormalizer:
             confidence = 0.0
         confidence = max(0.0, min(1.0, confidence))
 
-        if decision == "existing" and normalized.casefold() in self.normalized_skills:
-            skill = self.normalized_skills[normalized.casefold()]
+        existing_candidate = normalized or proposed
+        if decision == "existing" and existing_candidate.casefold() in self.normalized_skills:
+            skill = self.normalized_skills[existing_candidate.casefold()]
             return NormalizationDecision(
                 normalized_skill=skill,
                 kg_display_skill=self.display_map.get(skill.casefold(), ""),
@@ -253,9 +310,22 @@ class SkillNormalizer:
                 reason=reason,
             )
         if decision == "new" and allow_new_skills and proposed:
+            display = self.clean(item.get("kg_display_skill"))
+            is_valid, reject_reason = is_valid_new_skill_candidate(proposed, display, self.display_map)
+            if not is_valid:
+                return NormalizationDecision(
+                    normalized_skill="",
+                    kg_display_skill="",
+                    method="llm_new_skill_rejected_by_policy",
+                    confidence=confidence,
+                    status="unresolved",
+                    needs_review=True,
+                    reason=f"{reject_reason}; original_reason={reason}",
+                    proposed_normalized_skill=proposed,
+                )
             return NormalizationDecision(
                 normalized_skill=proposed,
-                kg_display_skill=self.clean(item.get("kg_display_skill")),
+                kg_display_skill=display,
                 method="llm_new_skill",
                 confidence=confidence,
                 status="new_skill_candidate",
@@ -328,7 +398,7 @@ def normalization_cache_key(
     allow_new_skills: bool,
 ) -> str:
     payload = {
-        "version": "skill_normalization_v1_2026_07_17",
+        "version": "skill_normalization_v2_2026_07_20_strict_new_skill_policy",
         "batch": batch,
         "normalized_skills": sorted(normalized_skills.values()),
         "display_map": display_map,
@@ -338,6 +408,30 @@ def normalization_cache_key(
     import hashlib
 
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def is_valid_new_skill_candidate(
+    proposed: str,
+    display: str,
+    display_map: dict[str, str],
+) -> tuple[bool, str]:
+    skill = SkillNormalizer.clean(proposed)
+    family = SkillNormalizer.clean(display)
+    if not skill:
+        return False, "empty proposed skill"
+    if not family:
+        return False, "new skill must include kg_display_skill"
+    if family not in set(display_map.values()):
+        return False, f"kg_display_skill is not in display dictionary: {family}"
+    if skill in NEW_SKILL_REJECT_EXACT:
+        return False, f"rejected task-level or quality phrase: {skill}"
+    if any(pattern.fullmatch(skill) or pattern.search(skill) for pattern in NEW_SKILL_REJECT_PATTERNS):
+        return False, f"rejected broad engineering phrase: {skill}"
+    if re.search(r"[A-Za-z][A-Za-z0-9+.#/-]*", skill):
+        return True, "accepted ascii technology marker"
+    if any(anchor in skill for anchor in NEW_SKILL_ALLOWED_ANCHORS):
+        return True, "accepted technical anchor"
+    return False, f"new skill lacks a stable technical anchor: {skill}"
 
 
 def _provider_config(
@@ -381,8 +475,18 @@ def call_normalization_api(
         "normalization layer, not an optional audit. Map each item to one existing normalized_skill when it is "
         "semantically the same skill. If no existing node fits but the item is clearly a resume/JD technical skill, "
         "return decision='new' and create a concise normalized skill name. For new skills, choose kg_display_skill "
-        "from the provided display_categories. Do not invent broad business skills, product scenarios, vague "
-        "responsibilities, or common-sense skills not supported by the evidence sentence. "
+        "from the provided display_categories. "
+        "Use decision='new' very strictly. A new skill must be a stable reusable technology, method, framework, "
+        "model family, algorithm, protocol, platform, toolchain, database, middleware, hardware/chip capability, "
+        "security technique family, or AI/data/software engineering capability that can reasonably become a KG node. "
+        "Reject task-level implementation details, quality adjectives, optimization tactics, generic engineering "
+        "actions, or business/product scenarios. For example, reject request merging, resource compression, "
+        "permission checks, anti-injection, interface security, high performance, high concurrency, compatibility, "
+        "stability, maintainability, communication, collaboration, and pressure resistance unless the phrase is an "
+        "established named technology or technique family. "
+        "Do not create a new skill only by copying a verb phrase from the JD. If uncertain, use decision='reject'. "
+        "Do not invent broad business skills, product scenarios, vague responsibilities, or common-sense skills "
+        "not supported by the evidence sentence. "
         f"allow_new_skills={str(allow_new_skills).lower()}. "
         "Return JSON only: {\"items\":[{\"skill_keyword\":\"...\",\"span_text\":\"...\","
         "\"decision\":\"existing|new|reject\",\"normalized_skill\":\"...\","

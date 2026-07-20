@@ -184,12 +184,9 @@ class JobSkillExtractor:
             if not api.clean_text(row.get("normalized_skill")) or not api.clean_text(row.get("kg_display_skill"))
         ]
         if invalid_rows:
-            sample = invalid_rows[:3]
-            raise RuntimeError(
-                "Skill normalization did not produce normalized_skill and kg_display_skill "
-                f"for {len(invalid_rows)} rows. Sample: {sample}"
-            )
-        return normalized_rows, stats
+            stats["dropped_unresolved_rows"] += len(invalid_rows)
+        valid_rows = [row for row in normalized_rows if row not in invalid_rows]
+        return valid_rows, stats
 
     def _call_or_load_cache(
         self,

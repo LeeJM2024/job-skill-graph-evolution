@@ -1,8 +1,13 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime
+import hashlib
 import json
+import re
 import sys
+import threading
+import time
 from pathlib import Path
 from typing import Any
 
@@ -24,12 +29,20 @@ from .skill_pool_store import SkillPoolStore
 from .similarity import Text2VecSimilarity
 from .taxonomy import JobTaxonomy
 from .text import clean_text
+from .title_cleaning import LLMTitleCleaner
 from .work_modes import (
     create_manual_workspace,
     resolve_data_stream_inputs,
     resolve_manual_inputs,
     write_manifest,
 )
+
+
+BASE_DATA_DIR = PROJECT_ROOT / "data" / "base"
+BASE_TITLE_DICTIONARY = BASE_DATA_DIR / "standard_job_title_dictionary.csv"
+BASE_EVENT_STREAM = BASE_DATA_DIR / "job_update_event_stream.csv"
+BASE_FREQUENCY_OUTPUT = BASE_DATA_DIR / "job_skill_monthly_frequency.csv"
+BASE_SKILL_POOL = BASE_DATA_DIR / "skill_pool.csv"
 
 
 def main() -> None:
@@ -130,20 +143,20 @@ def main() -> None:
     )
 
     route = subparsers.add_parser("route", help="Route a job title to family and standard job.")
-    add_routing_args(route)
+    add_routing_args(route, title_dictionary_required=False, default_title_dictionary=BASE_TITLE_DICTIONARY)
     route.add_argument("--job-title", required=True)
 
     process = subparsers.add_parser("process-one", help="Route and update one posting if it is an existing job.")
-    add_routing_args(process)
-    process.add_argument("--event-stream", required=True, type=Path)
-    process.add_argument("--frequency-output", required=True, type=Path)
+    add_routing_args(process, title_dictionary_required=False, default_title_dictionary=BASE_TITLE_DICTIONARY)
+    process.add_argument("--event-stream", type=Path, default=BASE_EVENT_STREAM)
+    process.add_argument("--frequency-output", type=Path, default=BASE_FREQUENCY_OUTPUT)
     process.add_argument(
         "--skill-pool",
         type=Path,
-        default=None,
-        help="Skill pool CSV. Defaults to skill_pool.csv beside --frequency-output.",
+        default=BASE_SKILL_POOL,
+        help="Skill pool CSV. Defaults to the initialized base skill_pool.csv.",
     )
-    process.add_argument("--job-id", required=True)
+    process.add_argument("--job-id", default=None, help="Optional. Generated automatically when omitted.")
     process.add_argument("--month", required=True)
     process.add_argument("--job-title", required=True)
     process.add_argument("--responsibility", default="")
@@ -174,6 +187,38 @@ def main() -> None:
     process.add_argument("--skill-cache", type=Path, default=None)
     process.add_argument("--skill-timeout", type=int, default=90)
     process.add_argument("--skill-retries", type=int, default=2)
+
+    submit = subparsers.add_parser(
+        "submit-one",
+        help="Submit one real posting to the initialized base dataset.",
+    )
+    submit.add_argument("--job-title", required=True)
+    submit.add_argument("--month", required=True)
+    submit.add_argument("--responsibility", default="")
+    submit.add_argument("--responsibility-file", type=Path, default=None)
+    submit.add_argument("--requirement", default="")
+    submit.add_argument("--requirement-file", type=Path, default=None)
+    submit.add_argument("--job-id", default=None, help="Optional. Generated automatically when omitted.")
+    submit.add_argument("--source", default="user_submission")
+    submit.add_argument("--dry-run", action="store_true")
+    submit.add_argument("--title-dictionary", type=Path, default=BASE_TITLE_DICTIONARY)
+    submit.add_argument("--event-stream", type=Path, default=BASE_EVENT_STREAM)
+    submit.add_argument("--frequency-output", type=Path, default=BASE_FREQUENCY_OUTPUT)
+    submit.add_argument("--skill-pool", type=Path, default=BASE_SKILL_POOL)
+    submit.add_argument("--category-threshold", type=float, default=0.6)
+    submit.add_argument("--job-threshold", type=float, default=0.85)
+    submit.add_argument("--tie-delta", type=float, default=0.03)
+    submit.add_argument("--text2vec-model", default="shibing624/text2vec-base-chinese")
+    submit.add_argument("--quiet", action="store_true", help="Only print the final JSON result.")
+    add_title_cleaning_args(submit)
+    submit.add_argument("--skill-provider", choices=["deepseek", "gpt"], default="deepseek")
+    submit.add_argument("--skill-model", default=None)
+    submit.add_argument("--skill-base-url", default=None)
+    submit.add_argument("--skill-api-key-env", default=None)
+    submit.add_argument("--skill-gold", type=Path, default=None)
+    submit.add_argument("--skill-cache", type=Path, default=None)
+    submit.add_argument("--skill-timeout", type=int, default=90)
+    submit.add_argument("--skill-retries", type=int, default=2)
 
     args = parser.parse_args()
     progress = build_progress_logger(args)
@@ -385,6 +430,15 @@ def main() -> None:
         )
         return
 
+    if args.command == "submit-one":
+        args.responsibility = read_text_arg(args.responsibility, args.responsibility_file)
+        args.requirement = read_text_arg(args.requirement, args.requirement_file)
+        args.job_id = args.job_id or generate_job_id(args.month, args.job_title)
+        progress(f"input: generated job_id={args.job_id}")
+    elif args.command == "process-one" and not args.job_id:
+        args.job_id = generate_job_id(args.month, args.job_title)
+        progress(f"input: generated job_id={args.job_id}")
+
     progress(f"taxonomy: loading title dictionary from {args.title_dictionary}")
     taxonomy = JobTaxonomy.from_csv(args.title_dictionary)
     progress(
@@ -394,26 +448,46 @@ def main() -> None:
     progress(f"text2vec: loading model {args.text2vec_model}")
     similarity = build_similarity(args)
     progress("text2vec: model ready")
+    progress(f"title_cleaning: initializing cleaner provider={args.title_clean_provider}")
+    title_cleaner = build_title_cleaner(args)
+    progress("title_cleaning: cleaner ready")
 
     if args.command == "route":
-        progress(f"routing: job_title={args.job_title}")
+        progress(f"title_cleaning: raw={args.job_title}")
+        routing_job_title = run_with_heartbeat(
+            progress,
+            "title_cleaning",
+            lambda: title_cleaner.clean(args.job_title),
+        )
+        progress(f"title_cleaning: cleaned={routing_job_title}")
+        progress(f"routing: job_title={routing_job_title}")
         result = taxonomy.route(
-            args.job_title,
+            routing_job_title,
             similarity=similarity,
             category_threshold=args.category_threshold,
             job_threshold=args.job_threshold,
             tie_delta=args.tie_delta,
         )
         progress(f"done: route status={result.status}")
-        print(json.dumps(serialize_route(result), ensure_ascii=False, indent=2))
+        print(
+            json.dumps(
+                {
+                    "job_title": args.job_title,
+                    "routing_job_title": routing_job_title,
+                    "route": serialize_route(result),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
         return
 
-    if args.command == "process-one":
+    if args.command in {"process-one", "submit-one"}:
         progress(f"input: job_id={args.job_id}, month={args.month}, job_title={args.job_title}")
         skill_pool_path = resolve_skill_pool_path(args)
         progress(f"skill_pool: target={skill_pool_path}")
-        skills = parse_skills(read_skills_json_arg(args))
-        raw_skill_keywords = parse_skill_keywords(args.skills)
+        skills = parse_skills(read_skills_json_arg(args)) if args.command == "process-one" else []
+        raw_skill_keywords = parse_skill_keywords(args.skills) if args.command == "process-one" else []
         if skills and raw_skill_keywords:
             raise ValueError("Use either --skills-json/--skills-json-file or --skills, not both.")
         progress(f"skills: parsed {len(skills)} supplied final normalized skills")
@@ -434,6 +508,7 @@ def main() -> None:
             frequency_store=FrequencyStore(args.event_stream, args.frequency_output),
             skill_pool_store=SkillPoolStore(skill_pool_path),
             similarity=similarity,
+            title_cleaner=title_cleaner,
             skill_extractor=skill_extractor,
             category_threshold=args.category_threshold,
             job_threshold=args.job_threshold,
@@ -451,22 +526,93 @@ def main() -> None:
         )
         progress(f"process: dry_run={args.dry_run}")
         result = system.process(posting, write=not args.dry_run)
-        progress("done: process-one completed")
+        progress(f"done: {args.command} completed")
         print(json.dumps(serialize_process_result(result), ensure_ascii=False, indent=2))
         return
 
 
-def add_routing_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--title-dictionary", required=True, type=Path)
+def add_routing_args(
+    parser: argparse.ArgumentParser,
+    *,
+    title_dictionary_required: bool = True,
+    default_title_dictionary: Path | None = None,
+) -> None:
+    parser.add_argument(
+        "--title-dictionary",
+        required=title_dictionary_required,
+        type=Path,
+        default=default_title_dictionary,
+    )
     parser.add_argument("--category-threshold", type=float, default=0.6)
     parser.add_argument("--job-threshold", type=float, default=0.85)
     parser.add_argument("--tie-delta", type=float, default=0.03)
     parser.add_argument("--text2vec-model", default="shibing624/text2vec-base-chinese")
     parser.add_argument("--quiet", action="store_true", help="Only print the final JSON result.")
+    add_title_cleaning_args(parser)
+
+
+def add_title_cleaning_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--title-clean-provider", choices=["deepseek", "gpt"], default="deepseek")
+    parser.add_argument("--title-clean-model", default=None)
+    parser.add_argument("--title-clean-base-url", default=None)
+    parser.add_argument("--title-clean-api-key-env", default=None)
+    parser.add_argument("--title-clean-timeout", type=int, default=60)
+    parser.add_argument("--title-clean-retries", type=int, default=2)
+
+
+def read_text_arg(inline_text: str, file_path: Path | None) -> str:
+    if file_path is None:
+        return inline_text
+    if clean_text(inline_text):
+        raise ValueError("Use either inline text or a text file for the same field, not both.")
+    return file_path.read_text(encoding="utf-8-sig")
+
+
+def generate_job_id(month: str, job_title: str) -> str:
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    title = clean_text(job_title)
+    slug = re.sub(r"[^0-9A-Za-z]+", "_", title).strip("_").lower()
+    if not slug:
+        slug = "job"
+    slug = slug[:24]
+    digest = hashlib.sha1(f"{month}|{title}|{timestamp}".encode("utf-8")).hexdigest()[:8]
+    return f"user_{clean_text(month).replace('-', '')}_{timestamp}_{slug}_{digest}"
 
 
 def build_similarity(args: argparse.Namespace):
     return Text2VecSimilarity(args.text2vec_model)
+
+
+def build_title_cleaner(args: argparse.Namespace) -> LLMTitleCleaner:
+    return LLMTitleCleaner(
+        provider=args.title_clean_provider,
+        model=args.title_clean_model,
+        base_url=args.title_clean_base_url,
+        api_key_env=args.title_clean_api_key_env,
+        timeout=args.title_clean_timeout,
+        retries=args.title_clean_retries,
+    )
+
+
+def run_with_heartbeat(progress, stage: str, action):
+    done = threading.Event()
+
+    def heartbeat() -> None:
+        waited_seconds = 0
+        while not done.wait(10):
+            waited_seconds += 10
+            progress(f"{stage}: still waiting for API/model response ({waited_seconds}s elapsed)")
+
+    thread = threading.Thread(target=heartbeat, daemon=True)
+    thread.start()
+    started_at = time.perf_counter()
+    try:
+        return action()
+    finally:
+        done.set()
+        elapsed = time.perf_counter() - started_at
+        if elapsed >= 1:
+            progress(f"{stage}: stage finished in {elapsed:.1f}s")
 
 
 def build_progress_logger(args: argparse.Namespace):
@@ -567,6 +713,7 @@ def serialize_process_result(result) -> dict[str, Any]:
     payload = {
         "job_id": result.posting.job_id,
         "job_title": result.posting.job_title,
+        "routing_job_title": result.posting.routing_job_title,
         "route": serialize_route(result.route),
         "updated": result.update is not None,
     }

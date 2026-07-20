@@ -38,6 +38,13 @@ ISP算法,硬件与芯片
 IT基础设施,云计算
 Java,编程语言
 JavaScript,编程语言
+TypeScript,编程语言
+HTML,编程语言
+CSS,编程语言
+Web,软件开发
+React,编程语言
+Vue.js,编程语言
+Angular,编程语言
 Kotlin,编程语言
 LLM,大模型
 LLMOps/MLOps,大模型
@@ -241,3 +248,4 @@ Web爬虫,数据工程
 高性能计算,硬件与芯片
 高性能通信,通信与网络
 高速接口,硬件与芯片
+性能优化,软件工程
