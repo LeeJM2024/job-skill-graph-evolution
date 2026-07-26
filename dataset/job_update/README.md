@@ -48,6 +48,39 @@ python -m job_update.cli submit-one `
   --dry-run
 ```
 
+## SQLite 数据库
+
+系统默认数据库文件：
+
+```text
+data/base/job_update.db
+```
+
+初始化数据库：
+
+```powershell
+python -m job_update.cli init-db
+```
+
+该命令会从当前 4 个 base CSV 导入：
+
+```text
+data/base/standard_job_title_dictionary.csv
+data/base/job_update_event_stream.csv
+data/base/job_skill_monthly_frequency.csv
+data/base/skill_pool.csv
+```
+
+`submit-one` 和 `process-one` 默认会在成功写入 CSV 后同步写入 SQLite；如果结果不是 `existing_job`，系统也会把本次岗位输入和路由结果写入数据库日志。
+
+从数据库导出回 CSV：
+
+```powershell
+python -m job_update.cli export-csv
+```
+
+当前版本保留 CSV 作为可读、可提交的数据文件，SQLite 作为本地数据库层。后续切换 PostgreSQL 时，可以沿用同一组表结构和命令语义。
+
 ## 目录结构
 
 ```text

@@ -5,6 +5,7 @@ import threading
 import time
 from typing import Callable
 
+from .database import SQLiteJobUpdateStore
 from .frequency_store import FrequencyStore
 from .models import ExistingJobUpdate, JobPosting, JobRoute, ProcessResult, ScoredCandidate
 from .route_adjudication import RouteAdjudicator
@@ -22,6 +23,7 @@ class JobUpdateSystem:
     taxonomy: JobTaxonomy
     frequency_store: FrequencyStore
     skill_pool_store: SkillPoolStore | None = None
+    database_store: SQLiteJobUpdateStore | None = None
     similarity: SimilarityBackend | None = None
     route_adjudicator: RouteAdjudicator | None = None
     title_cleaner: TitleCleaner | None = None
@@ -80,7 +82,11 @@ class JobUpdateSystem:
         )
         if route.status != "existing_job" or route.best_job is None:
             self._progress("done: not an existing job, frequency and skill pool will not be updated")
-            return ProcessResult(route=route, posting=posting, update=None)
+            result = ProcessResult(route=route, posting=posting, update=None)
+            if write and self.database_store is not None:
+                self._progress("database: writing route log")
+                self.database_store.sync_after_process(result=result)
+            return result
 
         if not posting.skills:
             if self.skill_extractor is None:
@@ -158,7 +164,15 @@ class JobUpdateSystem:
             if self.skill_pool_store is not None
             else None,
         )
-        return ProcessResult(route=route, posting=posting, update=update)
+        result = ProcessResult(route=route, posting=posting, update=update)
+        if write and self.database_store is not None:
+            self._progress("database: syncing processed posting, route, skills, frequency, and skill pool")
+            self.database_store.sync_after_process(
+                result=result,
+                frequency=frequency,
+                skill_pool=skill_pool,
+            )
+        return result
 
     def _route_posting(
         self,

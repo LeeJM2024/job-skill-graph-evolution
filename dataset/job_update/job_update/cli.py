@@ -20,6 +20,7 @@ from .analysis import (
     write_analysis_outputs,
 )
 from .comparison import compare_answer_tables, write_comparison_outputs
+from .database import SQLiteJobUpdateStore
 from .frequency_store import FrequencyStore, rebuild_frequency_table
 from .models import JobPosting, SkillMention
 from .output_runs import PROJECT_ROOT, resolve_run_output_dir, write_current_run_marker
@@ -44,6 +45,7 @@ BASE_TITLE_DICTIONARY = BASE_DATA_DIR / "standard_job_title_dictionary.csv"
 BASE_EVENT_STREAM = BASE_DATA_DIR / "job_update_event_stream.csv"
 BASE_FREQUENCY_OUTPUT = BASE_DATA_DIR / "job_skill_monthly_frequency.csv"
 BASE_SKILL_POOL = BASE_DATA_DIR / "skill_pool.csv"
+BASE_DATABASE = BASE_DATA_DIR / "job_update.db"
 
 
 def main() -> None:
@@ -53,6 +55,12 @@ def main() -> None:
     rebuild = subparsers.add_parser("rebuild-frequency", help="Rebuild monthly/cumulative skill frequency CSV.")
     rebuild.add_argument("--event-stream", required=True, type=Path)
     rebuild.add_argument("--output", required=True, type=Path)
+
+    init_db = subparsers.add_parser("init-db", help="Initialize the SQLite database from base CSV files.")
+    add_database_csv_args(init_db)
+
+    export_csv = subparsers.add_parser("export-csv", help="Export SQLite database tables back to CSV files.")
+    add_database_csv_args(export_csv)
 
     analyze = subparsers.add_parser(
         "analyze-event-stream",
@@ -151,6 +159,7 @@ def main() -> None:
     add_routing_args(process, title_dictionary_required=False, default_title_dictionary=BASE_TITLE_DICTIONARY)
     process.add_argument("--event-stream", type=Path, default=BASE_EVENT_STREAM)
     process.add_argument("--frequency-output", type=Path, default=BASE_FREQUENCY_OUTPUT)
+    process.add_argument("--database", type=Path, default=BASE_DATABASE)
     process.add_argument(
         "--skill-pool",
         type=Path,
@@ -207,6 +216,7 @@ def main() -> None:
     submit.add_argument("--event-stream", type=Path, default=BASE_EVENT_STREAM)
     submit.add_argument("--frequency-output", type=Path, default=BASE_FREQUENCY_OUTPUT)
     submit.add_argument("--skill-pool", type=Path, default=BASE_SKILL_POOL)
+    submit.add_argument("--database", type=Path, default=BASE_DATABASE)
     submit.add_argument("--category-threshold", type=float, default=0.58)
     submit.add_argument("--job-threshold", type=float, default=0.82)
     submit.add_argument("--tie-delta", type=float, default=0.03)
@@ -232,6 +242,40 @@ def main() -> None:
 
     args = parser.parse_args()
     progress = build_progress_logger(args)
+    if args.command == "init-db":
+        progress(f"database: initializing SQLite database at {args.database}")
+        counts = SQLiteJobUpdateStore(args.database).initialize_from_csv(
+            title_dictionary_path=args.title_dictionary,
+            event_stream_path=args.event_stream,
+            frequency_path=args.frequency_output,
+            skill_pool_path=args.skill_pool,
+        )
+        print(
+            json.dumps(
+                {"database": str(args.database), "initialized": counts},
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+
+    if args.command == "export-csv":
+        progress(f"database: exporting SQLite database from {args.database}")
+        counts = SQLiteJobUpdateStore(args.database).export_to_csv(
+            title_dictionary_path=args.title_dictionary,
+            event_stream_path=args.event_stream,
+            frequency_path=args.frequency_output,
+            skill_pool_path=args.skill_pool,
+        )
+        print(
+            json.dumps(
+                {"database": str(args.database), "exported": counts},
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+
     if args.command == "rebuild-frequency":
         events = pd.read_csv(args.event_stream, dtype=str).fillna("")
         frequency = rebuild_frequency_table(events)
@@ -516,10 +560,13 @@ def main() -> None:
         progress(f"routing_adjudication: initializing provider={args.route_provider}")
         route_adjudicator = build_route_adjudicator(args)
         progress("routing_adjudication: adjudicator ready")
+        if not args.dry_run:
+            ensure_database_initialized(args, progress)
         system = JobUpdateSystem(
             taxonomy=taxonomy,
             frequency_store=FrequencyStore(args.event_stream, args.frequency_output),
             skill_pool_store=SkillPoolStore(skill_pool_path),
+            database_store=SQLiteJobUpdateStore(args.database),
             similarity=similarity,
             route_adjudicator=route_adjudicator,
             title_cleaner=title_cleaner,
@@ -577,6 +624,14 @@ def add_routing_args(
     parser.add_argument("--text2vec-model", default="shibing624/text2vec-base-chinese")
     parser.add_argument("--quiet", action="store_true", help="Only print the final JSON result.")
     add_title_cleaning_args(parser)
+
+
+def add_database_csv_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--database", type=Path, default=BASE_DATABASE)
+    parser.add_argument("--title-dictionary", type=Path, default=BASE_TITLE_DICTIONARY)
+    parser.add_argument("--event-stream", type=Path, default=BASE_EVENT_STREAM)
+    parser.add_argument("--frequency-output", type=Path, default=BASE_FREQUENCY_OUTPUT)
+    parser.add_argument("--skill-pool", type=Path, default=BASE_SKILL_POOL)
 
 
 def add_title_cleaning_args(parser: argparse.ArgumentParser) -> None:
@@ -639,6 +694,18 @@ def build_route_adjudicator(args: argparse.Namespace) -> LLMRouteAdjudicator:
         api_key_env=args.route_api_key_env,
         timeout=args.route_timeout,
         retries=args.route_retries,
+    )
+
+
+def ensure_database_initialized(args: argparse.Namespace, progress) -> None:
+    if args.database.exists():
+        return
+    progress(f"database: {args.database} not found, initializing from current CSV files")
+    SQLiteJobUpdateStore(args.database).initialize_from_csv(
+        title_dictionary_path=args.title_dictionary,
+        event_stream_path=args.event_stream,
+        frequency_path=args.frequency_output,
+        skill_pool_path=resolve_skill_pool_path(args),
     )
 
 
