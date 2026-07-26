@@ -10,6 +10,9 @@ from .similarity import SimilarityBackend
 from .text import clean_text
 
 
+CATEGORY_AGGREGATION_TOP_N = 3
+
+
 @dataclass(slots=True)
 class StandardJob:
     title: str
@@ -58,12 +61,23 @@ class JobTaxonomy:
             profiles[category] = " ".join(parts)
         return profiles
 
+    def score_categories(self, job_title: str, similarity: SimilarityBackend) -> list[ScoredCandidate]:
+        return self._score_categories(clean_text(job_title), similarity)
+
+    def score_jobs(
+        self,
+        job_title: str,
+        similarity: SimilarityBackend,
+        jobs: list[StandardJob] | None = None,
+    ) -> list[ScoredCandidate]:
+        return self._score_jobs(clean_text(job_title), similarity, jobs or self.jobs)
+
     def route(
         self,
         job_title: str,
         similarity: SimilarityBackend,
-        category_threshold: float = 0.6,
-        job_threshold: float = 0.85,
+        category_threshold: float = 0.58,
+        job_threshold: float = 0.91,
         tie_delta: float = 0.03,
         max_categories: int = 3,
     ) -> JobRoute:
@@ -113,19 +127,24 @@ class JobTaxonomy:
         )
 
     def _score_categories(self, job_title: str, similarity: SimilarityBackend) -> list[ScoredCandidate]:
-        profiles = self.category_profiles()
-        names = list(profiles)
-        semantic_scores = similarity.score(job_title, [profiles[name] for name in names])
+        job_scores = self._score_jobs(job_title, similarity, self.jobs)
         candidates: list[ScoredCandidate] = []
-        for name, score in zip(names, semantic_scores):
-            semantic_score = self._bounded(score)
+        for name, jobs in self.jobs_by_category.items():
+            category_job_scores = [candidate for candidate in job_scores if candidate.metadata.get("category") == name]
+            top_scores = [candidate.score for candidate in category_job_scores[:CATEGORY_AGGREGATION_TOP_N]]
+            if not top_scores:
+                continue
+            score = top_scores[0]
             candidates.append(
                 ScoredCandidate(
                     name=name,
-                    score=semantic_score,
+                    score=self._bounded(score),
                     metadata={
-                        "profile": profiles[name],
-                        "semantic_score": semantic_score,
+                        "aggregation_method": f"top{CATEGORY_AGGREGATION_TOP_N}_job_max",
+                        "top_jobs": [
+                            {"name": candidate.name, "score": candidate.score}
+                            for candidate in category_job_scores[:CATEGORY_AGGREGATION_TOP_N]
+                        ],
                     },
                 )
             )

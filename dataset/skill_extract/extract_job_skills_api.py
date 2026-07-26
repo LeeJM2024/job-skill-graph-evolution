@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import http.client
 import json
 import os
 import re
@@ -651,7 +652,16 @@ def call_chat_api(
                 data = json.loads(response.read().decode("utf-8"))
             content = data["choices"][0]["message"]["content"]
             return extract_json_object(content)
-        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, KeyError, json.JSONDecodeError) as exc:
+        except (
+            urllib.error.HTTPError,
+            urllib.error.URLError,
+            TimeoutError,
+            ConnectionError,
+            ConnectionResetError,
+            http.client.HTTPException,
+            KeyError,
+            json.JSONDecodeError,
+        ) as exc:
             last_error = exc
             if attempt >= retries:
                 break

@@ -1,18 +1,6 @@
 {
-  "event_stream_rows": 1471,
-  "valid_event_rows": 1471,
-  "month_start": "2024-12",
-  "month_end": "2026-07",
-  "month_count": 20,
-  "standard_job_count": 54,
-  "event_jobs_in_dictionary": 1471,
-  "unknown_standard_jobs": [],
-  "job_demand_rows": 1080,
-  "skill_frequency_rows": 38420,
-  "unique_event_jobs": 52,
-  "unique_event_skills": 256,
-  "jobs_without_events": [
-    "大数据开发工程师",
-    "FPGA工程师"
-  ]
+  "base_event_rows": 1522,
+  "base_standard_jobs": 55,
+  "base_dictionary_jobs": 56,
+  "unknown_standard_jobs": []
 }

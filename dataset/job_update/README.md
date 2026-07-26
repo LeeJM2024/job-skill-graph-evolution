@@ -7,6 +7,47 @@
 - 数据流工作模式：读取“岗位数据流生成系统”的某一次 `run` 结果，输出命名与数据流系统的 `run_id` 保持一致。
 - 手动工作模式：人工把 CSV 放入指定输入工作区，系统读取后分析，输出命名为 `manual_YYYYMMDD_HHMM`，时间戳精确到分钟。
 
+## 单条招聘启事更新流程
+
+面向真实用户输入时，推荐使用 `submit-one`。用户只需要提供岗位名称、月份、岗位职责和岗位要求；`job_id` 会自动生成，基础数据文件默认读取 `data/base/`。
+
+系统默认流程：
+
+```text
+1. 调用大模型清洗岗位名称
+2. 使用 shibing624/text2vec 计算标准岗位相似度
+3. 高置信命中既有岗位时直接路由
+4. 中间分数样本调用大模型进行二次裁决
+5. 若大模型无法明确裁决但 Top1 相似度足够高，则取 Top1 作为既有岗位
+6. 调用 skill_extract 获取归一化后的技能和技能大族
+7. 更新事件流、岗位技能月度频率表和技能池
+```
+
+默认路由参数：
+
+```text
+category_threshold = 0.58
+job_threshold = 0.82
+tie_delta = 0.03
+llm_job_floor = 0.58
+llm_top_jobs = 20
+llm_accept_rank_limit = 1
+llm_selected_job_floor = 0.75
+llm_min_confidence = 0.80
+llm_uncertain_take_top1_threshold = 0.82
+```
+
+示例：
+
+```powershell
+python -m job_update.cli submit-one `
+  --month "2026-07" `
+  --job-title "《无畏契约手游》-前端开发工程师" `
+  --responsibility $resp `
+  --requirement $req `
+  --dry-run
+```
+
 ## 目录结构
 
 ```text
@@ -18,7 +59,7 @@ job_update/
     comparison_runs/<run_id>/    数据流模式比对结果
     manual_runs/manual_*/        手动模式结果
   README.md
-```
+```·
 
 ## 输入输出概览
 

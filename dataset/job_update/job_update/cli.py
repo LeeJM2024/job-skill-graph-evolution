@@ -23,6 +23,7 @@ from .comparison import compare_answer_tables, write_comparison_outputs
 from .frequency_store import FrequencyStore, rebuild_frequency_table
 from .models import JobPosting, SkillMention
 from .output_runs import PROJECT_ROOT, resolve_run_output_dir, write_current_run_marker
+from .route_adjudication import LLMRouteAdjudicator
 from .service import JobUpdateSystem
 from .skill_extraction import ExistingSkillExtractAdapter, ManualSkillKeywordExtractor, ManualSkillNormalizeAdapter
 from .skill_pool_store import SkillPoolStore
@@ -187,6 +188,7 @@ def main() -> None:
     process.add_argument("--skill-cache", type=Path, default=None)
     process.add_argument("--skill-timeout", type=int, default=90)
     process.add_argument("--skill-retries", type=int, default=2)
+    add_route_adjudication_args(process)
 
     submit = subparsers.add_parser(
         "submit-one",
@@ -205,9 +207,16 @@ def main() -> None:
     submit.add_argument("--event-stream", type=Path, default=BASE_EVENT_STREAM)
     submit.add_argument("--frequency-output", type=Path, default=BASE_FREQUENCY_OUTPUT)
     submit.add_argument("--skill-pool", type=Path, default=BASE_SKILL_POOL)
-    submit.add_argument("--category-threshold", type=float, default=0.6)
-    submit.add_argument("--job-threshold", type=float, default=0.85)
+    submit.add_argument("--category-threshold", type=float, default=0.58)
+    submit.add_argument("--job-threshold", type=float, default=0.82)
     submit.add_argument("--tie-delta", type=float, default=0.03)
+    submit.add_argument("--llm-job-floor", type=float, default=0.58)
+    submit.add_argument("--llm-top-jobs", type=int, default=20)
+    submit.add_argument("--llm-accept-rank-limit", type=int, default=1)
+    submit.add_argument("--llm-selected-job-floor", type=float, default=0.75)
+    submit.add_argument("--llm-min-confidence", type=float, default=0.80)
+    submit.add_argument("--llm-uncertain-take-top1-threshold", type=float, default=0.82)
+    submit.add_argument("--enable-taxonomy-gap-guard", action="store_true")
     submit.add_argument("--text2vec-model", default="shibing624/text2vec-base-chinese")
     submit.add_argument("--quiet", action="store_true", help="Only print the final JSON result.")
     add_title_cleaning_args(submit)
@@ -219,6 +228,7 @@ def main() -> None:
     submit.add_argument("--skill-cache", type=Path, default=None)
     submit.add_argument("--skill-timeout", type=int, default=90)
     submit.add_argument("--skill-retries", type=int, default=2)
+    add_route_adjudication_args(submit)
 
     args = parser.parse_args()
     progress = build_progress_logger(args)
@@ -503,16 +513,27 @@ def main() -> None:
             progress(f"skills: initializing skill_extract adapter provider={args.skill_provider}")
             skill_extractor = build_skill_extractor(args)
             progress("skills: skill_extract adapter ready")
+        progress(f"routing_adjudication: initializing provider={args.route_provider}")
+        route_adjudicator = build_route_adjudicator(args)
+        progress("routing_adjudication: adjudicator ready")
         system = JobUpdateSystem(
             taxonomy=taxonomy,
             frequency_store=FrequencyStore(args.event_stream, args.frequency_output),
             skill_pool_store=SkillPoolStore(skill_pool_path),
             similarity=similarity,
+            route_adjudicator=route_adjudicator,
             title_cleaner=title_cleaner,
             skill_extractor=skill_extractor,
             category_threshold=args.category_threshold,
             job_threshold=args.job_threshold,
             tie_delta=args.tie_delta,
+            llm_job_floor=args.llm_job_floor,
+            llm_top_jobs=args.llm_top_jobs,
+            llm_accept_rank_limit=args.llm_accept_rank_limit,
+            llm_selected_job_floor=args.llm_selected_job_floor,
+            llm_min_confidence=args.llm_min_confidence,
+            llm_uncertain_take_top1_threshold=args.llm_uncertain_take_top1_threshold,
+            use_taxonomy_gap_guard=args.enable_taxonomy_gap_guard,
             progress=progress,
         )
         posting = JobPosting(
@@ -543,9 +564,16 @@ def add_routing_args(
         type=Path,
         default=default_title_dictionary,
     )
-    parser.add_argument("--category-threshold", type=float, default=0.6)
-    parser.add_argument("--job-threshold", type=float, default=0.85)
+    parser.add_argument("--category-threshold", type=float, default=0.58)
+    parser.add_argument("--job-threshold", type=float, default=0.82)
     parser.add_argument("--tie-delta", type=float, default=0.03)
+    parser.add_argument("--llm-job-floor", type=float, default=0.58)
+    parser.add_argument("--llm-top-jobs", type=int, default=20)
+    parser.add_argument("--llm-accept-rank-limit", type=int, default=1)
+    parser.add_argument("--llm-selected-job-floor", type=float, default=0.75)
+    parser.add_argument("--llm-min-confidence", type=float, default=0.80)
+    parser.add_argument("--llm-uncertain-take-top1-threshold", type=float, default=0.82)
+    parser.add_argument("--enable-taxonomy-gap-guard", action="store_true")
     parser.add_argument("--text2vec-model", default="shibing624/text2vec-base-chinese")
     parser.add_argument("--quiet", action="store_true", help="Only print the final JSON result.")
     add_title_cleaning_args(parser)
@@ -558,6 +586,15 @@ def add_title_cleaning_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--title-clean-api-key-env", default=None)
     parser.add_argument("--title-clean-timeout", type=int, default=60)
     parser.add_argument("--title-clean-retries", type=int, default=2)
+
+
+def add_route_adjudication_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--route-provider", choices=["deepseek", "gpt"], default="deepseek")
+    parser.add_argument("--route-model", default=None)
+    parser.add_argument("--route-base-url", default=None)
+    parser.add_argument("--route-api-key-env", default=None)
+    parser.add_argument("--route-timeout", type=int, default=90)
+    parser.add_argument("--route-retries", type=int, default=2)
 
 
 def read_text_arg(inline_text: str, file_path: Path | None) -> str:
@@ -591,6 +628,17 @@ def build_title_cleaner(args: argparse.Namespace) -> LLMTitleCleaner:
         api_key_env=args.title_clean_api_key_env,
         timeout=args.title_clean_timeout,
         retries=args.title_clean_retries,
+    )
+
+
+def build_route_adjudicator(args: argparse.Namespace) -> LLMRouteAdjudicator:
+    return LLMRouteAdjudicator(
+        provider=args.route_provider,
+        model=args.route_model,
+        base_url=args.route_base_url,
+        api_key_env=args.route_api_key_env,
+        timeout=args.route_timeout,
+        retries=args.route_retries,
     )
 
 

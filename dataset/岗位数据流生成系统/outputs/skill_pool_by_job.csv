@@ -48,11 +48,11 @@
 大模型算法工程师,AI算法,模型对齐,大模型,new,31,31,0
 大模型算法工程师,AI算法,ASR,大模型,new,30,5,25
 大模型算法工程师,AI算法,模型调优,大模型,new,28,28,0
-大模型算法工程师,AI算法,数据工程,数据工程,traditional,27,27,0
 大模型算法工程师,AI算法,模型评测,大模型,new,27,15,12
 大模型算法工程师,AI算法,模型部署,大模型,new,26,0,26
 大模型算法工程师,AI算法,AI工作流设计,AI,new,25,25,0
 大模型算法工程师,AI算法,LoRA微调,大模型,new,25,0,25
+大模型算法工程师,AI算法,数据工程,数据工程,traditional,25,25,0
 大模型算法工程师,AI算法,深度学习框架,AI,traditional,25,0,25
 大模型算法工程师,AI算法,大模型后训练,大模型,new,24,0,24
 大模型算法工程师,AI算法,Ai coding,AI,new,22,12,10
@@ -68,7 +68,7 @@
 大模型算法工程师,AI算法,Tool Use,大模型,new,17,17,0
 大模型算法工程师,AI算法,CUDA,硬件与芯片,new,16,16,0
 大模型算法工程师,AI算法,Diffusion模型,大模型,new,16,14,2
-大模型算法工程师,AI算法,React,软件开发,traditional,16,16,0
+大模型算法工程师,AI算法,React,编程语言,traditional,16,16,0
 大模型算法工程师,AI算法,大模型评测,大模型,new,16,0,16
 大模型算法工程师,AI算法,Function Calling,大模型,new,15,0,15
 大模型算法工程师,AI算法,世界模型,大模型,new,15,15,0
@@ -112,7 +112,6 @@
 大模型算法工程师,AI算法,仿真技术,科学计算与仿真,traditional,5,5,0
 大模型算法工程师,AI算法,信息安全,安全,traditional,5,5,0
 大模型算法工程师,AI算法,跨语言技术,软件开发,traditional,5,4,1
-大模型算法工程师,AI算法,软件工程,软件工程,traditional,5,5,0
 大模型算法工程师,AI算法,AIops,系统与运维,new,4,0,4
 大模型算法工程师,AI算法,AI安全,安全,new,4,0,4
 大模型算法工程师,AI算法,AI工具,大模型,new,4,0,4
@@ -133,6 +132,7 @@
 大模型算法工程师,AI算法,Unreal Engine,软件开发,traditional,3,3,0
 大模型算法工程师,AI算法,人格化建模,AI,new,3,3,0
 大模型算法工程师,AI算法,信号处理,硬件与芯片,traditional,3,3,0
+大模型算法工程师,AI算法,性能优化,软件工程,traditional,3,3,0
 大模型算法工程师,AI算法,模型服务化,大模型,new,3,3,0
 大模型算法工程师,AI算法,硬件开发,硬件与芯片,traditional,3,3,0
 大模型算法工程师,AI算法,编解码技术,音视频技术,traditional,3,3,0
@@ -158,6 +158,7 @@
 大模型算法工程师,AI算法,端到端系统,软件开发,traditional,2,2,0
 大模型算法工程师,AI算法,网络技术,通信与网络,traditional,2,2,0
 大模型算法工程师,AI算法,自动化技术,系统与运维,traditional,2,2,0
+大模型算法工程师,AI算法,软件工程,软件工程,traditional,2,2,0
 大模型算法工程师,AI算法,软件测试,软件测试,traditional,2,2,0
 大模型算法工程师,AI算法,通信技术,通信与网络,traditional,2,2,0
 大模型算法工程师,AI算法,AI测试,AI,new,1,0,1
@@ -208,12 +209,12 @@
 大模型应用工程师,AI应用,prompt工程,大模型,new,108,1,107
 大模型应用工程师,AI应用,LangChain,大模型,new,103,0,103
 大模型应用工程师,AI应用,Machine Learning,AI,new,102,22,80
-大模型应用工程师,AI应用,数据工程,数据工程,traditional,95,95,0
 大模型应用工程师,AI应用,软件开发,软件开发,traditional,75,75,0
 大模型应用工程师,AI应用,Ai coding,AI,new,73,16,57
 大模型应用工程师,AI应用,分布式系统,软件工程,traditional,69,69,0
 大模型应用工程师,AI应用,NLP,大模型,new,68,68,0
 大模型应用工程师,AI应用,机器学习,AI,traditional,67,0,67
+大模型应用工程师,AI应用,数据工程,数据工程,traditional,60,60,0
 大模型应用工程师,AI应用,PyTorch,AI,traditional,58,0,58
 大模型应用工程师,AI应用,MCP,大模型,new,53,0,53
 大模型应用工程师,AI应用,多模态,大模型,new,53,0,53
@@ -222,12 +223,11 @@
 大模型应用工程师,AI应用,消息队列,数据工程,traditional,49,49,0
 大模型应用工程师,AI应用,Linux,系统与运维,traditional,47,47,0
 大模型应用工程师,AI应用,Function Calling,大模型,new,44,0,44
-大模型应用工程师,AI应用,React,软件开发,traditional,43,43,0
+大模型应用工程师,AI应用,React,编程语言,traditional,44,44,0
 大模型应用工程师,AI应用,大模型应用,大模型,new,42,24,18
 大模型应用工程师,AI应用,Multi-Agent,大模型,new,41,0,41
 大模型应用工程师,AI应用,AIGC,AI,new,39,4,35
 大模型应用工程师,AI应用,大模型训练,大模型,new,39,1,38
-大模型应用工程师,AI应用,软件工程,软件工程,traditional,39,39,0
 大模型应用工程师,AI应用,MySQL,数据工程,traditional,38,38,0
 大模型应用工程师,AI应用,Redis,数据工程,traditional,37,37,0
 大模型应用工程师,AI应用,SFT,大模型,new,37,0,37
@@ -251,6 +251,7 @@
 大模型应用工程师,AI应用,VLM,大模型,new,25,1,24
 大模型应用工程师,AI应用,大模型微调,大模型,new,25,10,15
 大模型应用工程师,AI应用,Docker,系统与运维,traditional,24,24,0
+大模型应用工程师,AI应用,性能优化,软件工程,traditional,24,24,0
 大模型应用工程师,AI应用,模型评测,大模型,new,24,18,6
 大模型应用工程师,AI应用,向量数据库,数据工程,new,23,0,23
 大模型应用工程师,AI应用,模型压缩,大模型,new,23,8,15
@@ -259,6 +260,7 @@
 大模型应用工程师,AI应用,DPO,大模型,new,20,0,20
 大模型应用工程师,AI应用,RLHF,大模型,new,20,0,20
 大模型应用工程师,AI应用,AI应用开发,AI,new,19,0,19
+大模型应用工程师,AI应用,软件工程,软件工程,traditional,19,19,0
 大模型应用工程师,AI应用,编程语言,编程语言,traditional,16,16,0
 大模型应用工程师,AI应用,Flink,数据工程,traditional,15,15,0
 大模型应用工程师,AI应用,分布式训练,大模型,new,15,15,0
@@ -268,6 +270,7 @@
 大模型应用工程师,AI应用,Embedding,大模型,new,14,0,14
 大模型应用工程师,AI应用,Hadoop,数据工程,traditional,14,14,0
 大模型应用工程师,AI应用,PPO,大模型,new,14,14,0
+大模型应用工程师,AI应用,Vue.js,编程语言,traditional,14,14,0
 大模型应用工程师,AI应用,Hive,数据工程,traditional,13,13,0
 大模型应用工程师,AI应用,Kafka,数据工程,traditional,13,13,0
 大模型应用工程师,AI应用,Kotlin,编程语言,traditional,13,13,0
@@ -275,7 +278,6 @@
 大模型应用工程师,AI应用,AI工作流设计,AI,new,12,12,0
 大模型应用工程师,AI应用,DeepSpeed,大模型,new,12,0,12
 大模型应用工程师,AI应用,LoRA微调,大模型,new,12,0,12
-大模型应用工程师,AI应用,Vue,软件开发,traditional,12,12,0
 大模型应用工程师,AI应用,信息安全,安全,traditional,12,12,0
 大模型应用工程师,AI应用,大模型安全,大模型,new,12,3,9
 大模型应用工程师,AI应用,Megatron,大模型,new,11,0,11
@@ -297,7 +299,7 @@
 大模型应用工程师,AI应用,网络协议,系统与运维,traditional,8,8,0
 大模型应用工程师,AI应用,计算机网络,通信与网络,traditional,8,8,0
 大模型应用工程师,AI应用,ASR,大模型,new,7,7,0
-大模型应用工程师,AI应用,CSS,软件开发,traditional,7,7,0
+大模型应用工程师,AI应用,CSS,编程语言,traditional,7,7,0
 大模型应用工程师,AI应用,DevOps,系统与运维,traditional,7,7,0
 大模型应用工程师,AI应用,PHP,编程语言,traditional,7,7,0
 大模型应用工程师,AI应用,Swift,编程语言,traditional,7,7,0
@@ -306,12 +308,12 @@
 大模型应用工程师,AI应用,模型调优,大模型,new,7,7,0
 大模型应用工程师,AI应用,模型部署,大模型,new,7,0,7
 大模型应用工程师,AI应用,计算机体系结构,硬件与芯片,traditional,7,7,0
-大模型应用工程师,AI应用,高性能计算,硬件与芯片,new,7,7,0
-大模型应用工程师,AI应用,HTML,软件开发,traditional,6,6,0
+大模型应用工程师,AI应用,HTML,编程语言,traditional,6,6,0
 大模型应用工程师,AI应用,TensorRT,大模型,new,6,6,0
 大模型应用工程师,AI应用,世界模型,大模型,new,6,6,0
 大模型应用工程师,AI应用,模型安全,大模型,new,6,6,0
 大模型应用工程师,AI应用,算法工程,算法与数学,traditional,6,6,0
+大模型应用工程师,AI应用,高性能计算,硬件与芯片,new,6,6,0
 大模型应用工程师,AI应用,Diffusion,大模型,new,5,0,5
 大模型应用工程师,AI应用,Lua,编程语言,traditional,5,5,0
 大模型应用工程师,AI应用,MongoDB,数据工程,traditional,5,5,0
@@ -424,10 +426,9 @@ AI应用工程师,AI应用,C/C++,编程语言,traditional,143,143,0
 AI应用工程师,AI应用,prompt工程,大模型,new,115,0,115
 AI应用工程师,AI应用,LangChain,大模型,new,97,0,97
 AI应用工程师,AI应用,软件开发,软件开发,traditional,95,95,0
-AI应用工程师,AI应用,数据工程,数据工程,traditional,81,81,0
 AI应用工程师,AI应用,MCP,大模型,new,64,0,64
 AI应用工程师,AI应用,TypeScript,编程语言,traditional,63,63,0
-AI应用工程师,AI应用,React,软件开发,traditional,62,62,0
+AI应用工程师,AI应用,React,编程语言,traditional,62,62,0
 AI应用工程师,AI应用,Ai coding,AI,new,55,5,50
 AI应用工程师,AI应用,分布式系统,软件工程,traditional,55,55,0
 AI应用工程师,AI应用,机器学习,AI,traditional,49,0,49
@@ -437,6 +438,7 @@ AI应用工程师,AI应用,JavaScript,编程语言,traditional,46,46,0
 AI应用工程师,AI应用,Multi-Agent,大模型,new,44,0,44
 AI应用工程师,AI应用,NLP,大模型,new,44,44,0
 AI应用工程师,AI应用,大模型应用,大模型,new,43,23,20
+AI应用工程师,AI应用,数据工程,数据工程,traditional,43,43,0
 AI应用工程师,AI应用,Function Calling,大模型,new,42,0,42
 AI应用工程师,AI应用,消息队列,数据工程,traditional,41,41,0
 AI应用工程师,AI应用,Memory,大模型,new,40,40,0
@@ -447,13 +449,13 @@ AI应用工程师,AI应用,AIGC,AI,new,35,2,33
 AI应用工程师,AI应用,操作系统,系统与运维,traditional,34,34,0
 AI应用工程师,AI应用,Context Engineering,大模型,new,31,31,0
 AI应用工程师,AI应用,Linux,系统与运维,traditional,31,31,0
+AI应用工程师,AI应用,Vue.js,编程语言,traditional,31,31,0
 AI应用工程师,AI应用,RLHF,大模型,new,29,0,29
 AI应用工程师,AI应用,AutoGen,大模型,new,28,0,28
 AI应用工程师,AI应用,MySQL,数据工程,traditional,28,28,0
 AI应用工程师,AI应用,TensorFlow,AI,traditional,28,0,28
 AI应用工程师,AI应用,计算机视觉,计算机视觉与图形,new,28,6,22
 AI应用工程师,AI应用,AI应用开发,AI,new,27,0,27
-AI应用工程师,AI应用,Vue,软件开发,traditional,27,27,0
 AI应用工程师,AI应用,多模态,大模型,new,27,0,27
 AI应用工程师,AI应用,上下文工程,大模型,new,25,25,0
 AI应用工程师,AI应用,Redis,数据工程,traditional,22,22,0
@@ -471,18 +473,18 @@ AI应用工程师,AI应用,iOS,软件开发,traditional,19,19,0
 AI应用工程师,AI应用,AI工作流设计,AI,new,18,18,0
 AI应用工程师,AI应用,Objective-C,编程语言,traditional,17,17,0
 AI应用工程师,AI应用,Rust,编程语言,traditional,17,17,0
+AI应用工程师,AI应用,性能优化,软件工程,traditional,17,17,0
 AI应用工程师,AI应用,Docker,系统与运维,traditional,16,16,0
 AI应用工程师,AI应用,Kubernetes,系统与运维,traditional,16,16,0
 AI应用工程师,AI应用,VLM,大模型,new,16,0,16
-AI应用工程师,AI应用,软件工程,软件工程,traditional,16,16,0
 AI应用工程师,AI应用,DPO,大模型,new,15,0,15
 AI应用工程师,AI应用,向量数据库,数据工程,new,15,0,15
+AI应用工程师,AI应用,CSS,编程语言,traditional,14,14,0
 AI应用工程师,AI应用,Elasticsearch,数据工程,traditional,14,14,0
+AI应用工程师,AI应用,HTML,编程语言,traditional,13,13,0
 AI应用工程师,AI应用,PHP,编程语言,traditional,12,12,0
 AI应用工程师,AI应用,CI/CD,系统与运维,traditional,11,11,0
-AI应用工程师,AI应用,CSS,软件开发,traditional,11,11,0
 AI应用工程师,AI应用,DevOps,系统与运维,traditional,11,11,0
-AI应用工程师,AI应用,HTML,软件开发,traditional,11,11,0
 AI应用工程师,AI应用,MongoDB,数据工程,traditional,11,11,0
 AI应用工程师,AI应用,云计算,云计算,traditional,11,11,0
 AI应用工程师,AI应用,模型微调,大模型,new,11,0,11
@@ -519,19 +521,22 @@ AI应用工程师,AI应用,推理优化,大模型,new,6,0,6
 AI应用工程师,AI应用,模型调优,大模型,new,6,6,0
 AI应用工程师,AI应用,网络协议,系统与运维,traditional,6,6,0
 AI应用工程师,AI应用,网络技术,通信与网络,traditional,6,6,0
-AI应用工程师,AI应用,自动化技术,系统与运维,traditional,6,6,0
 AI应用工程师,AI应用,软件测试,软件测试,traditional,6,6,0
 AI应用工程师,AI应用,音视频技术,音视频技术,traditional,6,6,0
 AI应用工程师,AI应用,AI安全,安全,new,5,0,5
 AI应用工程师,AI应用,ASR,大模型,new,5,1,4
+AI应用工程师,AI应用,Angular,编程语言,traditional,5,5,0
 AI应用工程师,AI应用,MyBatis,软件开发,traditional,5,5,0
+AI应用工程师,AI应用,Web,软件开发,traditional,5,5,0
 AI应用工程师,AI应用,模型部署,大模型,new,5,0,5
+AI应用工程师,AI应用,自动化技术,系统与运维,traditional,5,5,0
 AI应用工程师,AI应用,PostgreSQL,数据工程,traditional,4,4,0
 AI应用工程师,AI应用,推荐算法,AI,traditional,4,4,0
 AI应用工程师,AI应用,搜索算法,AI,traditional,4,4,0
 AI应用工程师,AI应用,研发效能,软件工程,traditional,4,4,0
 AI应用工程师,AI应用,系统开发,系统与运维,traditional,4,4,0
 AI应用工程师,AI应用,计算机体系结构,硬件与芯片,traditional,4,4,0
+AI应用工程师,AI应用,软件工程,软件工程,traditional,4,4,0
 AI应用工程师,AI应用,AI算法,AI,new,3,0,3
 AI应用工程师,AI应用,ClickHouse,数据工程,traditional,3,3,0
 AI应用工程师,AI应用,DeepSpeed,大模型,new,3,0,3
@@ -599,7 +604,6 @@ AI应用工程师,AI应用,硬件开发,硬件与芯片,traditional,1,1,0
 AI应用工程师,AI应用,端到端系统,软件开发,traditional,1,1,0
 AI应用工程师,AI应用,自动化算法,系统与运维,traditional,1,1,0
 AI应用工程师,AI应用,设备安全,安全,traditional,1,1,0
-AI应用工程师,AI应用,高性能计算,硬件与芯片,new,1,1,0
 AI安全工程师,AI安全,Python,编程语言,traditional,52,52,0
 AI安全工程师,AI安全,C/C++,编程语言,traditional,34,34,0
 AI安全工程师,AI安全,Go,编程语言,traditional,34,34,0
@@ -608,7 +612,7 @@ AI安全工程师,AI安全,AI安全,安全,new,24,0,24
 AI安全工程师,AI安全,Java,编程语言,traditional,24,24,0
 AI安全工程师,AI安全,Agent,大模型,new,22,0,22
 AI安全工程师,AI安全,大模型安全,大模型,new,20,8,12
-AI安全工程师,AI安全,数据工程,数据工程,traditional,17,17,0
+AI安全工程师,AI安全,数据工程,数据工程,traditional,13,13,0
 AI安全工程师,AI安全,机器学习,AI,traditional,13,0,13
 AI安全工程师,AI安全,prompt工程,大模型,new,12,0,12
 AI安全工程师,AI安全,PyTorch,AI,traditional,11,0,11
@@ -655,12 +659,12 @@ AI安全工程师,AI安全,Web爬虫,数据工程,traditional,3,3,0
 AI安全工程师,AI安全,仿真技术,科学计算与仿真,traditional,3,3,0
 AI安全工程师,AI安全,动态分析,软件工程,traditional,3,3,0
 AI安全工程师,AI安全,大模型应用,大模型,new,3,2,1
+AI安全工程师,AI安全,性能优化,软件工程,traditional,3,3,0
 AI安全工程师,AI安全,操作系统,系统与运维,traditional,3,3,0
 AI安全工程师,AI安全,模型工程,大模型,new,3,3,0
 AI安全工程师,AI安全,知识图谱,知识图谱,new,3,3,0
 AI安全工程师,AI安全,算法工程,算法与数学,traditional,3,3,0
 AI安全工程师,AI安全,设备安全,安全,traditional,3,3,0
-AI安全工程师,AI安全,软件工程,软件工程,traditional,3,3,0
 AI安全工程师,AI安全,AI工具,大模型,new,2,0,2
 AI安全工程师,AI安全,DPO,大模型,new,2,0,2
 AI安全工程师,AI安全,Hadoop,数据工程,traditional,2,2,0
@@ -686,21 +690,21 @@ AI安全工程师,AI安全,身份认证,安全,traditional,2,2,0
 AI安全工程师,AI安全,AIops,系统与运维,new,1,0,1
 AI安全工程师,AI安全,AI算法,AI,new,1,0,1
 AI安全工程师,AI安全,CI/CD,系统与运维,traditional,1,1,0
-AI安全工程师,AI安全,CSS,软件开发,traditional,1,1,0
+AI安全工程师,AI安全,CSS,编程语言,traditional,1,1,0
 AI安全工程师,AI安全,DeepSpeed,大模型,new,1,0,1
 AI安全工程师,AI安全,Diffusion,大模型,new,1,0,1
 AI安全工程师,AI安全,Elasticsearch,数据工程,traditional,1,1,0
 AI安全工程师,AI安全,Function Calling,大模型,new,1,0,1
 AI安全工程师,AI安全,GPU,系统与运维,traditional,1,1,0
 AI安全工程师,AI安全,GRPO,大模型,new,1,1,0
-AI安全工程师,AI安全,HTML,软件开发,traditional,1,1,0
+AI安全工程师,AI安全,HTML,编程语言,traditional,1,1,0
 AI安全工程师,AI安全,Kafka,数据工程,traditional,1,1,0
 AI安全工程师,AI安全,Megatron,大模型,new,1,0,1
 AI安全工程师,AI安全,PHP,编程语言,traditional,1,1,0
 AI安全工程师,AI安全,PPO,大模型,new,1,1,0
 AI安全工程师,AI安全,PostgreSQL,数据工程,traditional,1,1,0
 AI安全工程师,AI安全,Ray,AI,traditional,1,1,0
-AI安全工程师,AI安全,React,软件开发,traditional,1,1,0
+AI安全工程师,AI安全,React,编程语言,traditional,1,1,0
 AI安全工程师,AI安全,Redis,数据工程,traditional,1,1,0
 AI安全工程师,AI安全,SGLang,大模型,new,1,1,0
 AI安全工程师,AI安全,Unreal Engine,软件开发,traditional,1,1,0
@@ -748,7 +752,6 @@ AI Infra工程师,AI基础设施,计算机体系结构,硬件与芯片,tradition
 AI Infra工程师,AI基础设施,异构计算,硬件与芯片,new,56,56,0
 AI Infra工程师,AI基础设施,TensorRT-LLM,大模型,new,48,0,48
 AI Infra工程师,AI基础设施,Machine Learning,AI,new,47,15,32
-AI Infra工程师,AI基础设施,软件工程,软件工程,traditional,45,45,0
 AI Infra工程师,AI基础设施,模型并行,大模型,new,44,44,0
 AI Infra工程师,AI基础设施,Docker,系统与运维,traditional,43,43,0
 AI Infra工程师,AI基础设施,TensorRT,大模型,new,43,43,0
@@ -766,14 +769,16 @@ AI Infra工程师,AI基础设施,Ray,AI,traditional,31,31,0
 AI Infra工程师,AI基础设施,高性能通信,通信与网络,traditional,31,31,0
 AI Infra工程师,AI基础设施,推理优化,大模型,new,29,0,29
 AI Infra工程师,AI基础设施,Agent,大模型,new,28,1,27
-AI Infra工程师,AI基础设施,数据工程,数据工程,traditional,28,28,0
 AI Infra工程师,AI基础设施,系统开发,系统与运维,traditional,28,28,0
+AI Infra工程师,AI基础设施,性能优化,软件工程,traditional,27,27,0
 AI Infra工程师,AI基础设施,AIGC,AI,new,26,1,25
 AI Infra工程师,AI基础设施,多模态,大模型,new,26,0,26
 AI Infra工程师,AI基础设施,机器学习,AI,traditional,26,0,26
 AI Infra工程师,AI基础设施,模型推理,大模型,new,25,25,0
+AI Infra工程师,AI基础设施,数据工程,数据工程,traditional,23,23,0
 AI Infra工程师,AI基础设施,Diffusion,大模型,new,22,0,22
 AI Infra工程师,AI基础设施,内存管理,软件工程,traditional,20,20,0
+AI Infra工程师,AI基础设施,软件工程,软件工程,traditional,19,19,0
 AI Infra工程师,AI基础设施,操作系统,系统与运维,traditional,18,18,0
 AI Infra工程师,AI基础设施,AI芯片,硬件与芯片,new,17,11,6
 AI Infra工程师,AI基础设施,AI基础设施,AI,new,16,2,14
@@ -858,7 +863,7 @@ AI Infra工程师,AI基础设施,Android,软件开发,traditional,2,2,0
 AI Infra工程师,AI基础设施,Hadoop,数据工程,traditional,2,2,0
 AI Infra工程师,AI基础设施,MySQL,数据工程,traditional,2,2,0
 AI Infra工程师,AI基础设施,RISC-V,系统与运维,traditional,2,2,0
-AI Infra工程师,AI基础设施,React,软件开发,traditional,2,2,0
+AI Infra工程师,AI基础设施,React,编程语言,traditional,2,2,0
 AI Infra工程师,AI基础设施,参数调优,算法与数学,traditional,2,2,0
 AI Infra工程师,AI基础设施,在线服务,软件开发,traditional,2,2,0
 AI Infra工程师,AI基础设施,多目标优化,算法与数学,traditional,2,2,0
@@ -886,7 +891,7 @@ AI Infra工程师,AI基础设施,PostgreSQL,数据工程,traditional,1,1,0
 AI Infra工程师,AI基础设施,Scala,编程语言,traditional,1,1,0
 AI Infra工程师,AI基础设施,Spring,软件开发,traditional,1,1,0
 AI Infra工程师,AI基础设施,TypeScript,编程语言,traditional,1,1,0
-AI Infra工程师,AI基础设施,Vue,软件开发,traditional,1,1,0
+AI Infra工程师,AI基础设施,Vue.js,编程语言,traditional,1,1,0
 AI Infra工程师,AI基础设施,上下文工程,大模型,new,1,1,0
 AI Infra工程师,AI基础设施,仿真技术,科学计算与仿真,traditional,1,1,0
 AI Infra工程师,AI基础设施,信号完整性,硬件与芯片,traditional,1,1,0
@@ -958,7 +963,7 @@ AIGC算法工程师,AI算法,GRPO,大模型,new,2,2,0
 AIGC算法工程师,AI算法,Multi-Agent,大模型,new,2,0,2
 AIGC算法工程师,AI算法,Multimodal AI,大模型,new,2,2,0
 AIGC算法工程师,AI算法,PPO,大模型,new,2,2,0
-AIGC算法工程师,AI算法,React,软件开发,traditional,2,2,0
+AIGC算法工程师,AI算法,React,编程语言,traditional,2,2,0
 AIGC算法工程师,AI算法,SGLang,大模型,new,2,2,0
 AIGC算法工程师,AI算法,TTS,大模型,new,2,0,2
 AIGC算法工程师,AI算法,上下文工程,大模型,new,2,2,0
@@ -978,7 +983,7 @@ AIGC算法工程师,AI算法,Redis,数据工程,traditional,1,1,0
 AIGC算法工程师,AI算法,TensorRT,大模型,new,1,1,0
 AIGC算法工程师,AI算法,TypeScript,编程语言,traditional,1,1,0
 AIGC算法工程师,AI算法,Unreal Engine,软件开发,traditional,1,1,0
-AIGC算法工程师,AI算法,Vue,软件开发,traditional,1,1,0
+AIGC算法工程师,AI算法,Vue.js,编程语言,traditional,1,1,0
 AIGC算法工程师,AI算法,世界模型,大模型,new,1,1,0
 AIGC算法工程师,AI算法,仿真技术,科学计算与仿真,traditional,1,1,0
 AIGC算法工程师,AI算法,信息检索,AI,traditional,1,1,0
@@ -1172,16 +1177,17 @@ NLP算法工程师,AI算法,模型压缩,大模型,new,2,0,2
 NLP算法工程师,AI算法,模型微调,大模型,new,2,0,2
 NLP算法工程师,AI算法,模型部署,大模型,new,2,0,2
 NLP算法工程师,AI算法,网络编程,软件工程,traditional,2,2,0
-NLP算法工程师,AI算法,软件工程,软件工程,traditional,2,2,0
 NLP算法工程师,AI算法,AI工作流设计,AI,new,1,1,0
+NLP算法工程师,AI算法,CSS,编程语言,traditional,1,1,0
 NLP算法工程师,AI算法,Diffusion模型,大模型,new,1,1,0
 NLP算法工程师,AI算法,Embedding,大模型,new,1,0,1
 NLP算法工程师,AI算法,GRPO,大模型,new,1,1,0
+NLP算法工程师,AI算法,HTML,编程语言,traditional,1,1,0
 NLP算法工程师,AI算法,LoRA微调,大模型,new,1,0,1
 NLP算法工程师,AI算法,Node.js,编程语言,traditional,1,1,0
 NLP算法工程师,AI算法,PPO,大模型,new,1,1,0
 NLP算法工程师,AI算法,Perl,编程语言,traditional,1,1,0
-NLP算法工程师,AI算法,React,软件开发,traditional,1,1,0
+NLP算法工程师,AI算法,React,编程语言,traditional,1,1,0
 NLP算法工程师,AI算法,Rust,编程语言,traditional,1,1,0
 NLP算法工程师,AI算法,SRE,系统与运维,traditional,1,1,0
 NLP算法工程师,AI算法,Shell脚本,编程语言,traditional,1,1,0
@@ -1190,7 +1196,7 @@ NLP算法工程师,AI算法,TensorRT,大模型,new,1,1,0
 NLP算法工程师,AI算法,Tool Use,大模型,new,1,1,0
 NLP算法工程师,AI算法,Triton,大模型,new,1,1,0
 NLP算法工程师,AI算法,VLA模型,大模型,new,1,1,0
-NLP算法工程师,AI算法,Vue,软件开发,traditional,1,1,0
+NLP算法工程师,AI算法,Vue.js,编程语言,traditional,1,1,0
 NLP算法工程师,AI算法,Webpack,软件开发,traditional,1,1,0
 NLP算法工程师,AI算法,世界模型,大模型,new,1,1,0
 NLP算法工程师,AI算法,信息安全,安全,traditional,1,1,0
@@ -1201,6 +1207,7 @@ NLP算法工程师,AI算法,因果推断,算法与数学,new,1,1,0
 NLP算法工程师,AI算法,图像图形技术,计算机视觉与图形,traditional,1,1,0
 NLP算法工程师,AI算法,大模型调优,大模型,new,1,0,1
 NLP算法工程师,AI算法,微服务架构,软件工程,traditional,1,1,0
+NLP算法工程师,AI算法,性能优化,软件工程,traditional,1,1,0
 NLP算法工程师,AI算法,推理优化,大模型,new,1,0,1
 NLP算法工程师,AI算法,机器人与自动驾驶,机器人与自动驾驶,new,1,0,1
 NLP算法工程师,AI算法,模型服务化,大模型,new,1,1,0
@@ -1210,6 +1217,7 @@ NLP算法工程师,AI算法,稀疏计算,硬件与芯片,new,1,1,0
 NLP算法工程师,AI算法,网络技术,通信与网络,traditional,1,1,0
 NLP算法工程师,AI算法,跨语言技术,软件开发,traditional,1,1,0
 NLP算法工程师,AI算法,身份认证,安全,traditional,1,1,0
+NLP算法工程师,AI算法,软件工程,软件工程,traditional,1,1,0
 NLP算法工程师,AI算法,通信技术,通信与网络,traditional,1,1,0
 NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 计算机视觉算法工程师,AI算法,C/C++,编程语言,traditional,65,65,0
@@ -1392,18 +1400,18 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 推荐算法工程师,算法,操作系统,系统与运维,traditional,13,13,0
 推荐算法工程师,算法,Go,编程语言,traditional,12,12,0
 推荐算法工程师,算法,分布式系统,软件工程,traditional,12,12,0
-推荐算法工程师,算法,软件工程,软件工程,traditional,12,12,0
 推荐算法工程师,算法,算法工程,算法与数学,traditional,11,11,0
 推荐算法工程师,算法,特征工程,数据工程,traditional,10,10,0
 推荐算法工程师,算法,AIGC,AI,new,9,1,8
 推荐算法工程师,算法,Hadoop,数据工程,traditional,9,9,0
 推荐算法工程师,算法,RLHF,大模型,new,9,0,9
 推荐算法工程师,算法,SFT,大模型,new,9,0,9
+推荐算法工程师,算法,性能优化,软件工程,traditional,9,9,0
 推荐算法工程师,算法,Scala,编程语言,traditional,8,8,0
-推荐算法工程师,算法,数据工程,数据工程,traditional,8,8,0
 推荐算法工程师,算法,自然语言处理,AI,traditional,8,0,8
 推荐算法工程师,算法,计算机体系结构,硬件与芯片,traditional,8,8,0
 推荐算法工程师,算法,因果推断,算法与数学,new,7,7,0
+推荐算法工程师,算法,数据工程,数据工程,traditional,7,7,0
 推荐算法工程师,算法,Flink,数据工程,traditional,6,6,0
 推荐算法工程师,算法,Shell脚本,编程语言,traditional,6,6,0
 推荐算法工程师,算法,模型训练,大模型,new,6,2,4
@@ -1421,6 +1429,7 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 推荐算法工程师,算法,内存管理,软件工程,traditional,3,3,0
 推荐算法工程师,算法,冷启动优化,软件工程,traditional,3,3,0
 推荐算法工程师,算法,推理优化,大模型,new,3,0,3
+推荐算法工程师,算法,软件工程,软件工程,traditional,3,3,0
 推荐算法工程师,算法,DeepSpeed,大模型,new,2,0,2
 推荐算法工程师,算法,Diffusion,大模型,new,2,0,2
 推荐算法工程师,算法,HBase,数据工程,traditional,2,2,0
@@ -1441,8 +1450,8 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 推荐算法工程师,算法,AI工具,大模型,new,1,0,1
 推荐算法工程师,算法,AI工程,AI,new,1,0,1
 推荐算法工程师,算法,AI算法,AI,new,1,0,1
-推荐算法工程师,算法,CSS,软件开发,traditional,1,1,0
-推荐算法工程师,算法,HTML,软件开发,traditional,1,1,0
+推荐算法工程师,算法,CSS,编程语言,traditional,1,1,0
+推荐算法工程师,算法,HTML,编程语言,traditional,1,1,0
 推荐算法工程师,算法,JavaScript,编程语言,traditional,1,1,0
 推荐算法工程师,算法,Kafka,数据工程,traditional,1,1,0
 推荐算法工程师,算法,LangChain,大模型,new,1,0,1
@@ -1453,7 +1462,7 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 推荐算法工程师,算法,Redis,数据工程,traditional,1,1,0
 推荐算法工程师,算法,SRE,系统与运维,traditional,1,1,0
 推荐算法工程师,算法,Spring,软件开发,traditional,1,1,0
-推荐算法工程师,算法,Vue,软件开发,traditional,1,1,0
+推荐算法工程师,算法,Vue.js,编程语言,traditional,1,1,0
 推荐算法工程师,算法,上下文工程,大模型,new,1,1,0
 推荐算法工程师,算法,偏好学习,AI,new,1,1,0
 推荐算法工程师,算法,分布式存储,数据工程,traditional,1,1,0
@@ -1496,12 +1505,12 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 搜索算法工程师,算法,DPO,大模型,new,7,0,7
 搜索算法工程师,算法,Spark,数据工程,traditional,7,7,0
 搜索算法工程师,算法,Hive,数据工程,traditional,6,6,0
-搜索算法工程师,算法,数据工程,数据工程,traditional,6,6,0
 搜索算法工程师,算法,CUDA,硬件与芯片,new,5,5,0
 搜索算法工程师,算法,Elasticsearch,数据工程,traditional,5,5,0
 搜索算法工程师,算法,Hadoop,数据工程,traditional,5,5,0
 搜索算法工程师,算法,世界模型,大模型,new,5,5,0
 搜索算法工程师,算法,推理优化,大模型,new,5,0,5
+搜索算法工程师,算法,数据工程,数据工程,traditional,5,5,0
 搜索算法工程师,算法,模型训练,大模型,new,5,0,5
 搜索算法工程师,算法,自然语言处理,AI,traditional,5,0,5
 搜索算法工程师,算法,AIGC,AI,new,4,0,4
@@ -1526,7 +1535,7 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 搜索算法工程师,算法,Diffusion,大模型,new,2,0,2
 搜索算法工程师,算法,GPU,系统与运维,traditional,2,2,0
 搜索算法工程师,算法,HBase,数据工程,traditional,2,2,0
-搜索算法工程师,算法,HTML,软件开发,traditional,2,2,0
+搜索算法工程师,算法,HTML,编程语言,traditional,2,2,0
 搜索算法工程师,算法,Megatron,大模型,new,2,0,2
 搜索算法工程师,算法,Multi-Agent,大模型,new,2,0,2
 搜索算法工程师,算法,Unix,系统与运维,traditional,2,2,0
@@ -1617,6 +1626,8 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 广告算法工程师,算法,模型训练,大模型,new,3,0,3
 广告算法工程师,算法,软件开发,软件开发,traditional,3,3,0
 广告算法工程师,算法,Attention机制,大模型,new,2,2,0
+广告算法工程师,算法,CSS,编程语言,traditional,2,2,0
+广告算法工程师,算法,HTML,编程语言,traditional,2,2,0
 广告算法工程师,算法,Kafka,数据工程,traditional,2,2,0
 广告算法工程师,算法,RLHF,大模型,new,2,0,2
 广告算法工程师,算法,SGLang,大模型,new,2,2,0
@@ -1633,27 +1644,26 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 广告算法工程师,算法,编程语言,编程语言,traditional,2,2,0
 广告算法工程师,算法,计算机体系结构,硬件与芯片,traditional,2,2,0
 广告算法工程师,算法,AI算法,AI,new,1,0,1
-广告算法工程师,算法,CSS,软件开发,traditional,1,1,0
 广告算法工程师,算法,CUDA,硬件与芯片,new,1,1,0
 广告算法工程师,算法,DPO,大模型,new,1,0,1
 广告算法工程师,算法,DeepSpeed,大模型,new,1,0,1
 广告算法工程师,算法,Diffusion,大模型,new,1,0,1
 广告算法工程师,算法,Embedding,大模型,new,1,0,1
 广告算法工程师,算法,HBase,数据工程,traditional,1,1,0
-广告算法工程师,算法,HTML,软件开发,traditional,1,1,0
 广告算法工程师,算法,JavaScript,编程语言,traditional,1,1,0
 广告算法工程师,算法,LoRA微调,大模型,new,1,0,1
 广告算法工程师,算法,Megatron,大模型,new,1,0,1
 广告算法工程师,算法,NoSQL,数据工程,traditional,1,1,0
 广告算法工程师,算法,Node.js,编程语言,traditional,1,1,0
 广告算法工程师,算法,PPO,大模型,new,1,1,0
-广告算法工程师,算法,React,软件开发,traditional,1,1,0
+广告算法工程师,算法,React,编程语言,traditional,1,1,0
 广告算法工程师,算法,Redis,数据工程,traditional,1,1,0
 广告算法工程师,算法,SRE,系统与运维,traditional,1,1,0
 广告算法工程师,算法,TCP/IP,系统与运维,traditional,1,1,0
 广告算法工程师,算法,TensorRT,大模型,new,1,1,0
 广告算法工程师,算法,Triton,大模型,new,1,1,0
 广告算法工程师,算法,Unix,系统与运维,traditional,1,1,0
+广告算法工程师,算法,Vue.js,编程语言,traditional,1,1,0
 广告算法工程师,算法,Webpack,软件开发,traditional,1,1,0
 广告算法工程师,算法,上下文工程,大模型,new,1,1,0
 广告算法工程师,算法,信号处理,硬件与芯片,traditional,1,1,0
@@ -1661,11 +1671,11 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 广告算法工程师,算法,增量学习,AI,new,1,1,0
 广告算法工程师,算法,大模型训练,大模型,new,1,1,0
 广告算法工程师,算法,异常检测,软件工程,new,1,1,0
+广告算法工程师,算法,性能优化,软件工程,traditional,1,1,0
 广告算法工程师,算法,推理优化,大模型,new,1,0,1
 广告算法工程师,算法,时间序列算法,算法与数学,traditional,1,1,0
 广告算法工程师,算法,模型压缩,大模型,new,1,0,1
 广告算法工程师,算法,模型评测,大模型,new,1,1,0
-广告算法工程师,算法,软件工程,软件工程,traditional,1,1,0
 风控算法工程师,算法,Python,编程语言,traditional,54,54,0
 风控算法工程师,算法,机器学习,AI,traditional,51,0,51
 风控算法工程师,算法,深度学习,AI,traditional,37,0,37
@@ -1717,7 +1727,7 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 风控算法工程师,算法,Multimodal AI,大模型,new,2,2,0
 风控算法工程师,算法,OAuth,软件开发,traditional,2,2,0
 风控算法工程师,算法,PPO,大模型,new,2,2,0
-风控算法工程师,算法,React,软件开发,traditional,2,2,0
+风控算法工程师,算法,React,编程语言,traditional,2,2,0
 风控算法工程师,算法,云计算,云计算,traditional,2,2,0
 风控算法工程师,算法,信号处理,硬件与芯片,traditional,2,2,0
 风控算法工程师,算法,信息安全,安全,traditional,2,2,0
@@ -1767,8 +1777,8 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 机器学习算法工程师,AI算法,Spark,数据工程,traditional,13,13,0
 机器学习算法工程师,AI算法,模型并行,大模型,new,11,11,0
 机器学习算法工程师,AI算法,GPU,系统与运维,traditional,10,10,0
-机器学习算法工程师,AI算法,数据工程,数据工程,traditional,10,10,0
 机器学习算法工程师,AI算法,CUDA,硬件与芯片,new,9,9,0
+机器学习算法工程师,AI算法,数据工程,数据工程,traditional,9,9,0
 机器学习算法工程师,AI算法,计算机视觉,计算机视觉与图形,new,9,4,5
 机器学习算法工程师,AI算法,Hive,数据工程,traditional,8,8,0
 机器学习算法工程师,AI算法,Shell脚本,编程语言,traditional,8,8,0
@@ -1786,10 +1796,10 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 机器学习算法工程师,AI算法,搜索算法,AI,traditional,6,6,0
 机器学习算法工程师,AI算法,模型压缩,大模型,new,6,2,4
 机器学习算法工程师,AI算法,模型训练,大模型,new,6,1,5
-机器学习算法工程师,AI算法,软件工程,软件工程,traditional,6,6,0
 机器学习算法工程师,AI算法,软件开发,软件开发,traditional,6,6,0
 机器学习算法工程师,AI算法,高性能通信,通信与网络,traditional,6,6,0
 机器学习算法工程师,AI算法,SGLang,大模型,new,5,5,0
+机器学习算法工程师,AI算法,性能优化,软件工程,traditional,5,5,0
 机器学习算法工程师,AI算法,推理优化,大模型,new,5,0,5
 机器学习算法工程师,AI算法,特征工程,数据工程,traditional,5,5,0
 机器学习算法工程师,AI算法,知识图谱,知识图谱,new,5,1,4
@@ -1862,6 +1872,7 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 机器学习算法工程师,AI算法,网络编程,软件工程,traditional,1,1,0
 机器学习算法工程师,AI算法,自动化测试,软件开发,traditional,1,1,0
 机器学习算法工程师,AI算法,计算机网络,通信与网络,traditional,1,1,0
+机器学习算法工程师,AI算法,软件工程,软件工程,traditional,1,1,0
 机器学习算法工程师,AI算法,通信技术,通信与网络,traditional,1,1,0
 数据挖掘算法工程师,算法,Python,编程语言,traditional,38,38,0
 数据挖掘算法工程师,算法,机器学习,AI,traditional,30,0,30
@@ -1900,7 +1911,7 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 数据挖掘算法工程师,算法,LangChain,大模型,new,1,0,1
 数据挖掘算法工程师,算法,PHP,编程语言,traditional,1,1,0
 数据挖掘算法工程师,算法,RAG,大模型,new,1,0,1
-数据挖掘算法工程师,算法,React,软件开发,traditional,1,1,0
+数据挖掘算法工程师,算法,React,编程语言,traditional,1,1,0
 数据挖掘算法工程师,算法,Redis,数据工程,traditional,1,1,0
 数据挖掘算法工程师,算法,SFT,大模型,new,1,0,1
 数据挖掘算法工程师,算法,Transformer,大模型,new,1,0,1
@@ -1987,7 +1998,7 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 算法研究员,AI算法,Memory,大模型,new,1,1,0
 算法研究员,AI算法,PPO,大模型,new,1,1,0
 算法研究员,AI算法,RAG,大模型,new,1,0,1
-算法研究员,AI算法,React,软件开发,traditional,1,1,0
+算法研究员,AI算法,React,编程语言,traditional,1,1,0
 算法研究员,AI算法,SFT,大模型,new,1,0,1
 算法研究员,AI算法,SGLang,大模型,new,1,1,0
 算法研究员,AI算法,Spark,数据工程,traditional,1,1,0
@@ -2084,7 +2095,6 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 算法工程师,AI算法,DeepSpeed,大模型,new,17,0,17
 算法工程师,AI算法,AI算法,AI,new,15,0,15
 算法工程师,AI算法,多目标优化,算法与数学,traditional,15,15,0
-算法工程师,AI算法,软件工程,软件工程,traditional,15,15,0
 算法工程师,AI算法,Scala,编程语言,traditional,14,14,0
 算法工程师,AI算法,TensorRT,大模型,new,14,14,0
 算法工程师,AI算法,Tool Use,大模型,new,14,14,0
@@ -2107,10 +2117,11 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 算法工程师,AI算法,Function Calling,大模型,new,9,0,9
 算法工程师,AI算法,MCP,大模型,new,9,0,9
 算法工程师,AI算法,Megatron,大模型,new,9,0,9
+算法工程师,AI算法,性能优化,软件工程,traditional,9,9,0
 算法工程师,AI算法,空间智能,AI,new,9,9,0
 算法工程师,AI算法,AI应用开发,AI,new,8,0,8
 算法工程师,AI算法,LangGraph,大模型,new,8,0,8
-算法工程师,AI算法,React,软件开发,traditional,8,8,0
+算法工程师,AI算法,React,编程语言,traditional,8,8,0
 算法工程师,AI算法,Shell脚本,编程语言,traditional,8,8,0
 算法工程师,AI算法,推理优化,大模型,new,8,0,8
 算法工程师,AI算法,游戏与图形开发,游戏与图形,traditional,8,1,7
@@ -2133,6 +2144,7 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 算法工程师,AI算法,模型推理,大模型,new,6,6,0
 算法工程师,AI算法,模式识别,AI,new,6,6,0
 算法工程师,AI算法,硬件开发,硬件与芯片,traditional,6,6,0
+算法工程师,AI算法,软件工程,软件工程,traditional,6,6,0
 算法工程师,AI算法,软件测试,软件测试,traditional,6,6,0
 算法工程师,AI算法,AIops,系统与运维,new,5,0,5
 算法工程师,AI算法,Memory,大模型,new,5,5,0
@@ -2207,7 +2219,7 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 算法工程师,AI算法,Triton,大模型,new,1,1,0
 算法工程师,AI算法,TypeScript,编程语言,traditional,1,1,0
 算法工程师,AI算法,Unix,系统与运维,traditional,1,1,0
-算法工程师,AI算法,Vue,软件开发,traditional,1,1,0
+算法工程师,AI算法,Vue.js,编程语言,traditional,1,1,0
 算法工程师,AI算法,不确定性建模,算法与数学,new,1,1,0
 算法工程师,AI算法,信息论,算法与数学,traditional,1,1,0
 算法工程师,AI算法,分布式存储,数据工程,traditional,1,1,0
@@ -2244,16 +2256,16 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 后端开发工程师,软件研发,Redis,数据工程,traditional,346,346,0
 后端开发工程师,软件研发,消息队列,数据工程,traditional,320,320,0
 后端开发工程师,软件研发,分布式系统,软件工程,traditional,304,304,0
-后端开发工程师,软件研发,数据工程,数据工程,traditional,267,267,0
 后端开发工程师,软件研发,PHP,编程语言,traditional,234,234,0
 后端开发工程师,软件研发,操作系统,系统与运维,traditional,201,201,0
 后端开发工程师,软件研发,Linux,系统与运维,traditional,198,198,0
 后端开发工程师,软件研发,软件开发,软件开发,traditional,192,192,0
+后端开发工程师,软件研发,数据工程,数据工程,traditional,129,129,0
 后端开发工程师,软件研发,Agent,大模型,new,127,2,125
 后端开发工程师,软件研发,NoSQL,数据工程,traditional,116,116,0
 后端开发工程师,软件研发,Kafka,数据工程,traditional,107,107,0
 后端开发工程师,软件研发,LLM,大模型,new,92,1,91
-后端开发工程师,软件研发,软件工程,软件工程,traditional,91,91,0
+后端开发工程师,软件研发,性能优化,软件工程,traditional,79,79,0
 后端开发工程师,软件研发,计算机网络,通信与网络,traditional,70,70,0
 后端开发工程师,软件研发,RAG,大模型,new,63,0,63
 后端开发工程师,软件研发,微服务架构,软件工程,traditional,62,62,0
@@ -2297,7 +2309,7 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 后端开发工程师,软件研发,PyTorch,AI,traditional,14,0,14
 后端开发工程师,软件研发,Shell脚本,编程语言,traditional,13,13,0
 后端开发工程师,软件研发,向量数据库,数据工程,new,13,0,13
-后端开发工程师,软件研发,高性能计算,硬件与芯片,new,13,13,0
+后端开发工程师,软件研发,软件工程,软件工程,traditional,13,13,0
 后端开发工程师,软件研发,多模态,大模型,new,12,0,12
 后端开发工程师,软件研发,计算机体系结构,硬件与芯片,traditional,12,12,0
 后端开发工程师,软件研发,AI工具,大模型,new,11,0,11
@@ -2314,7 +2326,7 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 后端开发工程师,软件研发,模型微调,大模型,new,9,0,9
 后端开发工程师,软件研发,知识图谱,知识图谱,new,9,9,0
 后端开发工程师,软件研发,软件测试,软件测试,traditional,9,9,0
-后端开发工程师,软件研发,React,软件开发,traditional,8,8,0
+后端开发工程师,软件研发,React,编程语言,traditional,8,8,0
 后端开发工程师,软件研发,深度学习框架,AI,traditional,8,0,8
 后端开发工程师,软件研发,AI算法,AI,new,7,0,7
 后端开发工程师,软件研发,CUDA,硬件与芯片,new,7,7,0
@@ -2323,13 +2335,13 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 后端开发工程师,软件研发,地图算法,行业应用,traditional,7,7,0
 后端开发工程师,软件研发,流式计算,数据工程,traditional,7,7,0
 后端开发工程师,软件研发,算法工程,算法与数学,traditional,7,7,0
-后端开发工程师,软件研发,自动化技术,系统与运维,traditional,7,7,0
 后端开发工程师,软件研发,AIops,系统与运维,new,6,0,6
 后端开发工程师,软件研发,AI应用开发,AI,new,6,0,6
 后端开发工程师,软件研发,DevOps,系统与运维,traditional,6,6,0
 后端开发工程师,软件研发,模型评测,大模型,new,6,1,5
 后端开发工程师,软件研发,深度学习,AI,traditional,6,0,6
 后端开发工程师,软件研发,研发效能,软件工程,traditional,6,6,0
+后端开发工程师,软件研发,高性能计算,硬件与芯片,new,6,6,0
 后端开发工程师,软件研发,IT基础设施,云计算,traditional,5,5,0
 后端开发工程师,软件研发,LangGraph,大模型,new,5,0,5
 后端开发工程师,软件研发,Memory,大模型,new,5,5,0
@@ -2339,6 +2351,7 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 后端开发工程师,软件研发,Unreal Engine,软件开发,traditional,5,5,0
 后端开发工程师,软件研发,上下文工程,大模型,new,5,5,0
 后端开发工程师,软件研发,特征工程,数据工程,traditional,5,5,0
+后端开发工程师,软件研发,自动化技术,系统与运维,traditional,5,5,0
 后端开发工程师,软件研发,自动化测试,软件开发,traditional,5,5,0
 后端开发工程师,软件研发,音视频技术,音视频技术,traditional,5,5,0
 后端开发工程师,软件研发,Multi-Agent,大模型,new,4,0,4
@@ -2346,7 +2359,7 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 后端开发工程师,软件研发,Transformer,大模型,new,4,0,4
 后端开发工程师,软件研发,Triton,大模型,new,4,4,0
 后端开发工程师,软件研发,TypeScript,编程语言,traditional,4,4,0
-后端开发工程师,软件研发,Vue,软件开发,traditional,4,4,0
+后端开发工程师,软件研发,Vue.js,编程语言,traditional,4,4,0
 后端开发工程师,软件研发,查询优化,数据工程,traditional,4,4,0
 后端开发工程师,软件研发,模型推理,大模型,new,4,4,0
 后端开发工程师,软件研发,模型服务化,大模型,new,4,4,0
@@ -2355,7 +2368,7 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 后端开发工程师,软件研发,身份认证,安全,traditional,4,4,0
 后端开发工程师,软件研发,AI工程,AI,new,3,0,3
 后端开发工程师,软件研发,ASR,大模型,new,3,3,0
-后端开发工程师,软件研发,CSS,软件开发,traditional,3,3,0
+后端开发工程师,软件研发,CSS,编程语言,traditional,3,3,0
 后端开发工程师,软件研发,DeepSpeed,大模型,new,3,0,3
 后端开发工程师,软件研发,Diffusion,大模型,new,3,0,3
 后端开发工程师,软件研发,SFT,大模型,new,3,0,3
@@ -2371,7 +2384,7 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 后端开发工程师,软件研发,调试工具,软件工程,traditional,3,3,0
 后端开发工程师,软件研发,AutoGen,大模型,new,2,0,2
 后端开发工程师,软件研发,Embedding,大模型,new,2,0,2
-后端开发工程师,软件研发,HTML,软件开发,traditional,2,2,0
+后端开发工程师,软件研发,HTML,编程语言,traditional,2,2,0
 后端开发工程师,软件研发,Kotlin,编程语言,traditional,2,2,0
 后端开发工程师,软件研发,Megatron,大模型,new,2,0,2
 后端开发工程师,软件研发,RLHF,大模型,new,2,0,2
@@ -2412,15 +2425,17 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 后端开发工程师,软件研发,计算机视觉,计算机视觉与图形,new,1,1,0
 后端开发工程师,软件研发,跨语言技术,软件开发,traditional,1,1,0
 后端开发工程师,软件研发,软硬件协同,硬件与芯片,traditional,1,1,0
-前端开发工程师,软件研发,React,软件开发,traditional,359,358,0
+前端开发工程师,软件研发,React,编程语言,traditional,373,372,0
 前端开发工程师,软件研发,JavaScript,编程语言,traditional,347,347,0
-前端开发工程师,软件研发,CSS,软件开发,traditional,279,279,0
-前端开发工程师,软件研发,Vue,软件开发,traditional,257,257,0
-前端开发工程师,软件研发,HTML,软件开发,traditional,231,231,0
+前端开发工程师,软件研发,CSS,编程语言,traditional,346,346,0
+前端开发工程师,软件研发,Vue.js,编程语言,traditional,316,316,0
+前端开发工程师,软件研发,HTML,编程语言,traditional,304,304,0
 前端开发工程师,软件研发,Node.js,编程语言,traditional,231,231,0
 前端开发工程师,软件研发,软件开发,软件开发,traditional,151,151,0
+前端开发工程师,软件研发,性能优化,软件工程,traditional,147,147,0
 前端开发工程师,软件研发,TypeScript,编程语言,traditional,121,121,0
 前端开发工程师,软件研发,Webpack,软件开发,traditional,109,109,0
+前端开发工程师,软件研发,Angular,编程语言,traditional,97,97,0
 前端开发工程师,软件研发,Go,编程语言,traditional,75,75,0
 前端开发工程师,软件研发,Python,编程语言,traditional,66,66,0
 前端开发工程师,软件研发,跨平台开发,软件开发,traditional,61,61,0
@@ -2435,25 +2450,26 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 前端开发工程师,软件研发,C/C++,编程语言,traditional,30,30,0
 前端开发工程师,软件研发,动画技术,计算机视觉与图形,traditional,28,28,0
 前端开发工程师,软件研发,Android,软件开发,traditional,26,26,0
-前端开发工程师,软件研发,软件工程,软件工程,traditional,26,26,0
 前端开发工程师,软件研发,iOS,软件开发,traditional,23,23,0
 前端开发工程师,软件研发,计算机网络,通信与网络,traditional,22,22,0
+前端开发工程师,软件研发,Web,软件开发,traditional,20,20,0
 前端开发工程师,软件研发,CI/CD,系统与运维,traditional,18,18,0
 前端开发工程师,软件研发,网络技术,通信与网络,traditional,18,18,0
 前端开发工程师,软件研发,AI应用开发,AI,new,17,0,17
 前端开发工程师,软件研发,AIGC,AI,new,16,0,16
 前端开发工程师,软件研发,Rust,编程语言,traditional,15,15,0
 前端开发工程师,软件研发,操作系统,系统与运维,traditional,14,14,0
-前端开发工程师,软件研发,数据工程,数据工程,traditional,14,14,0
 前端开发工程师,软件研发,自动化测试,软件开发,traditional,14,14,0
 前端开发工程师,软件研发,PHP,编程语言,traditional,13,13,0
 前端开发工程师,软件研发,图像图形技术,计算机视觉与图形,traditional,13,13,0
+前端开发工程师,软件研发,数据工程,数据工程,traditional,13,13,0
 前端开发工程师,软件研发,Linux,系统与运维,traditional,12,12,0
 前端开发工程师,软件研发,prompt工程,大模型,new,12,1,11
 前端开发工程师,软件研发,交互技术,交互体验,traditional,12,12,0
 前端开发工程师,软件研发,AI工具,大模型,new,11,0,11
 前端开发工程师,软件研发,编程语言,编程语言,traditional,11,11,0
 前端开发工程师,软件研发,RAG,大模型,new,10,0,10
+前端开发工程师,软件研发,软件工程,软件工程,traditional,9,9,0
 前端开发工程师,软件研发,AI工作流设计,AI,new,8,8,0
 前端开发工程师,软件研发,大模型应用,大模型,new,7,4,3
 前端开发工程师,软件研发,Docker,系统与运维,traditional,6,6,0
@@ -2490,7 +2506,6 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 前端开发工程师,软件研发,消息队列,数据工程,traditional,2,2,0
 前端开发工程师,软件研发,研发效能,软件工程,traditional,2,2,0
 前端开发工程师,软件研发,空间智能,AI,new,2,2,0
-前端开发工程师,软件研发,自动化技术,系统与运维,traditional,2,2,0
 前端开发工程师,软件研发,跨语言技术,软件开发,traditional,2,2,0
 前端开发工程师,软件研发,软件测试,软件测试,traditional,2,2,0
 前端开发工程师,软件研发,通信技术,通信与网络,traditional,2,2,0
@@ -2512,9 +2527,10 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 前端开发工程师,软件研发,模型训练,大模型,new,1,0,1
 前端开发工程师,软件研发,模型评测,大模型,new,1,1,0
 前端开发工程师,软件研发,流式计算,数据工程,traditional,1,1,0
+前端开发工程师,软件研发,自动化技术,系统与运维,traditional,1,1,0
 前端开发工程师,软件研发,计算机体系结构,硬件与芯片,traditional,1,1,0
 前端开发工程师,软件研发,计算机视觉,计算机视觉与图形,new,1,1,0
-全栈开发工程师,软件研发,React,软件开发,traditional,42,42,0
+全栈开发工程师,软件研发,React,编程语言,traditional,42,42,0
 全栈开发工程师,软件研发,Agent,大模型,new,37,5,32
 全栈开发工程师,软件研发,Java,编程语言,traditional,32,32,0
 全栈开发工程师,软件研发,MySQL,数据工程,traditional,31,31,0
@@ -2523,18 +2539,17 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 全栈开发工程师,软件研发,Go,编程语言,traditional,26,26,0
 全栈开发工程师,软件研发,JavaScript,编程语言,traditional,26,26,0
 全栈开发工程师,软件研发,Redis,数据工程,traditional,25,25,0
+全栈开发工程师,软件研发,Vue.js,编程语言,traditional,25,25,0
 全栈开发工程师,软件研发,TypeScript,编程语言,traditional,22,22,0
-全栈开发工程师,软件研发,Vue,软件开发,traditional,22,22,0
 全栈开发工程师,软件研发,Node.js,编程语言,traditional,18,18,0
+全栈开发工程师,软件研发,CSS,编程语言,traditional,16,16,0
+全栈开发工程师,软件研发,HTML,编程语言,traditional,16,16,0
 全栈开发工程师,软件研发,Kafka,数据工程,traditional,14,14,0
-全栈开发工程师,软件研发,CSS,软件开发,traditional,13,13,0
 全栈开发工程师,软件研发,RAG,大模型,new,13,0,13
 全栈开发工程师,软件研发,Ai coding,AI,new,12,1,11
-全栈开发工程师,软件研发,HTML,软件开发,traditional,12,12,0
 全栈开发工程师,软件研发,LLM,大模型,new,12,0,12
 全栈开发工程师,软件研发,MCP,大模型,new,11,0,11
 全栈开发工程师,软件研发,Webpack,软件开发,traditional,11,11,0
-全栈开发工程师,软件研发,数据工程,数据工程,traditional,10,10,0
 全栈开发工程师,软件研发,C/C++,编程语言,traditional,9,9,0
 全栈开发工程师,软件研发,SRE,系统与运维,traditional,9,9,0
 全栈开发工程师,软件研发,Spring Boot,软件开发,traditional,9,9,0
@@ -2543,6 +2558,8 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 全栈开发工程师,软件研发,MongoDB,数据工程,traditional,8,8,0
 全栈开发工程师,软件研发,MyBatis,软件开发,traditional,8,8,0
 全栈开发工程师,软件研发,分布式系统,软件工程,traditional,8,8,0
+全栈开发工程师,软件研发,数据工程,数据工程,traditional,8,8,0
+全栈开发工程师,软件研发,性能优化,软件工程,traditional,7,7,0
 全栈开发工程师,软件研发,Android,软件开发,traditional,6,6,0
 全栈开发工程师,软件研发,CI/CD,系统与运维,traditional,6,6,0
 全栈开发工程师,软件研发,Docker,系统与运维,traditional,6,6,0
@@ -2565,7 +2582,6 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 全栈开发工程师,软件研发,上下文工程,大模型,new,4,4,0
 全栈开发工程师,软件研发,向量数据库,数据工程,new,4,0,4
 全栈开发工程师,软件研发,网络技术,通信与网络,traditional,4,4,0
-全栈开发工程师,软件研发,软件工程,软件工程,traditional,4,4,0
 全栈开发工程师,软件研发,Embedding,大模型,new,3,0,3
 全栈开发工程师,软件研发,Flink,数据工程,traditional,3,3,0
 全栈开发工程师,软件研发,Hive,数据工程,traditional,3,3,0
@@ -2576,6 +2592,7 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 全栈开发工程师,软件研发,AIGC,AI,new,2,0,2
 全栈开发工程师,软件研发,AIops,系统与运维,new,2,0,2
 全栈开发工程师,软件研发,AI应用开发,AI,new,2,0,2
+全栈开发工程师,软件研发,Angular,编程语言,traditional,2,2,0
 全栈开发工程师,软件研发,NLP,大模型,new,2,2,0
 全栈开发工程师,软件研发,Spark,数据工程,traditional,2,2,0
 全栈开发工程师,软件研发,多模态,大模型,new,2,0,2
@@ -2594,6 +2611,7 @@ NLP算法工程师,AI算法,音视频技术,音视频技术,traditional,1,1,0
 全栈开发工程师,软件研发,React Native,软件开发,traditional,1,1,0
 全栈开发工程师,软件研发,SFT,大模型,new,1,0,1
 全栈开发工程师,软件研发,Shell脚本,编程语言,traditional,1,1,0
+全栈开发工程师,软件研发,Web,软件开发,traditional,1,1,0
 全栈开发工程师,软件研发,世界模型,大模型,new,1,1,0
 全栈开发工程师,软件研发,云计算,云计算,traditional,1,1,0
 全栈开发工程师,软件研发,内存管理,软件工程,traditional,1,1,0
@@ -2618,7 +2636,6 @@ Java开发工程师,软件研发,Java,编程语言,traditional,256,256,0
 Java开发工程师,软件研发,MySQL,数据工程,traditional,114,114,0
 Java开发工程师,软件研发,分布式系统,软件工程,traditional,99,99,0
 Java开发工程师,软件研发,消息队列,数据工程,traditional,90,90,0
-Java开发工程师,软件研发,数据工程,数据工程,traditional,81,81,0
 Java开发工程师,软件研发,Redis,数据工程,traditional,78,78,0
 Java开发工程师,软件研发,编程语言,编程语言,traditional,74,74,0
 Java开发工程师,软件研发,Spring,软件开发,traditional,62,62,0
@@ -2629,16 +2646,15 @@ Java开发工程师,软件研发,Linux,系统与运维,traditional,47,47,0
 Java开发工程师,软件研发,Agent,大模型,new,46,4,42
 Java开发工程师,软件研发,Elasticsearch,数据工程,traditional,32,32,0
 Java开发工程师,软件研发,Python,编程语言,traditional,32,32,0
+Java开发工程师,软件研发,数据工程,数据工程,traditional,29,29,0
 Java开发工程师,软件研发,Go,编程语言,traditional,28,28,0
 Java开发工程师,软件研发,NoSQL,数据工程,traditional,24,24,0
 Java开发工程师,软件研发,RAG,大模型,new,24,0,24
 Java开发工程师,软件研发,Kafka,数据工程,traditional,20,20,0
 Java开发工程师,软件研发,DevOps,系统与运维,traditional,16,16,0
 Java开发工程师,软件研发,LLM,大模型,new,16,0,16
-Java开发工程师,软件研发,软件工程,软件工程,traditional,16,16,0
 Java开发工程师,软件研发,MongoDB,数据工程,traditional,14,14,0
 Java开发工程师,软件研发,微服务架构,软件工程,traditional,14,14,0
-Java开发工程师,软件研发,高性能计算,硬件与芯片,new,14,14,0
 Java开发工程师,软件研发,prompt工程,大模型,new,13,0,13
 Java开发工程师,软件研发,大模型应用,大模型,new,13,4,9
 Java开发工程师,软件研发,网络编程,软件工程,traditional,13,13,0
@@ -2647,6 +2663,7 @@ Java开发工程师,软件研发,云计算,云计算,traditional,12,12,0
 Java开发工程师,软件研发,Flink,数据工程,traditional,11,11,0
 Java开发工程师,软件研发,LangChain,大模型,new,11,0,11
 Java开发工程师,软件研发,SRE,系统与运维,traditional,11,11,0
+Java开发工程师,软件研发,性能优化,软件工程,traditional,10,10,0
 Java开发工程师,软件研发,Ai coding,AI,new,9,1,8
 Java开发工程师,软件研发,PostgreSQL,数据工程,traditional,9,9,0
 Java开发工程师,软件研发,Android,软件开发,traditional,8,8,0
@@ -2665,6 +2682,7 @@ Java开发工程师,软件研发,ClickHouse,数据工程,traditional,6,6,0
 Java开发工程师,软件研发,Machine Learning,AI,new,6,6,0
 Java开发工程师,软件研发,TCP/IP,系统与运维,traditional,6,6,0
 Java开发工程师,软件研发,向量数据库,数据工程,new,6,0,6
+Java开发工程师,软件研发,软件工程,软件工程,traditional,6,6,0
 Java开发工程师,软件研发,AI应用开发,AI,new,5,0,5
 Java开发工程师,软件研发,CI/CD,系统与运维,traditional,5,5,0
 Java开发工程师,软件研发,Docker,系统与运维,traditional,5,5,0
@@ -2690,17 +2708,20 @@ Java开发工程师,软件研发,Context Engineering,大模型,new,2,2,0
 Java开发工程师,软件研发,Embedding,大模型,new,2,0,2
 Java开发工程师,软件研发,Kotlin,编程语言,traditional,2,2,0
 Java开发工程师,软件研发,Objective-C,编程语言,traditional,2,2,0
-Java开发工程师,软件研发,React,软件开发,traditional,2,2,0
+Java开发工程师,软件研发,React,编程语言,traditional,2,2,0
 Java开发工程师,软件研发,查询优化,数据工程,traditional,2,2,0
 Java开发工程师,软件研发,汇编语言,编程语言,traditional,2,2,0
 Java开发工程师,软件研发,深度学习,AI,traditional,2,0,2
 Java开发工程师,软件研发,知识图谱,知识图谱,new,2,2,0
 Java开发工程师,软件研发,软件测试,软件测试,traditional,2,2,0
+Java开发工程师,软件研发,高性能计算,硬件与芯片,new,2,2,0
 Java开发工程师,软件研发,AI基础设施,AI,new,1,0,1
 Java开发工程师,软件研发,AI框架,AI,new,1,0,1
 Java开发工程师,软件研发,AutoGen,大模型,new,1,0,1
+Java开发工程师,软件研发,CSS,编程语言,traditional,1,1,0
 Java开发工程师,软件研发,Function Calling,大模型,new,1,0,1
 Java开发工程师,软件研发,GPU,系统与运维,traditional,1,1,0
+Java开发工程师,软件研发,HTML,编程语言,traditional,1,1,0
 Java开发工程师,软件研发,LoRA微调,大模型,new,1,0,1
 Java开发工程师,软件研发,NLP,大模型,new,1,1,0
 Java开发工程师,软件研发,Perl,编程语言,traditional,1,1,0
@@ -2748,10 +2769,8 @@ C++开发工程师,软件研发,内存管理,软件工程,traditional,5,5,0
 C++开发工程师,软件研发,系统开发,系统与运维,traditional,5,5,0
 C++开发工程师,软件研发,Shell脚本,编程语言,traditional,4,4,0
 C++开发工程师,软件研发,信号处理,硬件与芯片,traditional,4,4,0
-C++开发工程师,软件研发,数据工程,数据工程,traditional,4,4,0
 C++开发工程师,软件研发,模拟电路设计,硬件与芯片,traditional,4,4,0
 C++开发工程师,软件研发,编程语言,编程语言,traditional,4,4,0
-C++开发工程师,软件研发,软件工程,软件工程,traditional,4,4,0
 C++开发工程师,软件研发,软件开发,软件开发,traditional,4,4,0
 C++开发工程师,软件研发,高性能计算,硬件与芯片,new,4,4,0
 C++开发工程师,软件研发,Flutter,软件开发,traditional,3,3,0
@@ -2763,6 +2782,8 @@ C++开发工程师,软件研发,PyTorch,AI,traditional,3,0,3
 C++开发工程师,软件研发,React Native,软件开发,traditional,3,3,0
 C++开发工程师,软件研发,信息安全,安全,traditional,3,3,0
 C++开发工程师,软件研发,图像图形技术,计算机视觉与图形,traditional,3,2,1
+C++开发工程师,软件研发,性能优化,软件工程,traditional,3,3,0
+C++开发工程师,软件研发,数据工程,数据工程,traditional,3,3,0
 C++开发工程师,软件研发,机器学习,AI,traditional,3,0,3
 C++开发工程师,软件研发,模型压缩,大模型,new,3,0,3
 C++开发工程师,软件研发,消息队列,数据工程,traditional,3,3,0
@@ -2836,6 +2857,7 @@ C++开发工程师,软件研发,混沌工程,软件工程,traditional,1,1,0
 C++开发工程师,软件研发,算法工程,算法与数学,traditional,1,1,0
 C++开发工程师,软件研发,自然语言处理,AI,traditional,1,0,1
 C++开发工程师,软件研发,计算机视觉,计算机视觉与图形,new,1,1,0
+C++开发工程师,软件研发,软件工程,软件工程,traditional,1,1,0
 C++开发工程师,软件研发,软件测试,软件测试,traditional,1,1,0
 C++开发工程师,软件研发,高性能通信,通信与网络,traditional,1,1,0
 Python开发工程师,软件研发,Python,编程语言,traditional,33,33,0
@@ -2867,7 +2889,7 @@ Python开发工程师,软件研发,通信技术,通信与网络,traditional,2,2,
 Python开发工程师,软件研发,AIGC,AI,new,1,1,0
 Python开发工程师,软件研发,DeepSpeed,大模型,new,1,0,1
 Python开发工程师,软件研发,GPU,系统与运维,traditional,1,1,0
-Python开发工程师,软件研发,HTML,软件开发,traditional,1,1,0
+Python开发工程师,软件研发,HTML,编程语言,traditional,1,1,0
 Python开发工程师,软件研发,Java,编程语言,traditional,1,1,0
 Python开发工程师,软件研发,JavaScript,编程语言,traditional,1,1,0
 Python开发工程师,软件研发,Kafka,数据工程,traditional,1,1,0
@@ -2897,11 +2919,11 @@ Go开发工程师,软件研发,Go,编程语言,traditional,14,14,0
 Go开发工程师,软件研发,Linux,系统与运维,traditional,8,8,0
 Go开发工程师,软件研发,Python,编程语言,traditional,8,8,0
 Go开发工程师,软件研发,C/C++,编程语言,traditional,7,7,0
-Go开发工程师,软件研发,数据工程,数据工程,traditional,6,6,0
 Go开发工程师,软件研发,MySQL,数据工程,traditional,4,4,0
 Go开发工程师,软件研发,PHP,编程语言,traditional,4,4,0
 Go开发工程师,软件研发,云计算,云计算,traditional,4,4,0
 Go开发工程师,软件研发,分布式系统,软件工程,traditional,4,4,0
+Go开发工程师,软件研发,数据工程,数据工程,traditional,4,4,0
 Go开发工程师,软件研发,消息队列,数据工程,traditional,4,4,0
 Go开发工程师,软件研发,Docker,系统与运维,traditional,3,3,0
 Go开发工程师,软件研发,Java,编程语言,traditional,3,3,0
@@ -2912,29 +2934,29 @@ Go开发工程师,软件研发,PostgreSQL,数据工程,traditional,2,2,0
 Go开发工程师,软件研发,Redis,数据工程,traditional,2,2,0
 Go开发工程师,软件研发,微服务架构,软件工程,traditional,2,2,0
 Go开发工程师,软件研发,AIGC,AI,new,1,0,1
-Go开发工程师,软件研发,CSS,软件开发,traditional,1,1,0
+Go开发工程师,软件研发,CSS,编程语言,traditional,1,1,0
 Go开发工程师,软件研发,ClickHouse,数据工程,traditional,1,1,0
 Go开发工程师,软件研发,Elasticsearch,数据工程,traditional,1,1,0
 Go开发工程师,软件研发,Flink,数据工程,traditional,1,1,0
-Go开发工程师,软件研发,HTML,软件开发,traditional,1,1,0
+Go开发工程师,软件研发,HTML,编程语言,traditional,1,1,0
 Go开发工程师,软件研发,JavaScript,编程语言,traditional,1,1,0
 Go开发工程师,软件研发,Kafka,数据工程,traditional,1,1,0
 Go开发工程师,软件研发,LLM,大模型,new,1,0,1
 Go开发工程师,软件研发,NoSQL,数据工程,traditional,1,1,0
-Go开发工程师,软件研发,React,软件开发,traditional,1,1,0
+Go开发工程师,软件研发,React,编程语言,traditional,1,1,0
 Go开发工程师,软件研发,SRE,系统与运维,traditional,1,1,0
 Go开发工程师,软件研发,Spark,数据工程,traditional,1,1,0
 Go开发工程师,软件研发,TCP/IP,系统与运维,traditional,1,1,0
 Go开发工程师,软件研发,Unix,系统与运维,traditional,1,1,0
-Go开发工程师,软件研发,Vue,软件开发,traditional,1,1,0
+Go开发工程师,软件研发,Vue.js,编程语言,traditional,1,1,0
 Go开发工程师,软件研发,分布式存储,数据工程,traditional,1,1,0
+Go开发工程师,软件研发,性能优化,软件工程,traditional,1,1,0
 Go开发工程师,软件研发,操作系统,系统与运维,traditional,1,1,0
 Go开发工程师,软件研发,机器学习,AI,traditional,1,0,1
 Go开发工程师,软件研发,网络编程,软件工程,traditional,1,1,0
 Go开发工程师,软件研发,计算机体系结构,硬件与芯片,traditional,1,1,0
 Go开发工程师,软件研发,计算机网络,通信与网络,traditional,1,1,0
 Go开发工程师,软件研发,身份认证,安全,traditional,1,1,0
-Go开发工程师,软件研发,软件工程,软件工程,traditional,1,1,0
 客户端开发工程师,软件研发,C/C++,编程语言,traditional,281,281,0
 客户端开发工程师,软件研发,Java,编程语言,traditional,131,131,0
 客户端开发工程师,软件研发,Objective-C,编程语言,traditional,110,110,0
@@ -2945,8 +2967,8 @@ Go开发工程师,软件研发,软件工程,软件工程,traditional,1,1,0
 客户端开发工程师,软件研发,Unreal Engine,软件开发,traditional,48,48,0
 客户端开发工程师,软件研发,操作系统,系统与运维,traditional,44,44,0
 客户端开发工程师,软件研发,Lua,编程语言,traditional,43,43,0
-客户端开发工程师,软件研发,软件工程,软件工程,traditional,39,39,0
 客户端开发工程师,软件研发,计算机网络,通信与网络,traditional,37,37,0
+客户端开发工程师,软件研发,性能优化,软件工程,traditional,36,36,0
 客户端开发工程师,软件研发,Agent,大模型,new,34,13,21
 客户端开发工程师,软件研发,Python,编程语言,traditional,34,34,0
 客户端开发工程师,软件研发,动画技术,计算机视觉与图形,traditional,32,32,0
@@ -2958,8 +2980,8 @@ Go开发工程师,软件研发,软件工程,软件工程,traditional,1,1,0
 客户端开发工程师,软件研发,LLM,大模型,new,18,0,18
 客户端开发工程师,软件研发,TypeScript,编程语言,traditional,18,18,0
 客户端开发工程师,软件研发,游戏与图形开发,游戏与图形,traditional,15,13,2
-客户端开发工程师,软件研发,高性能计算,硬件与芯片,new,15,15,0
 客户端开发工程师,软件研发,内存管理,软件工程,traditional,14,14,0
+客户端开发工程师,软件研发,高性能计算,硬件与芯片,new,14,14,0
 客户端开发工程师,软件研发,Flutter,软件开发,traditional,13,13,0
 客户端开发工程师,软件研发,Go,编程语言,traditional,13,13,0
 客户端开发工程师,软件研发,仿真技术,科学计算与仿真,traditional,10,10,0
@@ -2978,7 +3000,7 @@ Go开发工程师,软件研发,软件工程,软件工程,traditional,1,1,0
 客户端开发工程师,软件研发,网络技术,通信与网络,traditional,6,6,0
 客户端开发工程师,软件研发,AIGC,AI,new,5,0,5
 客户端开发工程师,软件研发,RAG,大模型,new,5,0,5
-客户端开发工程师,软件研发,React,软件开发,traditional,5,5,0
+客户端开发工程师,软件研发,React,编程语言,traditional,5,5,0
 客户端开发工程师,软件研发,TCP/IP,系统与运维,traditional,5,5,0
 客户端开发工程师,软件研发,网络协议,系统与运维,traditional,5,5,0
 客户端开发工程师,软件研发,AI工具,大模型,new,4,0,4
@@ -2989,12 +3011,15 @@ Go开发工程师,软件研发,软件工程,软件工程,traditional,1,1,0
 客户端开发工程师,软件研发,数据工程,数据工程,traditional,4,4,0
 客户端开发工程师,软件研发,机器学习,AI,traditional,4,0,4
 客户端开发工程师,软件研发,系统开发,系统与运维,traditional,4,4,0
+客户端开发工程师,软件研发,软件工程,软件工程,traditional,4,4,0
 客户端开发工程师,软件研发,软件测试,软件测试,traditional,4,4,0
 客户端开发工程师,软件研发,ASR,大模型,new,3,1,2
+客户端开发工程师,软件研发,HTML,编程语言,traditional,3,3,0
 客户端开发工程师,软件研发,PHP,编程语言,traditional,3,3,0
 客户端开发工程师,软件研发,信号处理,硬件与芯片,traditional,3,3,0
 客户端开发工程师,软件研发,模型压缩,大模型,new,3,0,3
 客户端开发工程师,软件研发,AI工作流设计,AI,new,2,2,0
+客户端开发工程师,软件研发,CSS,编程语言,traditional,2,2,0
 客户端开发工程师,软件研发,Function Calling,大模型,new,2,0,2
 客户端开发工程师,软件研发,MCP,大模型,new,2,0,2
 客户端开发工程师,软件研发,PyTorch,AI,traditional,2,0,2
@@ -3019,7 +3044,7 @@ Go开发工程师,软件研发,软件工程,软件工程,traditional,1,1,0
 客户端开发工程师,软件研发,SFT,大模型,new,1,0,1
 客户端开发工程师,软件研发,Shell脚本,编程语言,traditional,1,1,0
 客户端开发工程师,软件研发,TTS,大模型,new,1,1,0
-客户端开发工程师,软件研发,Vue,软件开发,traditional,1,1,0
+客户端开发工程师,软件研发,Vue.js,编程语言,traditional,1,1,0
 客户端开发工程师,软件研发,Webpack,软件开发,traditional,1,1,0
 客户端开发工程师,软件研发,协同系统,软件开发,traditional,1,1,0
 客户端开发工程师,软件研发,向量数据库,数据工程,new,1,0,1
@@ -3045,8 +3070,8 @@ Android开发工程师,软件研发,Kotlin,编程语言,traditional,131,131,0
 Android开发工程师,软件研发,C/C++,编程语言,traditional,87,87,0
 Android开发工程师,软件研发,Android Framework,软件开发,traditional,47,47,0
 Android开发工程师,软件研发,iOS,软件开发,traditional,29,29,0
-Android开发工程师,软件研发,软件工程,软件工程,traditional,27,27,0
 Android开发工程师,软件研发,Objective-C,编程语言,traditional,25,25,0
+Android开发工程师,软件研发,性能优化,软件工程,traditional,24,24,0
 Android开发工程师,软件研发,软件开发,软件开发,traditional,24,24,0
 Android开发工程师,软件研发,Swift,编程语言,traditional,21,21,0
 Android开发工程师,软件研发,跨平台开发,软件开发,traditional,21,21,0
@@ -3080,8 +3105,9 @@ Android开发工程师,软件研发,Go,编程语言,traditional,3,3,0
 Android开发工程师,软件研发,汇编语言,编程语言,traditional,3,3,0
 Android开发工程师,软件研发,硬件开发,硬件与芯片,traditional,3,3,0
 Android开发工程师,软件研发,计算机体系结构,硬件与芯片,traditional,3,3,0
+Android开发工程师,软件研发,软件工程,软件工程,traditional,3,3,0
 Android开发工程师,软件研发,通信技术,通信与网络,traditional,3,3,0
-Android开发工程师,软件研发,CSS,软件开发,traditional,2,2,0
+Android开发工程师,软件研发,CSS,编程语言,traditional,2,2,0
 Android开发工程师,软件研发,TCP/IP,系统与运维,traditional,2,2,0
 Android开发工程师,软件研发,云计算,云计算,traditional,2,2,0
 Android开发工程师,软件研发,即时通信,通信与网络,traditional,2,2,0
@@ -3096,17 +3122,18 @@ Android开发工程师,软件研发,AI算法,AI,new,1,0,1
 Android开发工程师,软件研发,CI/CD,系统与运维,traditional,1,1,0
 Android开发工程师,软件研发,DevOps,系统与运维,traditional,1,1,0
 Android开发工程师,软件研发,Docker,系统与运维,traditional,1,1,0
-Android开发工程师,软件研发,HTML,软件开发,traditional,1,1,0
+Android开发工程师,软件研发,HTML,编程语言,traditional,1,1,0
 Android开发工程师,软件研发,NLP,大模型,new,1,1,0
 Android开发工程师,软件研发,OTA升级,系统与运维,traditional,1,1,0
 Android开发工程师,软件研发,PHP,编程语言,traditional,1,1,0
 Android开发工程师,软件研发,PyTorch,AI,traditional,1,0,1
 Android开发工程师,软件研发,RAG,大模型,new,1,0,1
-Android开发工程师,软件研发,React,软件开发,traditional,1,1,0
+Android开发工程师,软件研发,React,编程语言,traditional,1,1,0
 Android开发工程师,软件研发,TTS,大模型,new,1,1,0
 Android开发工程师,软件研发,TensorFlow,AI,traditional,1,0,1
 Android开发工程师,软件研发,TypeScript,编程语言,traditional,1,1,0
-Android开发工程师,软件研发,Vue,软件开发,traditional,1,1,0
+Android开发工程师,软件研发,Vue.js,编程语言,traditional,1,1,0
+Android开发工程师,软件研发,Web,软件开发,traditional,1,1,0
 Android开发工程师,软件研发,Web爬虫,数据工程,traditional,1,1,0
 Android开发工程师,软件研发,prompt工程,大模型,new,1,0,1
 Android开发工程师,软件研发,分布式系统,软件工程,traditional,1,1,0
@@ -3133,13 +3160,13 @@ iOS开发工程师,软件研发,跨平台开发,软件开发,traditional,18,17,1
 iOS开发工程师,软件研发,内存管理,软件工程,traditional,16,16,0
 iOS开发工程师,软件研发,Flutter,软件开发,traditional,13,13,0
 iOS开发工程师,软件研发,React Native,软件开发,traditional,10,10,0
-iOS开发工程师,软件研发,软件工程,软件工程,traditional,10,10,0
 iOS开发工程师,软件研发,Ai coding,AI,new,7,0,7
 iOS开发工程师,软件研发,SRE,系统与运维,traditional,7,7,0
 iOS开发工程师,软件研发,网络编程,软件工程,traditional,7,7,0
 iOS开发工程师,软件研发,Agent,大模型,new,6,0,6
 iOS开发工程师,软件研发,CI/CD,系统与运维,traditional,6,6,0
 iOS开发工程师,软件研发,Kotlin,编程语言,traditional,6,6,0
+iOS开发工程师,软件研发,性能优化,软件工程,traditional,6,6,0
 iOS开发工程师,软件研发,AIGC,AI,new,5,0,5
 iOS开发工程师,软件研发,Android,软件开发,traditional,5,5,0
 iOS开发工程师,软件研发,Java,编程语言,traditional,5,5,0
@@ -3149,6 +3176,7 @@ iOS开发工程师,软件研发,数据工程,数据工程,traditional,5,5,0
 iOS开发工程师,软件研发,图像图形技术,计算机视觉与图形,traditional,4,4,0
 iOS开发工程师,软件研发,操作系统,系统与运维,traditional,4,4,0
 iOS开发工程师,软件研发,系统开发,系统与运维,traditional,4,4,0
+iOS开发工程师,软件研发,软件工程,软件工程,traditional,4,4,0
 iOS开发工程师,软件研发,Rust,编程语言,traditional,3,3,0
 iOS开发工程师,软件研发,动画技术,计算机视觉与图形,traditional,3,3,0
 iOS开发工程师,软件研发,网络技术,通信与网络,traditional,3,3,0
@@ -3157,6 +3185,7 @@ iOS开发工程师,软件研发,LLM,大模型,new,2,0,2
 iOS开发工程师,软件研发,Linux,系统与运维,traditional,2,2,0
 iOS开发工程师,软件研发,Python,编程语言,traditional,2,2,0
 iOS开发工程师,软件研发,TypeScript,编程语言,traditional,2,2,0
+iOS开发工程师,软件研发,Vue.js,编程语言,traditional,2,2,0
 iOS开发工程师,软件研发,信息安全,安全,traditional,2,2,0
 iOS开发工程师,软件研发,即时通信,通信与网络,traditional,2,2,0
 iOS开发工程师,软件研发,汇编语言,编程语言,traditional,2,2,0
@@ -3165,12 +3194,11 @@ iOS开发工程师,软件研发,计算机体系结构,硬件与芯片,traditiona
 iOS开发工程师,软件研发,设备安全,安全,traditional,2,2,0
 iOS开发工程师,软件研发,软硬件协同,硬件与芯片,traditional,2,2,0
 iOS开发工程师,软件研发,AI算法,AI,new,1,0,1
-iOS开发工程师,软件研发,CSS,软件开发,traditional,1,1,0
+iOS开发工程师,软件研发,CSS,编程语言,traditional,1,1,0
 iOS开发工程师,软件研发,GPU,系统与运维,traditional,1,1,0
 iOS开发工程师,软件研发,MCP,大模型,new,1,0,1
 iOS开发工程师,软件研发,RISC-V,系统与运维,traditional,1,1,0
 iOS开发工程师,软件研发,TensorRT,大模型,new,1,1,0
-iOS开发工程师,软件研发,Vue,软件开发,traditional,1,1,0
 iOS开发工程师,软件研发,prompt工程,大模型,new,1,0,1
 iOS开发工程师,软件研发,动态分析,软件工程,traditional,1,1,0
 iOS开发工程师,软件研发,地图算法,行业应用,traditional,1,1,0
@@ -3188,7 +3216,6 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 系统软件工程师,软件研发,Java,编程语言,traditional,29,29,0
 系统软件工程师,软件研发,硬件开发,硬件与芯片,traditional,29,29,0
 系统软件工程师,软件研发,系统开发,系统与运维,traditional,22,22,0
-系统软件工程师,软件研发,软件工程,软件工程,traditional,20,20,0
 系统软件工程师,软件研发,CUDA,硬件与芯片,new,18,18,0
 系统软件工程师,软件研发,Go,编程语言,traditional,18,18,0
 系统软件工程师,软件研发,计算机体系结构,硬件与芯片,traditional,17,17,0
@@ -3204,7 +3231,9 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 系统软件工程师,软件研发,Android,软件开发,traditional,10,10,0
 系统软件工程师,软件研发,Machine Learning,AI,new,10,6,4
 系统软件工程师,软件研发,分布式系统,软件工程,traditional,10,10,0
+系统软件工程师,软件研发,性能优化,软件工程,traditional,10,10,0
 系统软件工程师,软件研发,调试工具,软件工程,traditional,10,10,0
+系统软件工程师,软件研发,软件工程,软件工程,traditional,10,10,0
 系统软件工程师,软件研发,AI框架,AI,new,9,0,9
 系统软件工程师,软件研发,TensorFlow,AI,traditional,9,0,9
 系统软件工程师,软件研发,光学技术,硬件与芯片,traditional,9,9,0
@@ -3260,7 +3289,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 系统软件工程师,软件研发,Kafka,数据工程,traditional,2,2,0
 系统软件工程师,软件研发,MongoDB,数据工程,traditional,2,2,0
 系统软件工程师,软件研发,RAG,大模型,new,2,0,2
-系统软件工程师,软件研发,React,软件开发,traditional,2,2,0
+系统软件工程师,软件研发,React,编程语言,traditional,2,2,0
 系统软件工程师,软件研发,上下文工程,大模型,new,2,2,0
 系统软件工程师,软件研发,信息安全,安全,traditional,2,2,0
 系统软件工程师,软件研发,分布式计算,数据工程,traditional,2,2,0
@@ -3277,7 +3306,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 系统软件工程师,软件研发,AI应用开发,AI,new,1,0,1
 系统软件工程师,软件研发,Ai coding,AI,new,1,0,1
 系统软件工程师,软件研发,CI/CD,系统与运维,traditional,1,1,0
-系统软件工程师,软件研发,CSS,软件开发,traditional,1,1,0
+系统软件工程师,软件研发,CSS,编程语言,traditional,1,1,0
 系统软件工程师,软件研发,Context Engineering,大模型,new,1,1,0
 系统软件工程师,软件研发,DeepSpeed,大模型,new,1,0,1
 系统软件工程师,软件研发,DevOps,系统与运维,traditional,1,1,0
@@ -3285,7 +3314,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 系统软件工程师,软件研发,Elasticsearch,数据工程,traditional,1,1,0
 系统软件工程师,软件研发,Embedding,大模型,new,1,0,1
 系统软件工程师,软件研发,Flink,数据工程,traditional,1,1,0
-系统软件工程师,软件研发,HTML,软件开发,traditional,1,1,0
+系统软件工程师,软件研发,HTML,编程语言,traditional,1,1,0
 系统软件工程师,软件研发,Hadoop,数据工程,traditional,1,1,0
 系统软件工程师,软件研发,Hive,数据工程,traditional,1,1,0
 系统软件工程师,软件研发,IT基础设施,云计算,traditional,1,1,0
@@ -3301,7 +3330,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 系统软件工程师,软件研发,TensorRT,大模型,new,1,1,0
 系统软件工程师,软件研发,Unix,系统与运维,traditional,1,1,0
 系统软件工程师,软件研发,Unreal Engine,软件开发,traditional,1,1,0
-系统软件工程师,软件研发,Vue,软件开发,traditional,1,1,0
+系统软件工程师,软件研发,Vue.js,编程语言,traditional,1,1,0
 系统软件工程师,软件研发,Webpack,软件开发,traditional,1,1,0
 系统软件工程师,软件研发,信号处理,硬件与芯片,traditional,1,1,0
 系统软件工程师,软件研发,充电系统,硬件与芯片,traditional,1,1,0
@@ -3338,19 +3367,21 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 嵌入式软件工程师,软件研发,Android,软件开发,traditional,3,3,0
 嵌入式软件工程师,软件研发,SRE,系统与运维,traditional,2,2,0
 嵌入式软件工程师,软件研发,异构计算,硬件与芯片,new,2,2,0
+嵌入式软件工程师,软件研发,性能优化,软件工程,traditional,2,2,0
 嵌入式软件工程师,软件研发,算法工程,算法与数学,traditional,2,2,0
 嵌入式软件工程师,软件研发,跨平台开发,软件开发,traditional,2,2,0
-嵌入式软件工程师,软件研发,软件工程,软件工程,traditional,2,2,0
 嵌入式软件工程师,软件研发,软件测试,软件测试,traditional,2,2,0
 嵌入式软件工程师,软件研发,软硬件协同,硬件与芯片,traditional,2,2,0
 嵌入式软件工程师,软件研发,通信技术,通信与网络,traditional,2,2,0
 嵌入式软件工程师,软件研发,AI工具,大模型,new,1,0,1
+嵌入式软件工程师,软件研发,CSS,编程语言,traditional,1,1,0
 嵌入式软件工程师,软件研发,GPU,系统与运维,traditional,1,1,0
+嵌入式软件工程师,软件研发,HTML,编程语言,traditional,1,1,0
 嵌入式软件工程师,软件研发,JavaScript,编程语言,traditional,1,1,0
 嵌入式软件工程师,软件研发,RISC-V,系统与运维,traditional,1,1,0
-嵌入式软件工程师,软件研发,React,软件开发,traditional,1,1,0
+嵌入式软件工程师,软件研发,React,编程语言,traditional,1,1,0
 嵌入式软件工程师,软件研发,React Native,软件开发,traditional,1,1,0
-嵌入式软件工程师,软件研发,Vue,软件开发,traditional,1,1,0
+嵌入式软件工程师,软件研发,Vue.js,编程语言,traditional,1,1,0
 嵌入式软件工程师,软件研发,Webpack,软件开发,traditional,1,1,0
 嵌入式软件工程师,软件研发,信号处理,硬件与芯片,traditional,1,1,0
 嵌入式软件工程师,软件研发,时间序列算法,算法与数学,traditional,1,1,0
@@ -3364,6 +3395,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 嵌入式软件工程师,软件研发,网络编程,软件工程,traditional,1,1,0
 嵌入式软件工程师,软件研发,计算机体系结构,硬件与芯片,traditional,1,1,0
 嵌入式软件工程师,软件研发,计算机视觉,计算机视觉与图形,new,1,1,0
+嵌入式软件工程师,软件研发,软件工程,软件工程,traditional,1,1,0
 驱动开发工程师,软件研发,C/C++,编程语言,traditional,41,41,0
 驱动开发工程师,软件研发,Linux,系统与运维,traditional,17,17,0
 驱动开发工程师,软件研发,Android,软件开发,traditional,7,7,0
@@ -3380,7 +3412,6 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 驱动开发工程师,软件研发,AI工具,大模型,new,3,0,3
 驱动开发工程师,软件研发,Android Framework,软件开发,traditional,3,3,0
 驱动开发工程师,软件研发,IT基础设施,云计算,traditional,3,3,0
-驱动开发工程师,软件研发,数据工程,数据工程,traditional,3,3,0
 驱动开发工程师,软件研发,AI算法,AI,new,2,0,2
 驱动开发工程师,软件研发,LLM,大模型,new,2,0,2
 驱动开发工程师,软件研发,NLP,大模型,new,2,2,0
@@ -3389,6 +3420,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 驱动开发工程师,软件研发,健康算法,行业应用,traditional,2,2,0
 驱动开发工程师,软件研发,内存管理,软件工程,traditional,2,2,0
 驱动开发工程师,软件研发,搜索算法,AI,traditional,2,2,0
+驱动开发工程师,软件研发,数据工程,数据工程,traditional,2,2,0
 驱动开发工程师,软件研发,网络技术,通信与网络,traditional,2,2,0
 驱动开发工程师,软件研发,计算机体系结构,硬件与芯片,traditional,2,2,0
 驱动开发工程师,软件研发,计算机视觉,计算机视觉与图形,new,2,2,0
@@ -3424,8 +3456,8 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 软件架构师,软件研发,Java,编程语言,traditional,125,125,0
 软件架构师,软件研发,Go,编程语言,traditional,114,114,0
 软件架构师,软件研发,云计算,云计算,traditional,82,81,1
-软件架构师,软件研发,数据工程,数据工程,traditional,77,77,0
 软件架构师,软件研发,分布式系统,软件工程,traditional,67,67,0
+软件架构师,软件研发,数据工程,数据工程,traditional,66,66,0
 软件架构师,软件研发,LLM,大模型,new,60,3,57
 软件架构师,软件研发,网络技术,通信与网络,traditional,48,48,0
 软件架构师,软件研发,Linux,系统与运维,traditional,47,47,0
@@ -3433,7 +3465,6 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 软件架构师,软件研发,RAG,大模型,new,33,0,33
 软件架构师,软件研发,系统开发,系统与运维,traditional,31,31,0
 软件架构师,软件研发,操作系统,系统与运维,traditional,30,30,0
-软件架构师,软件研发,软件工程,软件工程,traditional,29,29,0
 软件架构师,软件研发,SRE,系统与运维,traditional,27,27,0
 软件架构师,软件研发,Redis,数据工程,traditional,25,25,0
 软件架构师,软件研发,消息队列,数据工程,traditional,24,24,0
@@ -3444,6 +3475,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 软件架构师,软件研发,MySQL,数据工程,traditional,21,21,0
 软件架构师,软件研发,Node.js,编程语言,traditional,20,20,0
 软件架构师,软件研发,机器学习,AI,traditional,20,0,20
+软件架构师,软件研发,性能优化,软件工程,traditional,16,16,0
 软件架构师,软件研发,PyTorch,AI,traditional,15,0,15
 软件架构师,软件研发,深度学习,AI,traditional,15,0,15
 软件架构师,软件研发,软件开发,软件开发,traditional,15,15,0
@@ -3457,6 +3489,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 软件架构师,软件研发,LangChain,大模型,new,13,0,13
 软件架构师,软件研发,Machine Learning,AI,new,13,9,4
 软件架构师,软件研发,prompt工程,大模型,new,13,0,13
+软件架构师,软件研发,软件工程,软件工程,traditional,13,13,0
 软件架构师,软件研发,Ai coding,AI,new,12,6,6
 软件架构师,软件研发,DevOps,系统与运维,traditional,12,12,0
 软件架构师,软件研发,Docker,系统与运维,traditional,12,12,0
@@ -3498,7 +3531,6 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 软件架构师,软件研发,Kotlin,编程语言,traditional,6,6,0
 软件架构师,软件研发,Tool Use,大模型,new,6,6,0
 软件架构师,软件研发,VLM,大模型,new,6,0,6
-软件架构师,软件研发,高性能计算,硬件与芯片,new,6,6,0
 软件架构师,软件研发,高速接口,硬件与芯片,traditional,6,6,0
 软件架构师,软件研发,AIGC,AI,new,5,0,5
 软件架构师,软件研发,CI/CD,系统与运维,traditional,5,5,0
@@ -3516,6 +3548,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 软件架构师,软件研发,研发效能,软件工程,traditional,5,5,0
 软件架构师,软件研发,跨平台开发,软件开发,traditional,5,5,0
 软件架构师,软件研发,软件测试,软件测试,traditional,5,5,0
+软件架构师,软件研发,高性能计算,硬件与芯片,new,5,5,0
 软件架构师,软件研发,DPO,大模型,new,4,0,4
 软件架构师,软件研发,Elasticsearch,数据工程,traditional,4,4,0
 软件架构师,软件研发,Function Calling,大模型,new,4,0,4
@@ -3555,7 +3588,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 软件架构师,软件研发,GPU内存优化,硬件与芯片,new,2,2,0
 软件架构师,软件研发,Megatron,大模型,new,2,0,2
 软件架构师,软件研发,Memory,大模型,new,2,2,0
-软件架构师,软件研发,React,软件开发,traditional,2,2,0
+软件架构师,软件研发,React,编程语言,traditional,2,2,0
 软件架构师,软件研发,Swift,编程语言,traditional,2,2,0
 软件架构师,软件研发,向量计算,数据工程,new,2,2,0
 软件架构师,软件研发,图像图形技术,计算机视觉与图形,traditional,2,2,0
@@ -3613,7 +3646,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 软件开发工程师,软件研发,Python,编程语言,traditional,669,669,0
 软件开发工程师,软件研发,Java,编程语言,traditional,600,600,0
 软件开发工程师,软件研发,Go,编程语言,traditional,459,459,0
-软件开发工程师,软件研发,数据工程,数据工程,traditional,329,329,0
+软件开发工程师,软件研发,数据工程,数据工程,traditional,270,270,0
 软件开发工程师,软件研发,Linux,系统与运维,traditional,264,264,0
 软件开发工程师,软件研发,分布式系统,软件工程,traditional,236,236,0
 软件开发工程师,软件研发,Spark,数据工程,traditional,218,218,0
@@ -3627,7 +3660,6 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 软件开发工程师,软件研发,Redis,数据工程,traditional,129,129,0
 软件开发工程师,软件研发,网络技术,通信与网络,traditional,116,116,0
 软件开发工程师,软件研发,操作系统,系统与运维,traditional,112,112,0
-软件开发工程师,软件研发,软件工程,软件工程,traditional,112,112,0
 软件开发工程师,软件研发,Kubernetes,系统与运维,traditional,106,106,0
 软件开发工程师,软件研发,消息队列,数据工程,traditional,105,105,0
 软件开发工程师,软件研发,SRE,系统与运维,traditional,97,97,0
@@ -3644,14 +3676,15 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 软件开发工程师,软件研发,编程语言,编程语言,traditional,73,73,0
 软件开发工程师,软件研发,Docker,系统与运维,traditional,71,71,0
 软件开发工程师,软件研发,HBase,数据工程,traditional,71,71,0
+软件开发工程师,软件研发,性能优化,软件工程,traditional,70,70,0
 软件开发工程师,软件研发,Rust,编程语言,traditional,69,69,0
 软件开发工程师,软件研发,系统开发,系统与运维,traditional,66,66,0
 软件开发工程师,软件研发,计算机网络,通信与网络,traditional,66,66,0
 软件开发工程师,软件研发,Shell脚本,编程语言,traditional,65,65,0
-软件开发工程师,软件研发,高性能计算,硬件与芯片,new,60,60,0
 软件开发工程师,软件研发,prompt工程,大模型,new,58,0,58
 软件开发工程师,软件研发,机器学习,AI,traditional,57,0,57
 软件开发工程师,软件研发,TensorFlow,AI,traditional,55,0,55
+软件开发工程师,软件研发,高性能计算,硬件与芯片,new,54,54,0
 软件开发工程师,软件研发,Machine Learning,AI,new,53,31,22
 软件开发工程师,软件研发,VLM,大模型,new,53,0,53
 软件开发工程师,软件研发,Ai coding,AI,new,51,11,40
@@ -3660,6 +3693,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 软件开发工程师,软件研发,CUDA,硬件与芯片,new,48,48,0
 软件开发工程师,软件研发,Objective-C,编程语言,traditional,45,45,0
 软件开发工程师,软件研发,内存管理,软件工程,traditional,44,44,0
+软件开发工程师,软件研发,软件工程,软件工程,traditional,42,42,0
 软件开发工程师,软件研发,高性能通信,通信与网络,traditional,40,40,0
 软件开发工程师,软件研发,SGLang,大模型,new,39,39,0
 软件开发工程师,软件研发,MongoDB,数据工程,traditional,38,38,0
@@ -3686,6 +3720,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 软件开发工程师,软件研发,大模型应用,大模型,new,26,13,13
 软件开发工程师,软件研发,AI应用开发,AI,new,25,0,25
 软件开发工程师,软件研发,CI/CD,系统与运维,traditional,25,25,0
+软件开发工程师,软件研发,TypeScript,编程语言,traditional,25,25,0
 软件开发工程师,软件研发,信息安全,安全,traditional,25,25,0
 软件开发工程师,软件研发,PostgreSQL,数据工程,traditional,24,24,0
 软件开发工程师,软件研发,Ray,AI,traditional,24,24,0
@@ -3694,7 +3729,6 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 软件开发工程师,软件研发,NLP,大模型,new,22,22,0
 软件开发工程师,软件研发,Unix,系统与运维,traditional,22,22,0
 软件开发工程师,软件研发,Unreal Engine,软件开发,traditional,22,22,0
-软件开发工程师,软件研发,TypeScript,编程语言,traditional,21,21,0
 软件开发工程师,软件研发,向量数据库,数据工程,new,21,0,21
 软件开发工程师,软件研发,大模型训练,大模型,new,21,2,19
 软件开发工程师,软件研发,查询优化,数据工程,traditional,21,21,0
@@ -3703,7 +3737,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 软件开发工程师,软件研发,Memory,大模型,new,20,20,0
 软件开发工程师,软件研发,异构计算,硬件与芯片,new,20,20,0
 软件开发工程师,软件研发,模型工程,大模型,new,20,20,0
-软件开发工程师,软件研发,React,软件开发,traditional,19,18,0
+软件开发工程师,软件研发,React,编程语言,traditional,19,18,0
 软件开发工程师,软件研发,多模态,大模型,new,19,0,19
 软件开发工程师,软件研发,模型训练,大模型,new,19,8,11
 软件开发工程师,软件研发,模型评测,大模型,new,18,13,5
@@ -3752,27 +3786,26 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 软件开发工程师,软件研发,光学技术,硬件与芯片,traditional,9,9,0
 软件开发工程师,软件研发,弱网优化,系统与运维,traditional,9,9,0
 软件开发工程师,软件研发,推理优化,大模型,new,9,0,9
-软件开发工程师,软件研发,自动化技术,系统与运维,traditional,9,9,0
 软件开发工程师,软件研发,ASR,大模型,new,8,5,3
 软件开发工程师,软件研发,AutoGen,大模型,new,8,0,8
 软件开发工程师,软件研发,Flutter,软件开发,traditional,8,8,0
+软件开发工程师,软件研发,HTML,编程语言,traditional,8,8,0
 软件开发工程师,软件研发,Node.js,编程语言,traditional,8,8,0
 软件开发工程师,软件研发,Perl,编程语言,traditional,8,8,0
 软件开发工程师,软件研发,SFT,大模型,new,8,0,8
 软件开发工程师,软件研发,SIMD,硬件与芯片,traditional,8,8,0
+软件开发工程师,软件研发,Vue.js,编程语言,traditional,8,8,0
 软件开发工程师,软件研发,仿真技术,科学计算与仿真,traditional,8,8,0
 软件开发工程师,软件研发,算法工程,算法与数学,traditional,8,8,0
 软件开发工程师,软件研发,软硬件协同,硬件与芯片,traditional,8,8,0
-软件开发工程师,软件研发,HTML,软件开发,traditional,7,7,0
+软件开发工程师,软件研发,CSS,编程语言,traditional,7,7,0
 软件开发工程师,软件研发,RLHF,大模型,new,7,0,7
 软件开发工程师,软件研发,向量计算,数据工程,new,7,7,0
 软件开发工程师,软件研发,地图算法,行业应用,traditional,7,7,0
 软件开发工程师,软件研发,时间序列算法,算法与数学,traditional,7,7,0
 软件开发工程师,软件研发,身份认证,安全,traditional,7,7,0
-软件开发工程师,软件研发,CSS,软件开发,traditional,6,6,0
 软件开发工程师,软件研发,Megatron,大模型,new,6,0,6
 软件开发工程师,软件研发,PPO,大模型,new,6,6,0
-软件开发工程师,软件研发,Vue,软件开发,traditional,6,6,0
 软件开发工程师,软件研发,大模型微调,大模型,new,6,2,4
 软件开发工程师,软件研发,游戏与图形开发,游戏与图形,traditional,6,5,1
 软件开发工程师,软件研发,AUTOSAR,行业应用,traditional,5,5,0
@@ -3785,6 +3818,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 软件开发工程师,软件研发,模型微调,大模型,new,5,0,5
 软件开发工程师,软件研发,模型调优,大模型,new,5,5,0
 软件开发工程师,软件研发,模拟电路设计,硬件与芯片,traditional,5,5,0
+软件开发工程师,软件研发,自动化技术,系统与运维,traditional,5,5,0
 软件开发工程师,软件研发,自动化算法,系统与运维,traditional,5,5,0
 软件开发工程师,软件研发,TTS,大模型,new,4,3,1
 软件开发工程师,软件研发,冷启动优化,软件工程,traditional,4,4,0
@@ -3840,6 +3874,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 软件开发工程师,软件研发,ISP算法,硬件与芯片,traditional,1,1,0
 软件开发工程师,软件研发,Multimodal AI,大模型,new,1,1,0
 软件开发工程师,软件研发,PIE工艺整合,硬件与芯片,traditional,1,1,0
+软件开发工程师,软件研发,Web,软件开发,traditional,1,1,0
 软件开发工程师,软件研发,Webpack,软件开发,traditional,1,1,0
 软件开发工程师,软件研发,主题建模,算法与数学,traditional,1,1,0
 软件开发工程师,软件研发,交通算法,行业应用,traditional,1,1,0
@@ -4045,7 +4080,6 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 数据分析师,数据,推荐算法,AI,traditional,2,2,0
 数据分析师,数据,模型训练,大模型,new,2,0,2
 数据分析师,数据,自动化技术,系统与运维,traditional,2,2,0
-数据分析师,数据,软件工程,软件工程,traditional,2,2,0
 数据分析师,数据,AIGC,AI,new,1,0,1
 数据分析师,数据,AI工具,大模型,new,1,0,1
 数据分析师,数据,AI测试,AI,new,1,0,1
@@ -4066,6 +4100,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 数据分析师,数据,可靠性设计,系统与运维,traditional,1,1,0
 数据分析师,数据,大模型训练,大模型,new,1,0,1
 数据分析师,数据,大模型调优,大模型,new,1,0,1
+数据分析师,数据,性能优化,软件工程,traditional,1,1,0
 数据分析师,数据,搜索算法,AI,traditional,1,1,0
 数据分析师,数据,时钟设计,硬件与芯片,traditional,1,1,0
 数据分析师,数据,模型调优,大模型,new,1,1,0
@@ -4076,6 +4111,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 数据分析师,数据,自然语言处理,AI,traditional,1,0,1
 数据分析师,数据,计算机视觉,计算机视觉与图形,new,1,0,1
 数据分析师,数据,调试工具,软件工程,traditional,1,1,0
+数据分析师,数据,软件工程,软件工程,traditional,1,1,0
 数据分析师,数据,音视频技术,音视频技术,traditional,1,1,0
 数据工程师,数据,Python,编程语言,traditional,6,6,0
 数据工程师,数据,Machine Learning,AI,new,5,5,0
@@ -4140,23 +4176,23 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 大模型测试工程师,测试质量,模型训练,大模型,new,7,0,7
 大模型测试工程师,测试质量,自动化测试,软件开发,traditional,7,7,0
 大模型测试工程师,测试质量,自然语言处理,AI,traditional,7,0,7
-大模型测试工程师,测试质量,软件工程,软件工程,traditional,7,7,0
 大模型测试工程师,测试质量,CI/CD,系统与运维,traditional,6,6,0
 大模型测试工程师,测试质量,Kubernetes,系统与运维,traditional,6,6,0
 大模型测试工程师,测试质量,TTS,大模型,new,6,6,0
 大模型测试工程师,测试质量,图像图形技术,计算机视觉与图形,traditional,6,3,3
 大模型测试工程师,测试质量,大模型应用,大模型,new,6,3,3
-大模型测试工程师,测试质量,数据工程,数据工程,traditional,6,6,0
+大模型测试工程师,测试质量,软件工程,软件工程,traditional,6,6,0
 大模型测试工程师,测试质量,LangChain,大模型,new,5,0,5
 大模型测试工程师,测试质量,RLHF,大模型,new,5,0,5
 大模型测试工程师,测试质量,Ray,AI,traditional,5,5,0
 大模型测试工程师,测试质量,SFT,大模型,new,5,0,5
+大模型测试工程师,测试质量,数据工程,数据工程,traditional,5,5,0
 大模型测试工程师,测试质量,消息队列,数据工程,traditional,5,5,0
 大模型测试工程师,测试质量,AI应用开发,AI,new,4,0,4
 大模型测试工程师,测试质量,ASR,大模型,new,4,1,3
 大模型测试工程师,测试质量,Ai coding,AI,new,4,2,2
 大模型测试工程师,测试质量,Multi-Agent,大模型,new,4,0,4
-大模型测试工程师,测试质量,React,软件开发,traditional,4,3,0
+大模型测试工程师,测试质量,React,编程语言,traditional,4,3,0
 大模型测试工程师,测试质量,Rust,编程语言,traditional,4,4,0
 大模型测试工程师,测试质量,TensorFlow,AI,traditional,4,0,4
 大模型测试工程师,测试质量,上下文工程,大模型,new,4,4,0
@@ -4205,10 +4241,10 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 大模型测试工程师,测试质量,AI安全,安全,new,1,0,1
 大模型测试工程师,测试质量,AI算法,AI,new,1,0,1
 大模型测试工程师,测试质量,Android,软件开发,traditional,1,1,0
-大模型测试工程师,测试质量,CSS,软件开发,traditional,1,1,0
+大模型测试工程师,测试质量,CSS,编程语言,traditional,1,1,0
 大模型测试工程师,测试质量,CUDA,硬件与芯片,new,1,1,0
 大模型测试工程师,测试质量,GPU,系统与运维,traditional,1,1,0
-大模型测试工程师,测试质量,HTML,软件开发,traditional,1,1,0
+大模型测试工程师,测试质量,HTML,编程语言,traditional,1,1,0
 大模型测试工程师,测试质量,Hadoop,数据工程,traditional,1,1,0
 大模型测试工程师,测试质量,LangGraph,大模型,new,1,0,1
 大模型测试工程师,测试质量,LoRA微调,大模型,new,1,0,1
@@ -4230,6 +4266,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 大模型测试工程师,测试质量,大模型调优,大模型,new,1,0,1
 大模型测试工程师,测试质量,异常检测,软件工程,new,1,1,0
 大模型测试工程师,测试质量,异构计算,硬件与芯片,new,1,1,0
+大模型测试工程师,测试质量,性能优化,软件工程,traditional,1,1,0
 大模型测试工程师,测试质量,推荐算法,AI,traditional,1,1,0
 大模型测试工程师,测试质量,时间同步,系统与运维,traditional,1,1,0
 大模型测试工程师,测试质量,机器人与自动驾驶,机器人与自动驾驶,new,1,0,1
@@ -4254,10 +4291,10 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 测试开发工程师,测试质量,Shell脚本,编程语言,traditional,46,46,0
 测试开发工程师,测试质量,Objective-C,编程语言,traditional,45,45,0
 测试开发工程师,测试质量,MySQL,数据工程,traditional,39,39,0
-测试开发工程师,测试质量,数据工程,数据工程,traditional,38,38,0
 测试开发工程师,测试质量,软件开发,软件开发,traditional,38,38,0
 测试开发工程师,测试质量,LLM,大模型,new,35,0,35
 测试开发工程师,测试质量,JavaScript,编程语言,traditional,33,33,0
+测试开发工程师,测试质量,数据工程,数据工程,traditional,33,33,0
 测试开发工程师,测试质量,prompt工程,大模型,new,30,0,30
 测试开发工程师,测试质量,Agent,大模型,new,29,0,29
 测试开发工程师,测试质量,CI/CD,系统与运维,traditional,26,26,0
@@ -4267,7 +4304,6 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 测试开发工程师,测试质量,Android,软件开发,traditional,21,21,0
 测试开发工程师,测试质量,操作系统,系统与运维,traditional,18,18,0
 测试开发工程师,测试质量,模型评测,大模型,new,18,6,12
-测试开发工程师,测试质量,软件工程,软件工程,traditional,18,18,0
 测试开发工程师,测试质量,SRE,系统与运维,traditional,17,17,0
 测试开发工程师,测试质量,机器学习,AI,traditional,17,0,17
 测试开发工程师,测试质量,iOS,软件开发,traditional,16,16,0
@@ -4275,9 +4311,11 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 测试开发工程师,测试质量,AIops,系统与运维,new,15,0,15
 测试开发工程师,测试质量,Unix,系统与运维,traditional,15,15,0
 测试开发工程师,测试质量,Docker,系统与运维,traditional,14,14,0
+测试开发工程师,测试质量,软件工程,软件工程,traditional,14,14,0
 测试开发工程师,测试质量,AIGC,AI,new,13,3,10
 测试开发工程师,测试质量,消息队列,数据工程,traditional,12,12,0
 测试开发工程师,测试质量,网络技术,通信与网络,traditional,12,12,0
+测试开发工程师,测试质量,HTML,编程语言,traditional,10,10,0
 测试开发工程师,测试质量,Kafka,数据工程,traditional,10,10,0
 测试开发工程师,测试质量,NLP,大模型,new,10,10,0
 测试开发工程师,测试质量,大模型评测,大模型,new,10,0,10
@@ -4285,7 +4323,6 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 测试开发工程师,测试质量,Perl,编程语言,traditional,9,9,0
 测试开发工程师,测试质量,深度学习,AI,traditional,9,0,9
 测试开发工程师,测试质量,DevOps,系统与运维,traditional,8,8,0
-测试开发工程师,测试质量,HTML,软件开发,traditional,8,8,0
 测试开发工程师,测试质量,Kubernetes,系统与运维,traditional,8,8,0
 测试开发工程师,测试质量,LangChain,大模型,new,8,0,8
 测试开发工程师,测试质量,Machine Learning,AI,new,8,8,0
@@ -4318,6 +4355,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 测试开发工程师,测试质量,LoRA微调,大模型,new,4,0,4
 测试开发工程师,测试质量,TCP/IP,系统与运维,traditional,4,4,0
 测试开发工程师,测试质量,分布式系统,软件工程,traditional,4,4,0
+测试开发工程师,测试质量,性能优化,软件工程,traditional,4,4,0
 测试开发工程师,测试质量,模型推理,大模型,new,4,4,0
 测试开发工程师,测试质量,模型训练,大模型,new,4,0,4
 测试开发工程师,测试质量,AI算法,AI,new,3,0,3
@@ -4326,7 +4364,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 测试开发工程师,测试质量,DPO,大模型,new,3,0,3
 测试开发工程师,测试质量,PostgreSQL,数据工程,traditional,3,3,0
 测试开发工程师,测试质量,PyTorch,AI,traditional,3,0,3
-测试开发工程师,测试质量,React,软件开发,traditional,3,3,0
+测试开发工程师,测试质量,React,编程语言,traditional,3,3,0
 测试开发工程师,测试质量,TensorFlow,AI,traditional,3,0,3
 测试开发工程师,测试质量,功能安全,安全,traditional,3,3,0
 测试开发工程师,测试质量,图像图形技术,计算机视觉与图形,traditional,3,3,0
@@ -4373,7 +4411,8 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 测试开发工程师,测试质量,SIL测试,软件测试,traditional,1,1,0
 测试开发工程师,测试质量,TensorRT-LLM,大模型,new,1,0,1
 测试开发工程师,测试质量,Unreal Engine,软件开发,traditional,1,1,0
-测试开发工程师,测试质量,Vue,软件开发,traditional,1,1,0
+测试开发工程师,测试质量,Vue.js,编程语言,traditional,1,1,0
+测试开发工程师,测试质量,Web,软件开发,traditional,1,1,0
 测试开发工程师,测试质量,Web爬虫,数据工程,traditional,1,1,0
 测试开发工程师,测试质量,harness工程,软件工程,traditional,1,1,0
 测试开发工程师,测试质量,交通算法,行业应用,traditional,1,1,0
@@ -4420,7 +4459,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 质量工程师,测试质量,TensorRT,大模型,new,1,1,0
 质量工程师,测试质量,Transformer,大模型,new,1,0,1
 质量工程师,测试质量,VLM,大模型,new,1,0,1
-质量工程师,测试质量,Vue,软件开发,traditional,1,1,0
+质量工程师,测试质量,Vue.js,编程语言,traditional,1,1,0
 质量工程师,测试质量,prompt工程,大模型,new,1,0,1
 质量工程师,测试质量,信号处理,硬件与芯片,traditional,1,1,0
 质量工程师,测试质量,多模态,大模型,new,1,0,1
@@ -4443,7 +4482,7 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 测试工程师,测试质量,Shell脚本,编程语言,traditional,16,16,0
 测试工程师,测试质量,通信技术,通信与网络,traditional,13,13,0
 测试工程师,测试质量,Go,编程语言,traditional,11,11,0
-测试工程师,测试质量,数据工程,数据工程,traditional,11,11,0
+测试工程师,测试质量,数据工程,数据工程,traditional,10,10,0
 测试工程师,测试质量,CI/CD,系统与运维,traditional,7,7,0
 测试工程师,测试质量,信号处理,硬件与芯片,traditional,7,7,0
 测试工程师,测试质量,硬件开发,硬件与芯片,traditional,7,7,0
@@ -4487,14 +4526,14 @@ iOS开发工程师,软件研发,调试工具,软件工程,traditional,1,1,0
 测试工程师,测试质量,Android,软件开发,traditional,1,1,0
 测试工程师,测试质量,Android Framework,软件开发,traditional,1,1,0
 测试工程师,测试质量,Flink,数据工程,traditional,1,1,0
-测试工程师,测试质量,HTML,软件开发,traditional,1,1,0
+测试工程师,测试质量,HTML,编程语言,traditional,1,1,0
 测试工程师,测试质量,Kafka,数据工程,traditional,1,1,0
 测试工程师,测试质量,MCP,大模型,new,1,0,1
 测试工程师,测试质量,NLP,大模型,new,1,1,0
 测试工程师,测试质量,Objective-C,编程语言,traditional,1,1,0
 测试工程师,测试质量,Perl,编程语言,traditional,1,1,0
 测试工程师,测试质量,PyTorch,AI,traditional,1,0,1
-测试工程师,测试质量,React,软件开发,traditional,1,1,0
+测试工程师,测试质量,React,编程语言,traditional,1,1,0
 测试工程师,测试质量,Spark,数据工程,traditional,1,1,0
 测试工程师,测试质量,Swift,编程语言,traditional,1,1,0
 测试工程师,测试质量,TTS,大模型,new,1,0,1
@@ -4570,13 +4609,12 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 运维工程师,基础设施,网络技术,通信与网络,traditional,37,37,0
 运维工程师,基础设施,TCP/IP,系统与运维,traditional,31,31,0
 运维工程师,基础设施,云计算,云计算,traditional,30,30,0
-运维工程师,基础设施,数据工程,数据工程,traditional,28,28,0
 运维工程师,基础设施,IT基础设施,云计算,traditional,22,22,0
+运维工程师,基础设施,数据工程,数据工程,traditional,22,22,0
 运维工程师,基础设施,分布式系统,软件工程,traditional,19,19,0
 运维工程师,基础设施,AIops,系统与运维,new,18,0,18
 运维工程师,基础设施,Kafka,数据工程,traditional,16,16,0
 运维工程师,基础设施,Redis,数据工程,traditional,15,15,0
-运维工程师,基础设施,软件工程,软件工程,traditional,15,15,0
 运维工程师,基础设施,MySQL,数据工程,traditional,14,14,0
 运维工程师,基础设施,ClickHouse,数据工程,traditional,13,13,0
 运维工程师,基础设施,Flink,数据工程,traditional,13,13,0
@@ -4591,14 +4629,16 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 运维工程师,基础设施,HBase,数据工程,traditional,9,9,0
 运维工程师,基础设施,Unix,系统与运维,traditional,9,9,0
 运维工程师,基础设施,计算机体系结构,硬件与芯片,traditional,9,9,0
+运维工程师,基础设施,软件工程,软件工程,traditional,9,9,0
 运维工程师,基础设施,软件开发,软件开发,traditional,9,9,0
-运维工程师,基础设施,自动化技术,系统与运维,traditional,8,8,0
 运维工程师,基础设施,操作系统,系统与运维,traditional,7,7,0
 运维工程师,基础设施,DevOps,系统与运维,traditional,6,6,0
 运维工程师,基础设施,Rust,编程语言,traditional,6,6,0
 运维工程师,基础设施,Scala,编程语言,traditional,6,6,0
 运维工程师,基础设施,分布式存储,数据工程,traditional,6,6,0
+运维工程师,基础设施,性能优化,软件工程,traditional,6,6,0
 运维工程师,基础设施,消息队列,数据工程,traditional,6,6,0
+运维工程师,基础设施,自动化技术,系统与运维,traditional,6,6,0
 运维工程师,基础设施,AIGC,AI,new,5,1,4
 运维工程师,基础设施,CI/CD,系统与运维,traditional,5,5,0
 运维工程师,基础设施,CUDA,硬件与芯片,new,5,5,0
@@ -4628,9 +4668,9 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 运维工程师,基础设施,Memory,大模型,new,2,2,0
 运维工程师,基础设施,OTA升级,系统与运维,traditional,2,2,0
 运维工程师,基础设施,RAG,大模型,new,2,0,2
-运维工程师,基础设施,React,软件开发,traditional,2,2,0
+运维工程师,基础设施,React,编程语言,traditional,2,2,0
 运维工程师,基础设施,Spring,软件开发,traditional,2,2,0
-运维工程师,基础设施,Vue,软件开发,traditional,2,2,0
+运维工程师,基础设施,Vue.js,编程语言,traditional,2,2,0
 运维工程师,基础设施,向量数据库,数据工程,new,2,0,2
 运维工程师,基础设施,大模型调优,大模型,new,2,0,2
 运维工程师,基础设施,异常检测,软件工程,new,2,2,0
@@ -4643,9 +4683,9 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 运维工程师,基础设施,AI应用开发,AI,new,1,0,1
 运维工程师,基础设施,Android,软件开发,traditional,1,1,0
 运维工程师,基础设施,AutoGen,大模型,new,1,0,1
-运维工程师,基础设施,CSS,软件开发,traditional,1,1,0
+运维工程师,基础设施,CSS,编程语言,traditional,1,1,0
 运维工程师,基础设施,Function Calling,大模型,new,1,0,1
-运维工程师,基础设施,HTML,软件开发,traditional,1,1,0
+运维工程师,基础设施,HTML,编程语言,traditional,1,1,0
 运维工程师,基础设施,MCP,大模型,new,1,0,1
 运维工程师,基础设施,Tool Use,大模型,new,1,1,0
 运维工程师,基础设施,Transformer,大模型,new,1,0,1
@@ -4697,7 +4737,6 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 云计算工程师,基础设施,SRE,系统与运维,traditional,5,5,0
 云计算工程师,基础设施,VLM,大模型,new,5,0,5
 云计算工程师,基础设施,分布式存储,数据工程,traditional,5,5,0
-云计算工程师,基础设施,软件工程,软件工程,traditional,5,5,0
 云计算工程师,基础设施,AI基础设施,AI,new,4,0,4
 云计算工程师,基础设施,LangChain,大模型,new,4,0,4
 云计算工程师,基础设施,RAG,大模型,new,4,0,4
@@ -4718,6 +4757,7 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 云计算工程师,基础设施,Spark,数据工程,traditional,3,3,0
 云计算工程师,基础设施,异构计算,硬件与芯片,new,3,3,0
 云计算工程师,基础设施,微服务架构,软件工程,traditional,3,3,0
+云计算工程师,基础设施,性能优化,软件工程,traditional,3,3,0
 云计算工程师,基础设施,混沌工程,软件工程,traditional,3,3,0
 云计算工程师,基础设施,软件开发,软件开发,traditional,3,3,0
 云计算工程师,基础设施,AI工具,大模型,new,2,0,2
@@ -4730,7 +4770,7 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 云计算工程师,基础设施,NLP,大模型,new,2,2,0
 云计算工程师,基础设施,Node.js,编程语言,traditional,2,2,0
 云计算工程师,基础设施,Perl,编程语言,traditional,2,2,0
-云计算工程师,基础设施,React,软件开发,traditional,2,2,0
+云计算工程师,基础设施,React,编程语言,traditional,2,2,0
 云计算工程师,基础设施,SFT,大模型,new,2,0,2
 云计算工程师,基础设施,SGLang,大模型,new,2,2,0
 云计算工程师,基础设施,TensorFlow,AI,traditional,2,0,2
@@ -4739,6 +4779,7 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 云计算工程师,基础设施,多租户架构,系统与运维,traditional,2,2,0
 云计算工程师,基础设施,自动化运维,系统与运维,traditional,2,2,0
 云计算工程师,基础设施,调试工具,软件工程,traditional,2,2,0
+云计算工程师,基础设施,软件工程,软件工程,traditional,2,2,0
 云计算工程师,基础设施,高性能计算,硬件与芯片,new,2,2,0
 云计算工程师,基础设施,AI算法,AI,new,1,0,1
 云计算工程师,基础设施,ASR,大模型,new,1,1,0
@@ -4747,7 +4788,7 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 云计算工程师,基础设施,DeepSpeed,大模型,new,1,0,1
 云计算工程师,基础设施,Elasticsearch,数据工程,traditional,1,1,0
 云计算工程师,基础设施,HBase,数据工程,traditional,1,1,0
-云计算工程师,基础设施,HTML,软件开发,traditional,1,1,0
+云计算工程师,基础设施,HTML,编程语言,traditional,1,1,0
 云计算工程师,基础设施,Hadoop,数据工程,traditional,1,1,0
 云计算工程师,基础设施,Hive,数据工程,traditional,1,1,0
 云计算工程师,基础设施,JavaScript,编程语言,traditional,1,1,0
@@ -4756,6 +4797,7 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 云计算工程师,基础设施,Transformer,大模型,new,1,0,1
 云计算工程师,基础设施,Unreal Engine,软件开发,traditional,1,1,0
 云计算工程师,基础设施,VLA模型,大模型,new,1,1,0
+云计算工程师,基础设施,Vue.js,编程语言,traditional,1,1,0
 云计算工程师,基础设施,harness工程,软件工程,traditional,1,1,0
 云计算工程师,基础设施,上下文工程,大模型,new,1,1,0
 云计算工程师,基础设施,世界模型,大模型,new,1,1,0
@@ -4899,7 +4941,7 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 安全工程师,安全,自动化技术,系统与运维,traditional,2,2,0
 安全工程师,安全,AI应用开发,AI,new,1,0,1
 安全工程师,安全,AUTOSAR,行业应用,traditional,1,1,0
-安全工程师,安全,HTML,软件开发,traditional,1,1,0
+安全工程师,安全,HTML,编程语言,traditional,1,1,0
 安全工程师,安全,Hadoop,数据工程,traditional,1,1,0
 安全工程师,安全,Hive,数据工程,traditional,1,1,0
 安全工程师,安全,Kafka,数据工程,traditional,1,1,0
@@ -4943,22 +4985,21 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 网络工程师,基础设施,DevOps,系统与运维,traditional,2,2,0
 网络工程师,基础设施,Docker,系统与运维,traditional,2,2,0
 网络工程师,基础设施,PHP,编程语言,traditional,2,2,0
-网络工程师,基础设施,数据工程,数据工程,traditional,2,2,0
-网络工程师,基础设施,CSS,软件开发,traditional,1,1,0
+网络工程师,基础设施,CSS,编程语言,traditional,1,1,0
 网络工程师,基础设施,Elasticsearch,数据工程,traditional,1,1,0
 网络工程师,基础设施,Flink,数据工程,traditional,1,1,0
-网络工程师,基础设施,HTML,软件开发,traditional,1,1,0
+网络工程师,基础设施,HTML,编程语言,traditional,1,1,0
 网络工程师,基础设施,JavaScript,编程语言,traditional,1,1,0
 网络工程师,基础设施,Kafka,数据工程,traditional,1,1,0
 网络工程师,基础设施,MongoDB,数据工程,traditional,1,1,0
 网络工程师,基础设施,MySQL,数据工程,traditional,1,1,0
-网络工程师,基础设施,React,软件开发,traditional,1,1,0
+网络工程师,基础设施,React,编程语言,traditional,1,1,0
 网络工程师,基础设施,Redis,数据工程,traditional,1,1,0
 网络工程师,基础设施,Rust,编程语言,traditional,1,1,0
 网络工程师,基础设施,SRE,系统与运维,traditional,1,1,0
 网络工程师,基础设施,Spark,数据工程,traditional,1,1,0
 网络工程师,基础设施,TypeScript,编程语言,traditional,1,1,0
-网络工程师,基础设施,Vue,软件开发,traditional,1,1,0
+网络工程师,基础设施,Vue.js,编程语言,traditional,1,1,0
 网络工程师,基础设施,消息队列,数据工程,traditional,1,1,0
 网络工程师,基础设施,网络协议,系统与运维,traditional,1,1,0
 网络工程师,基础设施,自动化测试,软件开发,traditional,1,1,0
@@ -4966,20 +5007,20 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 网络工程师,基础设施,计算机网络,通信与网络,traditional,1,1,0
 网络工程师,基础设施,高性能通信,通信与网络,traditional,1,1,0
 数据库工程师,基础设施,C/C++,编程语言,traditional,8,8,0
-数据库工程师,基础设施,数据工程,数据工程,traditional,7,7,0
 数据库工程师,基础设施,Go,编程语言,traditional,6,6,0
 数据库工程师,基础设施,Python,编程语言,traditional,6,6,0
+数据库工程师,基础设施,数据工程,数据工程,traditional,6,6,0
 数据库工程师,基础设施,Linux,系统与运维,traditional,5,5,0
 数据库工程师,基础设施,MySQL,数据工程,traditional,5,5,0
 数据库工程师,基础设施,Agent,大模型,new,4,0,4
 数据库工程师,基础设施,PostgreSQL,数据工程,traditional,4,4,0
 数据库工程师,基础设施,分布式系统,软件工程,traditional,4,4,0
 数据库工程师,基础设施,AIops,系统与运维,new,3,0,3
-数据库工程师,基础设施,软件工程,软件工程,traditional,3,3,0
 数据库工程师,基础设施,Java,编程语言,traditional,2,2,0
 数据库工程师,基础设施,Kubernetes,系统与运维,traditional,2,2,0
 数据库工程师,基础设施,NoSQL,数据工程,traditional,2,2,0
 数据库工程师,基础设施,向量数据库,数据工程,new,2,0,2
+数据库工程师,基础设施,性能优化,软件工程,traditional,2,2,0
 数据库工程师,基础设施,操作系统,系统与运维,traditional,2,2,0
 数据库工程师,基础设施,查询优化,数据工程,traditional,2,2,0
 数据库工程师,基础设施,网络技术,通信与网络,traditional,2,2,0
@@ -5003,11 +5044,12 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 数据库工程师,基础设施,网络编程,软件工程,traditional,1,1,0
 数据库工程师,基础设施,自动化运维,系统与运维,traditional,1,1,0
 数据库工程师,基础设施,计算机体系结构,硬件与芯片,traditional,1,1,0
+数据库工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 数据库工程师,基础设施,软件开发,软件开发,traditional,1,1,0
 服务器工程师,基础设施,C/C++,编程语言,traditional,15,15,0
 服务器工程师,基础设施,Python,编程语言,traditional,7,7,0
-服务器工程师,基础设施,数据工程,数据工程,traditional,7,7,0
 服务器工程师,基础设施,IT基础设施,云计算,traditional,6,6,0
+服务器工程师,基础设施,数据工程,数据工程,traditional,5,5,0
 服务器工程师,基础设施,云计算,云计算,traditional,4,4,0
 服务器工程师,基础设施,计算机体系结构,硬件与芯片,traditional,4,4,0
 服务器工程师,基础设施,软件测试,软件测试,traditional,4,4,0
@@ -5015,7 +5057,6 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 服务器工程师,基础设施,Java,编程语言,traditional,3,3,0
 服务器工程师,基础设施,RISC-V,系统与运维,traditional,3,3,0
 服务器工程师,基础设施,系统开发,系统与运维,traditional,3,3,0
-服务器工程师,基础设施,软件工程,软件工程,traditional,3,3,0
 服务器工程师,基础设施,CUDA,硬件与芯片,new,2,2,0
 服务器工程师,基础设施,GPU,系统与运维,traditional,2,2,0
 服务器工程师,基础设施,Linux,系统与运维,traditional,2,2,0
@@ -5023,6 +5064,7 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 服务器工程师,基础设施,汇编语言,编程语言,traditional,2,2,0
 服务器工程师,基础设施,网络技术,通信与网络,traditional,2,2,0
 服务器工程师,基础设施,计算机网络,通信与网络,traditional,2,2,0
+服务器工程师,基础设施,软件工程,软件工程,traditional,2,2,0
 服务器工程师,基础设施,软硬件协同,硬件与芯片,traditional,2,2,0
 服务器工程师,基础设施,AI基础设施,AI,new,1,1,0
 服务器工程师,基础设施,Docker,系统与运维,traditional,1,1,0
@@ -5032,22 +5074,22 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 服务器工程师,基础设施,仿真技术,科学计算与仿真,traditional,1,1,0
 服务器工程师,基础设施,分布式系统,软件工程,traditional,1,1,0
 服务器工程师,基础设施,分布式计算,数据工程,traditional,1,1,0
+服务器工程师,基础设施,性能优化,软件工程,traditional,1,1,0
 服务器工程师,基础设施,操作系统,系统与运维,traditional,1,1,0
 服务器工程师,基础设施,消息队列,数据工程,traditional,1,1,0
 服务器工程师,基础设施,硬件开发,硬件与芯片,traditional,1,1,0
 服务器工程师,基础设施,编程语言,编程语言,traditional,1,1,0
 服务器工程师,基础设施,网络协议,系统与运维,traditional,1,1,0
-服务器工程师,基础设施,自动化技术,系统与运维,traditional,1,1,0
 服务器工程师,基础设施,高性能通信,通信与网络,traditional,1,1,0
 技术支持工程师,技术支持,Python,编程语言,traditional,40,40,0
 技术支持工程师,技术支持,LLM,大模型,new,24,3,21
 技术支持工程师,技术支持,Agent,大模型,new,23,1,22
 技术支持工程师,技术支持,PyTorch,AI,traditional,23,0,23
-技术支持工程师,技术支持,数据工程,数据工程,traditional,22,22,0
 技术支持工程师,技术支持,C/C++,编程语言,traditional,21,21,0
 技术支持工程师,技术支持,Machine Learning,AI,new,21,1,20
 技术支持工程师,技术支持,Go,编程语言,traditional,20,20,0
 技术支持工程师,技术支持,Java,编程语言,traditional,20,20,0
+技术支持工程师,技术支持,数据工程,数据工程,traditional,20,20,0
 技术支持工程师,技术支持,Linux,系统与运维,traditional,18,18,0
 技术支持工程师,技术支持,NLP,大模型,new,16,16,0
 技术支持工程师,技术支持,计算机视觉,计算机视觉与图形,new,16,4,12
@@ -5059,7 +5101,6 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 技术支持工程师,技术支持,网络技术,通信与网络,traditional,11,11,0
 技术支持工程师,技术支持,大模型训练,大模型,new,10,4,6
 技术支持工程师,技术支持,机器学习,AI,traditional,10,0,10
-技术支持工程师,技术支持,软件工程,软件工程,traditional,10,10,0
 技术支持工程师,技术支持,AIGC,AI,new,9,0,9
 技术支持工程师,技术支持,SRE,系统与运维,traditional,8,8,0
 技术支持工程师,技术支持,Transformer,大模型,new,8,0,8
@@ -5073,6 +5114,7 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 技术支持工程师,技术支持,TCP/IP,系统与运维,traditional,6,6,0
 技术支持工程师,技术支持,TensorFlow,AI,traditional,6,0,6
 技术支持工程师,技术支持,prompt工程,大模型,new,6,0,6
+技术支持工程师,技术支持,软件工程,软件工程,traditional,6,6,0
 技术支持工程师,技术支持,Diffusion模型,大模型,new,5,5,0
 技术支持工程师,技术支持,Flink,数据工程,traditional,5,5,0
 技术支持工程师,技术支持,LangChain,大模型,new,5,0,5
@@ -5095,6 +5137,7 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 技术支持工程师,技术支持,TypeScript,编程语言,traditional,4,4,0
 技术支持工程师,技术支持,上下文工程,大模型,new,4,4,0
 技术支持工程师,技术支持,图像图形技术,计算机视觉与图形,traditional,4,0,4
+技术支持工程师,技术支持,性能优化,软件工程,traditional,4,4,0
 技术支持工程师,技术支持,操作系统,系统与运维,traditional,4,4,0
 技术支持工程师,技术支持,模型训练,大模型,new,4,1,3
 技术支持工程师,技术支持,软件测试,软件测试,traditional,4,4,0
@@ -5155,7 +5198,7 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 技术支持工程师,技术支持,LangGraph,大模型,new,1,0,1
 技术支持工程师,技术支持,LoRA微调,大模型,new,1,0,1
 技术支持工程师,技术支持,Ray,AI,traditional,1,1,0
-技术支持工程师,技术支持,React,软件开发,traditional,1,1,0
+技术支持工程师,技术支持,React,编程语言,traditional,1,1,0
 技术支持工程师,技术支持,Redis,数据工程,traditional,1,1,0
 技术支持工程师,技术支持,Swift,编程语言,traditional,1,1,0
 技术支持工程师,技术支持,Tool Use,大模型,new,1,1,0
@@ -5268,6 +5311,7 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 解决方案工程师,技术支持,仿真技术,科学计算与仿真,traditional,1,1,0
 解决方案工程师,技术支持,区块链,行业应用,new,1,1,0
 解决方案工程师,技术支持,异常检测,软件工程,new,1,1,0
+解决方案工程师,技术支持,性能优化,软件工程,traditional,1,1,0
 解决方案工程师,技术支持,操作系统,系统与运维,traditional,1,1,0
 解决方案工程师,技术支持,数字人技术,AI,new,1,1,0
 解决方案工程师,技术支持,时间序列算法,算法与数学,traditional,1,1,0
@@ -5284,7 +5328,6 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 解决方案工程师,技术支持,计算机体系结构,硬件与芯片,traditional,1,1,0
 解决方案工程师,技术支持,计算机网络,通信与网络,traditional,1,1,0
 解决方案工程师,技术支持,计算机视觉,计算机视觉与图形,new,1,0,1
-解决方案工程师,技术支持,软件工程,软件工程,traditional,1,1,0
 机器人算法工程师,机器人,Java,编程语言,traditional,2,2,0
 机器人算法工程师,机器人,Python,编程语言,traditional,2,2,0
 机器人算法工程师,机器人,模型评测,大模型,new,2,1,1
@@ -5352,6 +5395,7 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 自动驾驶算法工程师,自动驾驶,多模态,大模型,new,1,0,1
 自动驾驶算法工程师,自动驾驶,工业自动化,工业与物联网,traditional,1,1,0
 自动驾驶算法工程师,自动驾驶,序列建模,AI,new,1,1,0
+自动驾驶算法工程师,自动驾驶,性能优化,软件工程,traditional,1,1,0
 自动驾驶算法工程师,自动驾驶,感知算法,AI,new,1,1,0
 自动驾驶算法工程师,自动驾驶,推理优化,大模型,new,1,0,1
 自动驾驶算法工程师,自动驾驶,模型训练,大模型,new,1,0,1
@@ -5361,7 +5405,6 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 自动驾驶算法工程师,自动驾驶,自动化测试,软件开发,traditional,1,1,0
 自动驾驶算法工程师,自动驾驶,计算机体系结构,硬件与芯片,traditional,1,1,0
 自动驾驶算法工程师,自动驾驶,调试工具,软件工程,traditional,1,1,0
-自动驾驶算法工程师,自动驾驶,软件工程,软件工程,traditional,1,1,0
 自动驾驶算法工程师,自动驾驶,软硬件协同,硬件与芯片,traditional,1,1,0
 控制算法工程师,算法,C/C++,编程语言,traditional,4,4,0
 控制算法工程师,算法,Python,编程语言,traditional,2,2,0
@@ -5394,11 +5437,11 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 图形图像工程师,多媒体,Android,软件开发,traditional,1,1,0
 图形图像工程师,多媒体,LLM,大模型,new,1,0,1
 图形图像工程师,多媒体,Python,编程语言,traditional,1,1,0
+图形图像工程师,多媒体,性能优化,软件工程,traditional,1,1,0
 图形图像工程师,多媒体,模拟电路设计,硬件与芯片,traditional,1,1,0
 图形图像工程师,多媒体,深度学习,AI,traditional,1,0,1
 图形图像工程师,多媒体,深度学习框架,AI,traditional,1,0,1
 图形图像工程师,多媒体,计算机视觉,计算机视觉与图形,new,1,0,1
-图形图像工程师,多媒体,软件工程,软件工程,traditional,1,1,0
 音视频工程师,多媒体,C/C++,编程语言,traditional,16,16,0
 音视频工程师,多媒体,多模态,大模型,new,9,0,9
 音视频工程师,多媒体,图像图形技术,计算机视觉与图形,traditional,7,7,0
@@ -5455,17 +5498,17 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 通信工程师,通信,Machine Learning,AI,new,13,4,9
 通信工程师,通信,机器学习,AI,traditional,13,0,13
 通信工程师,通信,硬件开发,硬件与芯片,traditional,13,13,0
-通信工程师,通信,软件工程,软件工程,traditional,13,13,0
 通信工程师,通信,Linux,系统与运维,traditional,12,12,0
 通信工程师,通信,计算机视觉,计算机视觉与图形,new,12,3,9
 通信工程师,通信,Java,编程语言,traditional,11,11,0
 通信工程师,通信,NLP,大模型,new,11,11,0
 通信工程师,通信,网络技术,通信与网络,traditional,11,11,0
 通信工程师,通信,Agent,大模型,new,9,0,9
-通信工程师,通信,数据工程,数据工程,traditional,8,8,0
+通信工程师,通信,软件工程,软件工程,traditional,9,9,0
 通信工程师,通信,算法工程,算法与数学,traditional,8,8,0
 通信工程师,通信,GPU,系统与运维,traditional,7,7,0
 通信工程师,通信,Shell脚本,编程语言,traditional,7,7,0
+通信工程师,通信,数据工程,数据工程,traditional,7,7,0
 通信工程师,通信,模型训练,大模型,new,7,2,5
 通信工程师,通信,高速接口,硬件与芯片,traditional,7,7,0
 通信工程师,通信,SGLang,大模型,new,6,6,0
@@ -5486,6 +5529,7 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 通信工程师,通信,TensorRT-LLM,大模型,new,4,0,4
 通信工程师,通信,Triton,大模型,new,4,4,0
 通信工程师,通信,大模型训练,大模型,new,4,0,4
+通信工程师,通信,性能优化,软件工程,traditional,4,4,0
 通信工程师,通信,触觉技术,交互体验,traditional,4,4,0
 通信工程师,通信,高性能计算,硬件与芯片,new,4,4,0
 通信工程师,通信,AIGC,AI,new,3,0,3
@@ -5547,7 +5591,7 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 通信工程师,通信,Perl,编程语言,traditional,1,1,0
 通信工程师,通信,RLHF,大模型,new,1,0,1
 通信工程师,通信,Ray,AI,traditional,1,1,0
-通信工程师,通信,React,软件开发,traditional,1,1,0
+通信工程师,通信,React,编程语言,traditional,1,1,0
 通信工程师,通信,SFT,大模型,new,1,0,1
 通信工程师,通信,SRE,系统与运维,traditional,1,1,0
 通信工程师,通信,Scala,编程语言,traditional,1,1,0
@@ -5593,10 +5637,10 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 芯片设计工程师,芯片,TensorFlow,AI,traditional,33,0,33
 芯片设计工程师,芯片,Go,编程语言,traditional,29,29,0
 芯片设计工程师,芯片,网络技术,通信与网络,traditional,29,29,0
-芯片设计工程师,芯片,数据工程,数据工程,traditional,27,27,0
 芯片设计工程师,芯片,NLP,大模型,new,26,26,0
 芯片设计工程师,芯片,多模态,大模型,new,26,0,26
 芯片设计工程师,芯片,分布式系统,软件工程,traditional,23,23,0
+芯片设计工程师,芯片,数据工程,数据工程,traditional,23,23,0
 芯片设计工程师,芯片,机器学习,AI,traditional,23,0,23
 芯片设计工程师,芯片,Linux,系统与运维,traditional,21,21,0
 芯片设计工程师,芯片,模拟电路设计,硬件与芯片,traditional,21,21,0
@@ -5604,7 +5648,6 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 芯片设计工程师,芯片,VLM,大模型,new,19,0,19
 芯片设计工程师,芯片,编程语言,编程语言,traditional,19,19,0
 芯片设计工程师,芯片,时钟设计,硬件与芯片,traditional,18,18,0
-芯片设计工程师,芯片,软件工程,软件工程,traditional,18,18,0
 芯片设计工程师,芯片,时间序列算法,算法与数学,traditional,15,15,0
 芯片设计工程师,芯片,系统开发,系统与运维,traditional,15,15,0
 芯片设计工程师,芯片,高速接口,硬件与芯片,traditional,15,15,0
@@ -5620,6 +5663,7 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 芯片设计工程师,芯片,知识图谱,知识图谱,new,12,12,0
 芯片设计工程师,芯片,计算机视觉,计算机视觉与图形,new,12,0,12
 芯片设计工程师,芯片,内存管理,软件工程,traditional,11,11,0
+芯片设计工程师,芯片,软件工程,软件工程,traditional,11,11,0
 芯片设计工程师,芯片,CUDA,硬件与芯片,new,10,10,0
 芯片设计工程师,芯片,GPU,系统与运维,traditional,10,10,0
 芯片设计工程师,芯片,Shell脚本,编程语言,traditional,10,10,0
@@ -5644,6 +5688,7 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 芯片设计工程师,芯片,PPO,大模型,new,7,7,0
 芯片设计工程师,芯片,SFT,大模型,new,7,0,7
 芯片设计工程师,芯片,云计算,云计算,traditional,7,7,0
+芯片设计工程师,芯片,性能优化,软件工程,traditional,7,7,0
 芯片设计工程师,芯片,查询优化,数据工程,traditional,7,7,0
 芯片设计工程师,芯片,模型推理,大模型,new,7,7,0
 芯片设计工程师,芯片,Diffusion,大模型,new,6,0,6
@@ -5683,7 +5728,7 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 芯片设计工程师,芯片,GPU内存优化,硬件与芯片,new,3,3,0
 芯片设计工程师,芯片,Hive,数据工程,traditional,3,3,0
 芯片设计工程师,芯片,Kafka,数据工程,traditional,3,3,0
-芯片设计工程师,芯片,React,软件开发,traditional,3,3,0
+芯片设计工程师,芯片,React,编程语言,traditional,3,3,0
 芯片设计工程师,芯片,Scala,编程语言,traditional,3,3,0
 芯片设计工程师,芯片,TensorRT,大模型,new,3,3,0
 芯片设计工程师,芯片,偏好学习,AI,new,3,3,0
@@ -5833,12 +5878,12 @@ DevOps工程师,基础设施,软件工程,软件工程,traditional,1,1,0
 硬件工程师,硬件,PyTorch,AI,traditional,7,0,7
 硬件工程师,硬件,软件测试,软件测试,traditional,7,7,0
 硬件工程师,硬件,通信技术,通信与网络,traditional,7,7,0
-硬件工程师,硬件,自动化技术,系统与运维,traditional,6,6,0
 硬件工程师,硬件,高速接口,硬件与芯片,traditional,6,6,0
 硬件工程师,硬件,GPU,系统与运维,traditional,5,5,0
 硬件工程师,硬件,TensorFlow,AI,traditional,5,0,5
 硬件工程师,硬件,功能安全,安全,traditional,5,5,0
 硬件工程师,硬件,机器人与自动驾驶,机器人与自动驾驶,new,5,5,0
+硬件工程师,硬件,自动化技术,系统与运维,traditional,5,5,0
 硬件工程师,硬件,软件工程,软件工程,traditional,5,5,0
 硬件工程师,硬件,AI芯片,硬件与芯片,new,4,0,4
 硬件工程师,硬件,SGLang,大模型,new,4,4,0

@@ -1,6 +1,8 @@
 ﻿standard_job_title,standard_category,match_keywords
 大模型算法工程师,AI算法,大模型.*算法|LLM.*算法|算法.*大模型|Foundation Model|World Model
-AI应用工程师,AI应用,AI应用|AI\s*Application|AI全栈|AI Agent|AIGC应用|智能应用
+AI Agent算法工程师,AI算法,AI\s*Agent.*算法|Agentic.*算法|智能体.*算法|Agent.*研究|智能体.*研究|Agent.*训练|Agent.*规划|任务规划|规划算法|Agent RL|Agent强化学习|Tool Use|工具学习|多智能体.*算法|Multi-Agent.*算法|Agent.*推理|智能体演进
+AI Agent应用工程师,AI应用,AI\s*Agent.*开发|AI\s*Agent.*研发|Agent开发|Agent研发|智能体开发|智能体研发|Agent平台|Agent编排|Agent工作流|Agentic Workflow|任务拆解|工具调用|Function Calling|MCP|Memory|多智能体|Multi-Agent|LangGraph|AutoGen|CrewAI|Dify|LangChain
+AI应用工程师,AI应用,AI应用|AI\s*Application|AI全栈|AIGC应用|智能应用|AI业务应用
 AI安全工程师,AI安全,AI.*安全|大模型安全|AIGC.*安全|guardrail|jailbreak|prompt injection
 AI Infra工程师,AI基础设施,AI\s*Infra|AI基础设施|机器学习系统|大模型训练|训练优化|推理优化|模型部署|算力
 NLP算法工程师,AI算法,NLP|自然语言|语言模型|文本算法|语义

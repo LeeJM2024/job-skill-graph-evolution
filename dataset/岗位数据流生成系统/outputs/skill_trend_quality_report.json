@@ -1,30 +1,32 @@
 {
   "config_seed": 20260716,
   "skill_plan_seed": 20260719,
-  "run_dir": "outputs/runs/run_20260720_140441_seed_20260716",
+  "run_dir": "outputs/runs/run_20260724_000536_seed_20260716",
   "month_start": "2024-12",
   "month_end": "2026-07",
   "month_count": 20,
-  "jobs_in_demand_plan": 71,
+  "jobs_in_demand_plan": 73,
   "jobs_with_skill_plan": 69,
   "jobs_without_skill_plan": [
+    "AI Agent算法工程师",
+    "AI Agent应用工程师",
     "大数据开发工程师",
     "FPGA工程师"
   ],
-  "selected_job_skill_pairs": 2490,
-  "skill_probability_rows": 49800,
+  "selected_job_skill_pairs": 2494,
+  "skill_probability_rows": 49880,
   "skill_stage_counts": {
     "new": 601,
-    "traditional": 1889
+    "traditional": 1893
   },
   "skill_trend_type_counts": {
-    "后期突增": 166,
-    "稳定型": 696,
-    "先上升后稳定": 376,
-    "持续上升": 355,
+    "后期突增": 157,
+    "稳定型": 702,
+    "先上升后稳定": 362,
+    "持续上升": 378,
     "持续下降": 390,
-    "间歇出现": 271,
-    "先上升后下降": 236
+    "间歇出现": 290,
+    "先上升后下降": 215
   },
   "min_selected_skills_per_generated_job": 4,
   "max_selected_skills_per_generated_job": 55

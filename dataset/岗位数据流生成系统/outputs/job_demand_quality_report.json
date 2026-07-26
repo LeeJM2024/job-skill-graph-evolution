@@ -1,33 +1,37 @@
 {
   "config_seed": 20260716,
   "plan_seed": 20260718,
-  "run_dir": "outputs/runs/run_20260720_140441_seed_20260716",
+  "run_dir": "outputs/runs/run_20260724_000536_seed_20260716",
   "month_start": "2024-12",
   "month_end": "2026-07",
   "month_count": 20,
-  "standard_job_count": 71,
+  "standard_job_count": 73,
   "target_total_jd_count": 2335,
   "actual_total_jd_count": 2335,
   "jobs_with_generated_jd": 69,
   "jobs_without_generated_jd": [
+    "AI Agent算法工程师",
+    "AI Agent应用工程师",
     "大数据开发工程师",
     "FPGA工程师"
   ],
   "no_sample_jobs_kept_zero": [
+    "AI Agent算法工程师",
+    "AI Agent应用工程师",
     "大数据开发工程师",
     "FPGA工程师"
   ],
-  "jobs_with_zero_months_count": 57,
+  "jobs_with_zero_months_count": 59,
   "jobs_with_reappearance_count": 53,
   "trend_type_counts": {
     "持续上升": 8,
+    "无样本不生成": 4,
     "稳定波动": 23,
     "消失后再出现": 8,
     "持续下降": 4,
     "先上升后下降": 8,
     "先上升后稳定": 9,
-    "间歇出现": 9,
-    "无样本不生成": 2
+    "间歇出现": 9
   },
   "planned_monthly_total_min": 91,
   "planned_monthly_total_max": 136

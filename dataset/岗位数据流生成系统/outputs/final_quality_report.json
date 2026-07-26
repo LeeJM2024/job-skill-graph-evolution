@@ -1,11 +1,11 @@
 {
   "config_seed": 20260716,
-  "run_dir": "outputs/runs/run_20260720_140441_seed_20260716",
+  "run_dir": "outputs/runs/run_20260724_000536_seed_20260716",
   "month_start": "2024-12",
   "month_end": "2026-07",
   "month_count": 20,
-  "standard_job_count": 71,
-  "event_stream_file": "outputs/runs/run_20260720_140441_seed_20260716/job_update_event_stream_generated.csv",
+  "standard_job_count": 73,
+  "event_stream_file": "outputs/runs/run_20260724_000536_seed_20260716/job_update_event_stream_generated.csv",
   "event_stream_rows": 2335,
   "event_stream_fields": [
     "job_id",
@@ -29,35 +29,37 @@
   "excluded_fields_present": [],
   "unique_generated_jobs": 69,
   "unique_generated_months": 20,
-  "job_demand_answer_rows": 1420,
-  "skill_frequency_answer_file": "outputs/runs/run_20260720_140441_seed_20260716/job_skill_monthly_frequency_answer.csv",
-  "skill_frequency_answer_rows": 49800,
-  "skill_trend_design_rows": 2490,
+  "job_demand_answer_rows": 1460,
+  "skill_frequency_answer_file": "outputs/runs/run_20260724_000536_seed_20260716/job_skill_monthly_frequency_answer.csv",
+  "skill_frequency_answer_rows": 49880,
+  "skill_trend_design_rows": 2494,
   "demand_plan_mismatch_count": 0,
   "invalid_skill_pair_count": 0,
   "total_monthly_jd_count_from_answer": 2335,
   "jobs_without_generated_jd": [
+    "AI Agent算法工程师",
+    "AI Agent应用工程师",
     "大数据开发工程师",
     "FPGA工程师"
   ],
   "skill_stage_row_counts": {
     "new": 12020,
-    "traditional": 37780
+    "traditional": 37860
   },
   "skill_trend_type_counts": {
-    "先上升后下降": 236,
-    "先上升后稳定": 376,
-    "后期突增": 166,
-    "持续上升": 355,
+    "先上升后下降": 215,
+    "先上升后稳定": 362,
+    "后期突增": 157,
+    "持续上升": 378,
     "持续下降": 390,
-    "稳定型": 696,
-    "间歇出现": 271
+    "稳定型": 702,
+    "间歇出现": 290
   },
   "event_stream_quality_report": {
     "config_seed": 20260716,
     "event_stream_seed": 20260720,
-    "run_dir": "outputs/runs/run_20260720_140441_seed_20260716",
-    "output_event_stream_file": "outputs/runs/run_20260720_140441_seed_20260716/job_update_event_stream_generated.csv",
+    "run_dir": "outputs/runs/run_20260724_000536_seed_20260716",
+    "output_event_stream_file": "outputs/runs/run_20260724_000536_seed_20260716/job_update_event_stream_generated.csv",
     "generated_event_rows": 2335,
     "unique_generated_jobs": 69,
     "unique_generated_months": 20,
@@ -67,19 +69,19 @@
     "min_skills_per_jd": 4,
     "max_skills_per_jd": 10,
     "skill_count_distribution": {
-      "4": 61,
-      "5": 262,
-      "6": 491,
-      "7": 689,
-      "8": 543,
-      "9": 258,
-      "10": 31
+      "4": 73,
+      "5": 267,
+      "6": 545,
+      "7": 638,
+      "8": 497,
+      "9": 278,
+      "10": 37
     },
     "text_adaptation_distribution": {
-      "none": 1102,
-      "requirement_skill_hint": 477,
-      "responsibility_skill_hint": 522,
-      "responsibility_skill_hint+requirement_skill_hint": 234
+      "none": 1114,
+      "requirement_skill_hint": 490,
+      "responsibility_skill_hint": 478,
+      "responsibility_skill_hint+requirement_skill_hint": 253
     },
     "excluded_fields": [
       "traditional_skills",
