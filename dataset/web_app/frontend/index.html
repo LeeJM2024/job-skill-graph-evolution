@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>岗位技能更新系统 Web 控制台</title>
+    <link rel="stylesheet" href="/assets/app.css" />
+  </head>
+  <body>
+    <div id="app">
+      <aside class="sidebar" aria-label="主导航">
+        <div class="brand">
+          <span class="brand-mark">JS</span>
+          <div>
+            <strong>岗位更新控制台</strong>
+            <small>本地测试与审核</small>
+          </div>
+        </div>
+        <nav>
+          <button class="nav-item active" data-view="auto">自动测试</button>
+          <button class="nav-item" data-view="manual">手动输入</button>
+          <button class="nav-item" data-view="backups">备份记录</button>
+        </nav>
+      </aside>
+
+      <main class="shell">
+        <section class="topbar">
+          <div>
+            <h1>岗位技能更新系统</h1>
+            <p>调用本地数据流脚本、展示验证结果，并对单条或批量岗位做审核入库。</p>
+          </div>
+          <div id="health" class="status-pill">检查中</div>
+        </section>
+
+        <section id="view-auto" class="view active">
+          <div class="section-head">
+            <div>
+              <h2>岗位流自动测试</h2>
+              <p>一键生成数据流并分析，或选择已有 run 重新比对。</p>
+            </div>
+            <div class="actions">
+              <button id="refresh-runs" class="ghost-btn">刷新 run</button>
+              <button id="run-full" class="primary-btn">一键完整测试</button>
+            </div>
+          </div>
+
+          <div class="control-row">
+            <label>
+              月份起始
+              <input id="month-start" value="2024-12" />
+            </label>
+            <label>
+              月份结束
+              <input id="month-end" value="2026-07" />
+            </label>
+            <label>
+              通过阈值
+              <input id="pass-threshold" type="number" min="0" max="1" step="0.01" value="0.9" />
+            </label>
+            <label class="wide">
+              已有 run
+              <select id="run-select"></select>
+            </label>
+            <button id="run-existing" class="secondary-btn">测试已有 run</button>
+          </div>
+
+          <div id="pipeline-loading" class="loading hidden">任务运行中，结果生成后会自动显示。</div>
+          <div id="metrics" class="metric-grid"></div>
+          <div class="chart-grid">
+            <div class="panel">
+              <h3>岗位族分布</h3>
+              <div id="category-chart" class="bar-chart"></div>
+            </div>
+            <div class="panel">
+              <h3>技能 TopN</h3>
+              <div id="skill-chart" class="bar-chart"></div>
+            </div>
+            <div class="panel wide-panel">
+              <h3>月份趋势</h3>
+              <div id="trend-chart" class="trend-chart"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title-row">
+              <h3>差异明细预览</h3>
+              <span id="report-path" class="muted"></span>
+            </div>
+            <div id="diff-tables" class="diff-grid"></div>
+          </div>
+
+          <div class="panel">
+            <h3>运行日志</h3>
+            <pre id="pipeline-log" class="log-box">暂无运行日志。</pre>
+          </div>
+        </section>
+
+        <section id="view-manual" class="view">
+          <div class="section-head">
+            <div>
+              <h2>手动输入与人工审核</h2>
+              <p>支持单条录入和批量 CSV 导入；每条记录单独判断、单独审核。</p>
+            </div>
+          </div>
+
+          <div class="manual-grid">
+            <form id="job-form" class="panel form-panel">
+              <h3>单条岗位</h3>
+              <label>月份<input name="month" value="2026-07" /></label>
+              <label>岗位名称<input name="job_title" required placeholder="例如：大模型应用工程师" /></label>
+              <label>岗位职责<textarea name="responsibility" rows="5"></textarea></label>
+              <label>岗位要求<textarea name="requirement" rows="5"></textarea></label>
+              <button class="primary-btn" type="submit">开始判断</button>
+            </form>
+
+            <div class="panel form-panel">
+              <h3>批量 CSV</h3>
+              <p class="muted">支持列名：job_title / 岗位名称、month / 月份、responsibility / 岗位职责、requirement / 岗位要求。</p>
+              <input id="csv-file" type="file" accept=".csv" />
+              <button id="upload-csv" class="secondary-btn">导入并判断</button>
+              <div id="csv-summary" class="muted"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title-row">
+              <h3>审核队列</h3>
+              <button id="refresh-review" class="ghost-btn">刷新</button>
+            </div>
+            <div id="review-list" class="review-list"></div>
+          </div>
+        </section>
+
+        <section id="view-backups" class="view">
+          <div class="section-head">
+            <div>
+              <h2>备份记录</h2>
+              <p>每次确认入库前会备份数据库和 4 个 base CSV。</p>
+            </div>
+            <button id="manual-backup" class="primary-btn">立即备份</button>
+          </div>
+          <div id="backup-list" class="backup-list"></div>
+        </section>
+      </main>
+
+      <dialog id="review-dialog">
+        <form method="dialog" class="dialog-body">
+          <div class="panel-title-row">
+            <h3 id="dialog-title">人工审核</h3>
+            <button class="icon-btn" value="cancel" aria-label="关闭">×</button>
+          </div>
+          <div id="dialog-content"></div>
+        </form>
+      </dialog>
+    </div>
+    <script src="/assets/app.js" type="module"></script>
+  </body>
+</html>

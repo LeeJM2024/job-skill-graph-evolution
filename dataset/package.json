@@ -24,6 +24,7 @@
     "graph:build": "python scripts/build_neo4j_job_skill_graph.py",
     "graph:import": "python scripts/build_neo4j_job_skill_graph.py --import-neo4j",
     "graph:ui": "python -m http.server 8010",
-    "synthesize:resumes": "python scripts/synthesize_detailed_resumes.py"
+    "synthesize:resumes": "python scripts/synthesize_detailed_resumes.py",
+    "web:job-update": "python -m uvicorn backend.app:app --host 127.0.0.1 --port 8787 --app-dir web_app"
   }
 }
