@@ -144,6 +144,48 @@ class SQLiteJobUpdateStore:
                 self._replace_dataframe(conn, "skill_pool", skill_pool, SKILL_POOL_COLUMNS)
             conn.commit()
 
+    def upsert_standard_job(
+        self,
+        *,
+        standard_job_title: str,
+        standard_category: str,
+        match_keywords: str,
+    ) -> None:
+        self.migrate()
+        title = clean_text(standard_job_title)
+        category = clean_text(standard_category)
+        keywords = clean_text(match_keywords) or title
+        if not title or not category:
+            raise ValueError("standard_job_title and standard_category are required")
+
+        with self._connect() as conn:
+            existing = conn.execute(
+                "SELECT row_order FROM standard_jobs WHERE standard_job_title = ?",
+                (title,),
+            ).fetchone()
+            row_order = (
+                int(existing["row_order"])
+                if existing is not None
+                else int(
+                    conn.execute(
+                        "SELECT COALESCE(MAX(row_order), -1) + 1 AS next_order FROM standard_jobs"
+                    ).fetchone()["next_order"]
+                )
+            )
+            conn.execute(
+                """
+                INSERT INTO standard_jobs
+                (standard_job_title, standard_category, match_keywords, row_order, updated_at)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(standard_job_title) DO UPDATE SET
+                    standard_category = excluded.standard_category,
+                    match_keywords = excluded.match_keywords,
+                    updated_at = excluded.updated_at
+                """,
+                (title, category, keywords, row_order, _now()),
+            )
+            conn.commit()
+
     def migrate(self) -> None:
         self.database_path.parent.mkdir(parents=True, exist_ok=True)
         with self._connect() as conn:

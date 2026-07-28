@@ -140,3 +140,43 @@ def test_process_writes_sqlite_database_when_enabled(tmp_path) -> None:
     assert skill_count == 1
     assert frequency_count == 1
     assert pool_count == 1
+
+
+def test_upsert_standard_job_preserves_route_and_skill_history(tmp_path) -> None:
+    database = tmp_path / "job_update.db"
+    store = SQLiteJobUpdateStore(database)
+    store.migrate()
+
+    result = JobUpdateSystem(
+        taxonomy=JobTaxonomy([StandardJob("AI App Engineer", "AI", "LLM")]),
+        frequency_store=FrequencyStore(tmp_path / "events.csv", tmp_path / "frequency.csv"),
+        skill_pool_store=SkillPoolStore(tmp_path / "skill_pool.csv"),
+        database_store=store,
+        similarity=FixedSimilarity(),
+        route_adjudicator=UnusedAdjudicator(),
+    ).process(
+        JobPosting(
+            job_id="job_001",
+            month="2026-07",
+            job_title="AI App Engineer",
+            skills=[SkillMention(normalized_skill="LLM", kg_display_skill="AI")],
+            metadata={"source": "test"},
+        ),
+        write=True,
+    )
+
+    assert result.update is not None
+    store.upsert_standard_job(
+        standard_job_title="AI Agent Engineer",
+        standard_category="AI",
+        match_keywords="Agent",
+    )
+
+    with sqlite3.connect(database) as conn:
+        standard_job_count = conn.execute("SELECT COUNT(*) FROM standard_jobs").fetchone()[0]
+        route_count = conn.execute("SELECT COUNT(*) FROM job_routes").fetchone()[0]
+        skill_count = conn.execute("SELECT COUNT(*) FROM skill_mentions").fetchone()[0]
+
+    assert standard_job_count == 1
+    assert route_count == 1
+    assert skill_count == 1
