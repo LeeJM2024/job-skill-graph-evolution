@@ -14,11 +14,18 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
+from industry_migration_prior import (
+    SkillMigrationPrior,
+    activation_month,
+    load_industry_priors,
+)
 from run_context import get_current_run_dir, relative_to_project
+from source_relabeling import build_standard_job_rules, relabel_standard_job
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = PROJECT_ROOT / "config" / "generation_config.json"
+MAX_PRIOR_ACTIVATION_SKILLS_PER_JD = 4
 
 
 @dataclass(frozen=True)
@@ -34,8 +41,10 @@ class SourceJD:
 class SkillProbability:
     skill: str
     skill_stage: str
+    skill_plan_role: str
     skill_trend_type: str
     probability: float
+    expected_skill_count: int
 
 
 def read_config() -> dict:
@@ -90,11 +99,14 @@ def compact_text(value: str | None) -> str:
 
 def load_source_jds(source_path: Path) -> dict[str, list[SourceJD]]:
     rows = read_csv_dicts(source_path)
+    standard_rows = read_csv_dicts(resolve_project_path(read_config()["standard_job_file"]))
+    standard_job_rules = build_standard_job_rules(standard_rows)
     source_by_job: dict[str, list[SourceJD]] = defaultdict(list)
     seen: set[tuple[str, str, str, str]] = set()
 
     for row in rows:
-        standard_job = (row.get("standard_job") or "").strip()
+        original_standard_job = (row.get("standard_job") or "").strip()
+        standard_job = relabel_standard_job(row, original_standard_job, standard_job_rules)
         title = (row.get("job_title") or "").strip()
         responsibility = compact_text(row.get("job_responsibility"))
         requirement = compact_text(row.get("job_requirement"))
@@ -140,8 +152,10 @@ def load_skill_probability_plan(
             SkillProbability(
                 skill=skill,
                 skill_stage=(row.get("skill_stage") or "").strip(),
+                skill_plan_role=(row.get("skill_plan_role") or "trend").strip(),
                 skill_trend_type=(row.get("skill_trend_type") or "").strip(),
                 probability=probability,
+                expected_skill_count=parse_int(row.get("expected_skill_count")),
             )
         )
     return probability_by_job_month
@@ -155,6 +169,12 @@ def load_allowed_job_skills(run_dir: Path) -> set[tuple[str, str]]:
         if (row.get("standard_job") or "").strip()
         and (row.get("skill") or "").strip()
     }
+
+
+def load_configured_industry_priors() -> dict[str, SkillMigrationPrior]:
+    config = read_config()
+    prior_path = resolve_project_path(config["skill_industry_migration_prior_file"])
+    return load_industry_priors(prior_path)
 
 
 def weighted_sample_without_replacement(
@@ -186,20 +206,48 @@ def target_skill_count(pool_size: int, rng: random.Random) -> int:
 
 
 def choose_skills(
-    skill_probabilities: list[SkillProbability], rng: random.Random
+    skill_probabilities: list[SkillProbability],
+    rng: random.Random,
+    required_skills: list[str] | None = None,
 ) -> list[str]:
     if not skill_probabilities:
         return []
 
-    target_count = target_skill_count(len(skill_probabilities), rng)
+    required_skills = required_skills or []
+    required_keys = {skill for skill in required_skills if skill}
+    target_count = max(
+        target_skill_count(len(skill_probabilities), rng),
+        min(len(skill_probabilities), len(required_keys)),
+    )
     chosen = [
         item
         for item in skill_probabilities
         if rng.random() < min(max(item.probability, 0.0), 1.0)
     ]
+    chosen_by_skill = {item.skill: item for item in chosen}
+    candidate_by_skill = {item.skill: item for item in skill_probabilities}
+    for skill in required_keys:
+        candidate = candidate_by_skill.get(skill)
+        if candidate is not None:
+            chosen_by_skill[skill] = candidate
+    chosen = list(chosen_by_skill.values())
 
     if len(chosen) > target_count:
-        chosen = weighted_sample_without_replacement(chosen, target_count, rng)
+        required_items = [
+            item for item in chosen if item.skill in required_keys
+        ]
+        optional_items = [
+            item for item in chosen if item.skill not in required_keys
+        ]
+        chosen = required_items[:target_count]
+        if len(chosen) < target_count:
+            chosen.extend(
+                weighted_sample_without_replacement(
+                    optional_items,
+                    target_count - len(chosen),
+                    rng,
+                )
+            )
     elif len(chosen) < target_count:
         chosen_keys = {item.skill for item in chosen}
         remaining = [
@@ -213,6 +261,63 @@ def choose_skills(
 
     chosen.sort(key=lambda item: (-item.probability, item.skill))
     return [item.skill for item in chosen]
+
+
+def build_core_skill_assignments(
+    skill_probabilities: list[SkillProbability],
+    planned_count: int,
+    rng: random.Random,
+) -> list[list[str]]:
+    assignments: list[list[str]] = [[] for _ in range(max(planned_count, 0))]
+    if planned_count <= 0:
+        return assignments
+
+    core_items = [
+        item
+        for item in skill_probabilities
+        if item.skill_plan_role == "core" and item.probability > 0
+    ]
+    slots: list[str] = []
+    for item in core_items:
+        quota = item.expected_skill_count
+        if quota <= 0:
+            quota = round(item.probability * planned_count)
+        quota = max(1, quota)
+        quota = min(planned_count, quota)
+        slots.extend([item.skill] * quota)
+
+    rng.shuffle(slots)
+    for index, skill in enumerate(slots):
+        assignments[index % planned_count].append(skill)
+    return assignments
+
+
+def build_prior_activation_assignments(
+    skill_probabilities: list[SkillProbability],
+    *,
+    job: str,
+    month: str,
+    planned_count: int,
+    industry_priors: dict[str, SkillMigrationPrior],
+) -> list[list[str]]:
+    assignments: list[list[str]] = [[] for _ in range(max(planned_count, 0))]
+    if planned_count <= 0:
+        return assignments
+
+    activation_skills: list[str] = []
+    for item in skill_probabilities:
+        prior = industry_priors.get(item.skill.casefold())
+        if prior is None:
+            continue
+        if activation_month(prior, job) == month:
+            activation_skills.append(item.skill)
+
+    for skill in sorted(set(activation_skills)):
+        target_index = min(range(planned_count), key=lambda index: len(assignments[index]))
+        if len(assignments[target_index]) >= MAX_PRIOR_ACTIVATION_SKILLS_PER_JD:
+            continue
+        assignments[target_index].append(skill)
+    return assignments
 
 
 def sentence_contains_any_skill(text: str, skills: list[str]) -> bool:
@@ -279,6 +384,7 @@ def generate_event_stream(run_dir: Path) -> tuple[list[dict], dict]:
     demand_rows = load_demand_plan(run_dir)
     skill_probability_by_job_month = load_skill_probability_plan(run_dir)
     allowed_job_skills = load_allowed_job_skills(run_dir)
+    industry_priors = load_configured_industry_priors()
 
     event_rows: list[dict] = []
     source_usage_by_job: dict[str, Counter[int]] = defaultdict(Counter)
@@ -304,12 +410,31 @@ def generate_event_stream(run_dir: Path) -> tuple[list[dict], dict]:
         skill_probabilities = skill_probability_by_job_month.get((job, month), [])
         if not skill_probabilities:
             missing_skill_plan_job_months.add((job, month))
+        core_skill_assignments = build_core_skill_assignments(
+            skill_probabilities,
+            planned_count,
+            rng,
+        )
+        prior_activation_assignments = build_prior_activation_assignments(
+            skill_probabilities,
+            job=job,
+            month=month,
+            planned_count=planned_count,
+            industry_priors=industry_priors,
+        )
 
-        for _ in range(planned_count):
+        for jd_index in range(planned_count):
             source_jd, _source_idx = source_jd_sample(
                 source_jds, source_usage_by_job[job], rng
             )
-            skills = choose_skills(skill_probabilities, rng)
+            skills = choose_skills(
+                skill_probabilities,
+                rng,
+                required_skills=[
+                    *core_skill_assignments[jd_index],
+                    *prior_activation_assignments[jd_index],
+                ],
+            )
             for skill in skills:
                 if (job, skill) not in allowed_job_skills:
                     invalid_skill_pairs.add((job, skill))

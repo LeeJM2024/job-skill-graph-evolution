@@ -13,6 +13,8 @@ dataset/skill_extract/cache/
 dataset/skill_extract/tmp_smoke/
 dataset/job_update/outputs/*
 !dataset/job_update/outputs/.gitkeep
+dataset/job_update/threshold_tuning/outputs/*
+!dataset/job_update/threshold_tuning/outputs/.gitkeep
 dataset/岗位数据流生成系统/outputs/runs/*
 !dataset/岗位数据流生成系统/outputs/runs/.gitkeep
 
@@ -49,13 +51,13 @@ dataset/归档文件夹/
 # Neo4j and database artifacts
 neo4j_dump/
 *.dump
-*.db
 *.sqlite
 *.sqlite3
 
 # Large generated keyword mention exports
 dataset/structured/job_keyword_mentions.csv
 dataset/structured/job_keyword_mentions.jsonl
+dataset/resume/synthetic_detailed_resumes_experience_30k.csv
 
 # Python
 __pycache__/

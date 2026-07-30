@@ -69,9 +69,19 @@ class ExistingJobUpdate:
     monthly_rows: int
     frequency_rows: int
     skill_pool_rows: int = 0
+    lifecycle_rows: int = 0
+    migration_rows: int = 0
+    spread_rows: int = 0
+    profile_snapshot_rows: int = 0
+    profile_diff_rows: int = 0
     event_stream_path: str | None = None
     frequency_path: str | None = None
     skill_pool_path: str | None = None
+    lifecycle_path: str | None = None
+    migration_path: str | None = None
+    spread_path: str | None = None
+    profile_snapshot_path: str | None = None
+    profile_diff_path: str | None = None
 
 
 @dataclass(slots=True)

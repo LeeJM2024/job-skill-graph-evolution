@@ -15,7 +15,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
+from industry_migration_prior import (
+    SkillMigrationPrior,
+    load_industry_priors,
+    stage_min_source_count,
+)
 from run_context import relative_to_project, start_new_run
+from source_relabeling import build_standard_job_rules, relabel_standard_job
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -138,11 +144,14 @@ def build_profile() -> tuple[list[dict], list[dict], dict]:
     standard_path = resolve_project_path(config["standard_job_file"])
     source_path = resolve_project_path(config["source_job_file"])
     skill_dictionary_path = resolve_project_path(config["skill_dictionary_file"])
+    industry_prior_path = resolve_project_path(config["skill_industry_migration_prior_file"])
 
     standard_rows = read_csv_dicts(standard_path)
     source_rows = read_csv_dicts(source_path)
     skill_dictionary_rows = read_csv_dicts(skill_dictionary_path)
+    industry_priors = load_industry_priors(industry_prior_path)
     dictionary_by_keyword, dictionary_by_normalized = load_skill_dictionary(skill_dictionary_rows)
+    standard_job_rules = build_standard_job_rules(standard_rows)
 
     standard_jobs: list[str] = []
     standard_categories: dict[str, str] = {}
@@ -178,6 +187,7 @@ def build_profile() -> tuple[list[dict], list[dict], dict]:
     normalized_skill_mentions = 0
     unmapped_skill_mentions = 0
     unmapped_skill_counter: Counter[str] = Counter()
+    relabeled_standard_job_counter: Counter[tuple[str, str]] = Counter()
 
     def normalize_and_record(raw_skill: str) -> SkillDictionaryItem:
         nonlocal raw_skill_mentions, normalized_skill_mentions, unmapped_skill_mentions
@@ -196,10 +206,13 @@ def build_profile() -> tuple[list[dict], list[dict], dict]:
         return item
 
     for row in source_rows:
-        standard_job = (row.get("standard_job") or "").strip()
+        original_standard_job = (row.get("standard_job") or "").strip()
+        standard_job = relabel_standard_job(row, original_standard_job, standard_job_rules)
         if not standard_job:
             rows_without_standard_job += 1
             continue
+        if standard_job != original_standard_job:
+            relabeled_standard_job_counter[(original_standard_job, standard_job)] += 1
         if standard_job not in allowed_jobs:
             rows_outside_dictionary += 1
             continue
@@ -232,6 +245,16 @@ def build_profile() -> tuple[list[dict], list[dict], dict]:
             if item.normalized_skill and item.kg_display_skill:
                 new_counter_by_job[standard_job][item.normalized_skill] += 1
                 skill_counter_by_job[standard_job][item.normalized_skill] += 0
+
+    prior_adjustment_report = apply_industry_migration_priors(
+        industry_priors=industry_priors,
+        allowed_jobs=allowed_jobs,
+        skill_counter_by_job=skill_counter_by_job,
+        traditional_counter_by_job=traditional_counter_by_job,
+        new_counter_by_job=new_counter_by_job,
+        dictionary_stage_by_skill=dictionary_stage_by_skill,
+        display_by_skill=display_by_skill,
+    )
 
     input_profile_rows: list[dict] = []
     skill_pool_rows: list[dict] = []
@@ -359,9 +382,72 @@ def build_profile() -> tuple[list[dict], list[dict], dict]:
             {"skill": skill, "count": count}
             for skill, count in unmapped_skill_counter.most_common(20)
         ],
+        "relabeled_standard_job_rows": sum(relabeled_standard_job_counter.values()),
+        "relabeled_standard_job_pairs": [
+            {"from": source, "to": target, "count": count}
+            for (source, target), count in relabeled_standard_job_counter.most_common()
+        ],
+        "industry_prior_skill_count": len(industry_priors),
+        "industry_prior_adjustment": prior_adjustment_report,
     }
 
     return input_profile_rows, skill_pool_rows, quality_report
+
+
+def apply_industry_migration_priors(
+    *,
+    industry_priors: dict[str, SkillMigrationPrior],
+    allowed_jobs: set[str],
+    skill_counter_by_job: dict[str, Counter[str]],
+    traditional_counter_by_job: dict[str, Counter[str]],
+    new_counter_by_job: dict[str, Counter[str]],
+    dictionary_stage_by_skill: dict[str, str],
+    display_by_skill: dict[str, str],
+) -> dict[str, int]:
+    removed_pairs = 0
+    injected_pairs = 0
+    boosted_pairs = 0
+
+    for prior in industry_priors.values():
+        missing_jobs = sorted(job for job in prior.all_jobs if job not in allowed_jobs)
+        if missing_jobs:
+            raise ValueError(
+                f"Industry migration prior references jobs outside the standard dictionary: "
+                f"skill={prior.skill}, jobs={'; '.join(missing_jobs)}"
+            )
+
+        allowed_prior_jobs = set(prior.all_jobs)
+        dictionary_stage_by_skill[prior.skill] = prior.skill_type or "new"
+        display_by_skill[prior.skill] = prior.kg_display_skill
+
+        for job in list(skill_counter_by_job):
+            if job in allowed_prior_jobs:
+                continue
+            if prior.skill in skill_counter_by_job[job]:
+                del skill_counter_by_job[job][prior.skill]
+                removed_pairs += 1
+            traditional_counter_by_job[job].pop(prior.skill, None)
+            new_counter_by_job[job].pop(prior.skill, None)
+
+        for job in prior.all_jobs:
+            stage = prior.stage_for_job(job)
+            minimum = stage_min_source_count(stage)
+            if minimum <= 0:
+                continue
+            old_count = skill_counter_by_job[job][prior.skill]
+            if old_count <= 0:
+                injected_pairs += 1
+            elif old_count < minimum:
+                boosted_pairs += 1
+            skill_counter_by_job[job][prior.skill] = max(old_count, minimum)
+            new_counter_by_job[job][prior.skill] = max(new_counter_by_job[job][prior.skill], minimum)
+            traditional_counter_by_job[job].pop(prior.skill, None)
+
+    return {
+        "removed_unrealistic_job_skill_pairs": removed_pairs,
+        "injected_missing_prior_pairs": injected_pairs,
+        "boosted_prior_pairs": boosted_pairs,
+    }
 
 
 def main() -> None:

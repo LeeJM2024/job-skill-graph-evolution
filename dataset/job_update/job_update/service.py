@@ -7,10 +7,13 @@ from typing import Callable
 
 from .database import SQLiteJobUpdateStore
 from .frequency_store import FrequencyStore
+from .job_profile_store import JobProfileStore
 from .models import ExistingJobUpdate, JobPosting, JobRoute, ProcessResult, ScoredCandidate
 from .route_adjudication import RouteAdjudicator
 from .similarity import SimilarityBackend, Text2VecSimilarity
 from .skill_extraction import SkillExtractor
+from .skill_lifecycle_store import SkillLifecycleStore
+from .skill_migration_store import SkillMigrationStore
 from .skill_normalizer import PassthroughSkillNormalizer, SkillNormalizer
 from .skill_pool_store import SkillPoolStore
 from .taxonomy import JobTaxonomy
@@ -23,6 +26,9 @@ class JobUpdateSystem:
     taxonomy: JobTaxonomy
     frequency_store: FrequencyStore
     skill_pool_store: SkillPoolStore | None = None
+    skill_lifecycle_store: SkillLifecycleStore | None = None
+    skill_migration_store: SkillMigrationStore | None = None
+    job_profile_store: JobProfileStore | None = None
     database_store: SQLiteJobUpdateStore | None = None
     similarity: SimilarityBackend | None = None
     route_adjudicator: RouteAdjudicator | None = None
@@ -134,12 +140,75 @@ class JobUpdateSystem:
         else:
             self._progress("skill_pool: no skill pool path configured, skipped")
 
+        lifecycle_rows = 0
+        lifecycle = None
+        if self.skill_lifecycle_store is not None:
+            mode = "dry-run rebuild" if not write else "calculate update"
+            self._progress(f"lifecycle: rebuilding skill lifecycle table ({mode})")
+            lifecycle = self.skill_lifecycle_store.rebuild(
+                frequency=frequency,
+                skill_pool=skill_pool,
+                as_of_month=posting.month,
+                write=False,
+            )
+            lifecycle_rows = len(lifecycle)
+            self._progress(f"lifecycle: rows={lifecycle_rows}")
+        else:
+            self._progress("lifecycle: no lifecycle path configured, skipped")
+
+        migration_rows = 0
+        spread_rows = 0
+        migration = None
+        spread = None
+        if self.skill_migration_store is not None:
+            mode = "dry-run rebuild" if not write else "calculate update"
+            self._progress(f"migration: rebuilding skill migration and monthly spread tables ({mode})")
+            migration, spread = self.skill_migration_store.rebuild(
+                frequency=frequency,
+                skill_pool=skill_pool,
+                write=False,
+            )
+            migration_rows = len(migration)
+            spread_rows = len(spread)
+            self._progress(f"migration: migration_rows={migration_rows}, spread_rows={spread_rows}")
+        else:
+            self._progress("migration: no migration path configured, skipped")
+
+        profile_snapshot_rows = 0
+        profile_diff_rows = 0
+        profile_snapshots = None
+        profile_diffs = None
+        if self.job_profile_store is not None:
+            mode = "dry-run rebuild" if not write else "calculate update"
+            self._progress(f"job_profile: rebuilding profile snapshots and diffs ({mode})")
+            profile_snapshots, profile_diffs = self.job_profile_store.rebuild(
+                frequency=frequency,
+                skill_pool=skill_pool,
+                write=False,
+            )
+            profile_snapshot_rows = len(profile_snapshots)
+            profile_diff_rows = len(profile_diffs)
+            self._progress(
+                f"job_profile: snapshot_rows={profile_snapshot_rows}, diff_rows={profile_diff_rows}"
+            )
+        else:
+            self._progress("job_profile: no profile path configured, skipped")
+
         if write:
             self._progress("write: writing event stream and frequency table")
             self.frequency_store.write_tables(events, frequency)
             if self.skill_pool_store is not None and skill_pool is not None:
                 self._progress("write: writing skill pool")
                 self.skill_pool_store.write_pool(skill_pool)
+            if self.skill_lifecycle_store is not None and lifecycle is not None:
+                self._progress("write: writing skill lifecycle")
+                self.skill_lifecycle_store.write_lifecycle(lifecycle)
+            if self.skill_migration_store is not None and migration is not None and spread is not None:
+                self._progress("write: writing skill migration and monthly spread")
+                self.skill_migration_store.write_tables(migration, spread)
+            if self.job_profile_store is not None and profile_snapshots is not None and profile_diffs is not None:
+                self._progress("write: writing job profile snapshots and diffs")
+                self.job_profile_store.write_tables(profile_snapshots, profile_diffs)
         else:
             self._progress("write: dry-run, no files were written")
 
@@ -156,6 +225,11 @@ class JobUpdateSystem:
             monthly_rows=monthly_rows,
             frequency_rows=len(frequency),
             skill_pool_rows=skill_pool_rows,
+            lifecycle_rows=lifecycle_rows,
+            migration_rows=migration_rows,
+            spread_rows=spread_rows,
+            profile_snapshot_rows=profile_snapshot_rows,
+            profile_diff_rows=profile_diff_rows,
             event_stream_path=str(self.frequency_store.event_stream_path),
             frequency_path=str(self.frequency_store.frequency_path)
             if self.frequency_store.frequency_path is not None
@@ -163,14 +237,37 @@ class JobUpdateSystem:
             skill_pool_path=str(self.skill_pool_store.skill_pool_path)
             if self.skill_pool_store is not None
             else None,
+            lifecycle_path=str(self.skill_lifecycle_store.skill_lifecycle_path)
+            if self.skill_lifecycle_store is not None
+            else None,
+            migration_path=str(self.skill_migration_store.skill_migration_path)
+            if self.skill_migration_store is not None
+            else None,
+            spread_path=str(self.skill_migration_store.skill_job_monthly_spread_path)
+            if self.skill_migration_store is not None
+            else None,
+            profile_snapshot_path=str(self.job_profile_store.snapshot_path)
+            if self.job_profile_store is not None
+            else None,
+            profile_diff_path=str(self.job_profile_store.diff_path)
+            if self.job_profile_store is not None
+            else None,
         )
         result = ProcessResult(route=route, posting=posting, update=update)
         if write and self.database_store is not None:
-            self._progress("database: syncing processed posting, route, skills, frequency, and skill pool")
+            self._progress(
+                "database: syncing processed posting, route, skills, frequency, "
+                "skill pool, lifecycle, migration, and job profile"
+            )
             self.database_store.sync_after_process(
                 result=result,
                 frequency=frequency,
                 skill_pool=skill_pool,
+                lifecycle=lifecycle,
+                migration=migration,
+                spread=spread,
+                profile_snapshots=profile_snapshots,
+                profile_diffs=profile_diffs,
             )
         return result
 

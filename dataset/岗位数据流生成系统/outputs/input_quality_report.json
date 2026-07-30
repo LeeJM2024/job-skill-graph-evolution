@@ -6,21 +6,16 @@
   "source_rows_without_standard_job": 0,
   "source_rows_outside_standard_dictionary": 0,
   "source_rows_without_any_skill": 415,
-  "jobs_with_source_jd": 69,
+  "jobs_with_source_jd": 71,
   "jobs_without_source_jd": [
-    "AI Agent算法工程师",
-    "AI Agent应用工程师",
     "大数据开发工程师",
     "FPGA工程师"
   ],
-  "jobs_with_skill_pool": 69,
+  "jobs_with_skill_pool": 72,
   "jobs_without_skill_pool": [
-    "AI Agent算法工程师",
-    "AI Agent应用工程师",
-    "大数据开发工程师",
-    "FPGA工程师"
+    "大数据开发工程师"
   ],
-  "total_job_skill_pairs": 5997,
+  "total_job_skill_pairs": 5194,
   "unique_skills_across_jobs": 329,
   "skill_dictionary_keyword_count": 2555,
   "skill_dictionary_normalized_count": 336,
@@ -111,6 +106,50 @@
       "count": 214
     }
   ],
+  "relabeled_standard_job_rows": 1251,
+  "relabeled_standard_job_pairs": [
+    {
+      "from": "大模型应用工程师",
+      "to": "AI Agent应用工程师",
+      "count": 328
+    },
+    {
+      "from": "大模型算法工程师",
+      "to": "AI Agent算法工程师",
+      "count": 327
+    },
+    {
+      "from": "AI应用工程师",
+      "to": "AI Agent应用工程师",
+      "count": 268
+    },
+    {
+      "from": "算法工程师",
+      "to": "AI Agent算法工程师",
+      "count": 171
+    },
+    {
+      "from": "大模型应用工程师",
+      "to": "AI Agent算法工程师",
+      "count": 105
+    },
+    {
+      "from": "AI应用工程师",
+      "to": "AI Agent算法工程师",
+      "count": 42
+    },
+    {
+      "from": "AIGC算法工程师",
+      "to": "AI Agent算法工程师",
+      "count": 10
+    }
+  ],
+  "industry_prior_skill_count": 57,
+  "industry_prior_adjustment": {
+    "removed_unrealistic_job_skill_pairs": 1150,
+    "injected_missing_prior_pairs": 140,
+    "boosted_prior_pairs": 326
+  },
   "config_seed": 20260716,
-  "run_dir": "outputs/runs/run_20260724_000536_seed_20260716"
+  "run_dir": "outputs/runs/run_20260728_171800_seed_20260716"
 }

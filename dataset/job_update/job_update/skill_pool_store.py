@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 import pandas as pd
 
@@ -144,6 +144,106 @@ class SkillPoolStore:
         pool.to_csv(self.skill_pool_path, index=False, encoding="utf-8-sig")
 
 
+def rebuild_skill_pool_table(
+    events: pd.DataFrame,
+    *,
+    standard_job_categories: dict[str, str],
+    skill_universe: pd.DataFrame,
+    source: str = "base_event_stream",
+) -> pd.DataFrame:
+    events = events.copy().fillna("")
+    required_event_columns = ["job_id", "month", "standard_job", "skills"]
+    for column in required_event_columns:
+        if column not in events.columns:
+            events[column] = ""
+
+    family_by_job_skill: dict[tuple[str, str], tuple[str, str]] = {}
+    universe = skill_universe.copy().fillna("")
+    for column in ["standard_job", "skill", "kg_display_skill", "skill_stage"]:
+        if column not in universe.columns:
+            universe[column] = ""
+    for _, row in universe.iterrows():
+        job = clean_text(row.get("standard_job"))
+        skill = clean_text(row.get("skill"))
+        family = clean_text(row.get("kg_display_skill"))
+        skill_type = clean_text(row.get("skill_stage"))
+        if job and skill and family:
+            family_by_job_skill[(job, skill.casefold())] = (family, skill_type)
+
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    pool: dict[str, dict[str, Any]] = {}
+    for _, event in events.iterrows():
+        job_id = clean_text(event.get("job_id"))
+        month = clean_text(event.get("month"))
+        standard_job = clean_text(event.get("standard_job"))
+        standard_category = clean_text(standard_job_categories.get(standard_job))
+        if not job_id or not month or not standard_job:
+            continue
+
+        for raw_skill in sorted(set(split_semicolon(event.get("skills")))):
+            skill = clean_text(raw_skill)
+            if not skill:
+                continue
+            family, skill_type = family_by_job_skill.get((standard_job, skill.casefold()), ("", ""))
+            if not family:
+                raise ValueError(
+                    "Missing kg_display_skill in skill_universe for "
+                    f"standard_job={standard_job}, skill={skill}"
+                )
+            key = skill.casefold()
+            if key not in pool:
+                pool[key] = {
+                    "normalized_skill": skill,
+                    "kg_display_skill": family,
+                    "skill_type": skill_type,
+                    "standard_categories": [],
+                    "standard_jobs": [],
+                    "first_seen_month": month,
+                    "last_seen_month": month,
+                    "first_seen_job_id": job_id,
+                    "last_seen_job_id": job_id,
+                    "mention_count": 0,
+                    "source_job_ids": [],
+                    "source_count": 0,
+                    "sources": [],
+                    "updated_at": now,
+                }
+
+            row = pool[key]
+            row["kg_display_skill"] = row["kg_display_skill"] or family
+            row["skill_type"] = row["skill_type"] or skill_type
+            _append_unique(row["standard_categories"], standard_category)
+            _append_unique(row["standard_jobs"], standard_job)
+            _append_unique(row["source_job_ids"], job_id)
+            _append_unique(row["sources"], source)
+            row["mention_count"] = int(row["mention_count"]) + 1
+            row["source_count"] = len(row["source_job_ids"])
+
+            if month < row["first_seen_month"]:
+                row["first_seen_month"] = month
+                row["first_seen_job_id"] = job_id
+            if month >= row["last_seen_month"]:
+                row["last_seen_month"] = month
+                row["last_seen_job_id"] = job_id
+
+    rows: list[dict[str, str]] = []
+    for row in pool.values():
+        rows.append(
+            {
+                **row,
+                "standard_categories": "; ".join(row["standard_categories"]),
+                "standard_jobs": "; ".join(row["standard_jobs"]),
+                "mention_count": str(row["mention_count"]),
+                "source_job_ids": "; ".join(row["source_job_ids"]),
+                "source_count": str(row["source_count"]),
+                "sources": "; ".join(row["sources"]),
+            }
+        )
+    return pd.DataFrame(rows, columns=SKILL_POOL_COLUMNS).sort_values(
+        ["normalized_skill"]
+    ).reset_index(drop=True)
+
+
 def _first_non_empty(*values: object) -> str:
     for value in values:
         text = clean_text(value)
@@ -165,6 +265,12 @@ def _join_unique(existing: Iterable[object], new_values: Iterable[object]) -> st
         seen.add(key)
         values.append(text)
     return "; ".join(values)
+
+
+def _append_unique(values: list[str], value: object) -> None:
+    text = clean_text(value)
+    if text and text.casefold() not in {item.casefold() for item in values}:
+        values.append(text)
 
 
 def _int_value(value: object) -> int:

@@ -22,12 +22,15 @@ from .analysis import (
 from .comparison import compare_answer_tables, write_comparison_outputs
 from .database import SQLiteJobUpdateStore
 from .frequency_store import FrequencyStore, rebuild_frequency_table
+from .job_profile_store import JobProfileStore
 from .models import JobPosting, SkillMention
 from .output_runs import PROJECT_ROOT, resolve_run_output_dir, write_current_run_marker
 from .route_adjudication import LLMRouteAdjudicator
 from .service import JobUpdateSystem
 from .skill_extraction import ExistingSkillExtractAdapter, ManualSkillKeywordExtractor, ManualSkillNormalizeAdapter
-from .skill_pool_store import SkillPoolStore
+from .skill_lifecycle_store import SkillLifecycleStore
+from .skill_migration_store import SkillMigrationStore
+from .skill_pool_store import SkillPoolStore, rebuild_skill_pool_table
 from .similarity import Text2VecSimilarity
 from .taxonomy import JobTaxonomy
 from .text import clean_text
@@ -45,6 +48,11 @@ BASE_TITLE_DICTIONARY = BASE_DATA_DIR / "standard_job_title_dictionary.csv"
 BASE_EVENT_STREAM = BASE_DATA_DIR / "job_update_event_stream.csv"
 BASE_FREQUENCY_OUTPUT = BASE_DATA_DIR / "job_skill_monthly_frequency.csv"
 BASE_SKILL_POOL = BASE_DATA_DIR / "skill_pool.csv"
+BASE_SKILL_LIFECYCLE = BASE_DATA_DIR / "skill_lifecycle.csv"
+BASE_SKILL_MIGRATION = BASE_DATA_DIR / "skill_migration.csv"
+BASE_SKILL_JOB_MONTHLY_SPREAD = BASE_DATA_DIR / "skill_job_monthly_spread.csv"
+BASE_JOB_PROFILE_SNAPSHOTS = BASE_DATA_DIR / "job_profile_snapshots.csv"
+BASE_JOB_PROFILE_DIFF = BASE_DATA_DIR / "job_profile_diff.csv"
 BASE_DATABASE = BASE_DATA_DIR / "job_update.db"
 
 
@@ -55,6 +63,37 @@ def main() -> None:
     rebuild = subparsers.add_parser("rebuild-frequency", help="Rebuild monthly/cumulative skill frequency CSV.")
     rebuild.add_argument("--event-stream", required=True, type=Path)
     rebuild.add_argument("--output", required=True, type=Path)
+
+    rebuild_lifecycle = subparsers.add_parser("rebuild-lifecycle", help="Rebuild skill lifecycle CSV.")
+    rebuild_lifecycle.add_argument("--frequency-input", type=Path, default=BASE_FREQUENCY_OUTPUT)
+    rebuild_lifecycle.add_argument("--skill-pool", type=Path, default=BASE_SKILL_POOL)
+    rebuild_lifecycle.add_argument("--output", type=Path, default=BASE_SKILL_LIFECYCLE)
+    rebuild_lifecycle.add_argument("--as-of-month", default=None)
+
+    rebuild_migration = subparsers.add_parser(
+        "rebuild-migration",
+        help="Rebuild skill migration and skill-job monthly spread CSVs.",
+    )
+    rebuild_migration.add_argument("--frequency-input", type=Path, default=BASE_FREQUENCY_OUTPUT)
+    rebuild_migration.add_argument("--skill-pool", type=Path, default=BASE_SKILL_POOL)
+    rebuild_migration.add_argument("--migration-output", type=Path, default=BASE_SKILL_MIGRATION)
+    rebuild_migration.add_argument("--spread-output", type=Path, default=BASE_SKILL_JOB_MONTHLY_SPREAD)
+
+    rebuild_profile = subparsers.add_parser(
+        "rebuild-profile",
+        help="Rebuild job profile snapshots and month-to-month/month-pair diffs.",
+    )
+    rebuild_profile.add_argument("--frequency-input", type=Path, default=BASE_FREQUENCY_OUTPUT)
+    rebuild_profile.add_argument("--skill-pool", type=Path, default=BASE_SKILL_POOL)
+    rebuild_profile.add_argument("--snapshot-output", type=Path, default=BASE_JOB_PROFILE_SNAPSHOTS)
+    rebuild_profile.add_argument("--diff-output", type=Path, default=BASE_JOB_PROFILE_DIFF)
+
+    rebuild_skill_pool = subparsers.add_parser("rebuild-skill-pool", help="Rebuild skill pool CSV from an event stream.")
+    rebuild_skill_pool.add_argument("--event-stream", type=Path, default=BASE_EVENT_STREAM)
+    rebuild_skill_pool.add_argument("--title-dictionary", type=Path, default=BASE_TITLE_DICTIONARY)
+    rebuild_skill_pool.add_argument("--skill-universe", required=True, type=Path)
+    rebuild_skill_pool.add_argument("--output", type=Path, default=BASE_SKILL_POOL)
+    rebuild_skill_pool.add_argument("--source", default="base_event_stream")
 
     init_db = subparsers.add_parser("init-db", help="Initialize the SQLite database from base CSV files.")
     add_database_csv_args(init_db)
@@ -166,6 +205,16 @@ def main() -> None:
         default=BASE_SKILL_POOL,
         help="Skill pool CSV. Defaults to the initialized base skill_pool.csv.",
     )
+    process.add_argument(
+        "--skill-lifecycle",
+        type=Path,
+        default=BASE_SKILL_LIFECYCLE,
+        help="Skill lifecycle CSV. Defaults to the initialized base skill_lifecycle.csv.",
+    )
+    process.add_argument("--skill-migration", type=Path, default=BASE_SKILL_MIGRATION)
+    process.add_argument("--skill-job-monthly-spread", type=Path, default=BASE_SKILL_JOB_MONTHLY_SPREAD)
+    process.add_argument("--job-profile-snapshots", type=Path, default=BASE_JOB_PROFILE_SNAPSHOTS)
+    process.add_argument("--job-profile-diff", type=Path, default=BASE_JOB_PROFILE_DIFF)
     process.add_argument("--job-id", default=None, help="Optional. Generated automatically when omitted.")
     process.add_argument("--month", required=True)
     process.add_argument("--job-title", required=True)
@@ -216,6 +265,11 @@ def main() -> None:
     submit.add_argument("--event-stream", type=Path, default=BASE_EVENT_STREAM)
     submit.add_argument("--frequency-output", type=Path, default=BASE_FREQUENCY_OUTPUT)
     submit.add_argument("--skill-pool", type=Path, default=BASE_SKILL_POOL)
+    submit.add_argument("--skill-lifecycle", type=Path, default=BASE_SKILL_LIFECYCLE)
+    submit.add_argument("--skill-migration", type=Path, default=BASE_SKILL_MIGRATION)
+    submit.add_argument("--skill-job-monthly-spread", type=Path, default=BASE_SKILL_JOB_MONTHLY_SPREAD)
+    submit.add_argument("--job-profile-snapshots", type=Path, default=BASE_JOB_PROFILE_SNAPSHOTS)
+    submit.add_argument("--job-profile-diff", type=Path, default=BASE_JOB_PROFILE_DIFF)
     submit.add_argument("--database", type=Path, default=BASE_DATABASE)
     submit.add_argument("--category-threshold", type=float, default=0.58)
     submit.add_argument("--job-threshold", type=float, default=0.82)
@@ -249,6 +303,11 @@ def main() -> None:
             event_stream_path=args.event_stream,
             frequency_path=args.frequency_output,
             skill_pool_path=args.skill_pool,
+            lifecycle_path=args.skill_lifecycle,
+            migration_path=args.skill_migration,
+            spread_path=args.skill_job_monthly_spread,
+            profile_snapshot_path=args.job_profile_snapshots,
+            profile_diff_path=args.job_profile_diff,
         )
         print(
             json.dumps(
@@ -266,6 +325,11 @@ def main() -> None:
             event_stream_path=args.event_stream,
             frequency_path=args.frequency_output,
             skill_pool_path=args.skill_pool,
+            lifecycle_path=args.skill_lifecycle,
+            migration_path=args.skill_migration,
+            spread_path=args.skill_job_monthly_spread,
+            profile_snapshot_path=args.job_profile_snapshots,
+            profile_diff_path=args.job_profile_diff,
         )
         print(
             json.dumps(
@@ -282,6 +346,100 @@ def main() -> None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         frequency.to_csv(args.output, index=False, encoding="utf-8-sig")
         print(json.dumps({"rows": len(frequency), "output": str(args.output)}, ensure_ascii=False, indent=2))
+        return
+
+    if args.command == "rebuild-skill-pool":
+        progress(f"skill_pool: loading event stream from {args.event_stream}")
+        events = pd.read_csv(args.event_stream, dtype=str, encoding="utf-8-sig").fillna("")
+        progress(f"skill_pool: loading title dictionary from {args.title_dictionary}")
+        title_dictionary = pd.read_csv(args.title_dictionary, dtype=str, encoding="utf-8-sig").fillna("")
+        progress(f"skill_pool: loading skill universe from {args.skill_universe}")
+        skill_universe = pd.read_csv(args.skill_universe, dtype=str, encoding="utf-8-sig").fillna("")
+        standard_job_categories = {
+            clean_text(row.get("standard_job_title")): clean_text(row.get("standard_category"))
+            for _, row in title_dictionary.iterrows()
+        }
+        pool = rebuild_skill_pool_table(
+            events,
+            standard_job_categories=standard_job_categories,
+            skill_universe=skill_universe,
+            source=args.source,
+        )
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        pool.to_csv(args.output, index=False, encoding="utf-8-sig")
+        progress(f"skill_pool: rows={len(pool)}")
+        print(json.dumps({"rows": len(pool), "output": str(args.output)}, ensure_ascii=False, indent=2))
+        return
+
+    if args.command == "rebuild-lifecycle":
+        progress(f"lifecycle: loading frequency table from {args.frequency_input}")
+        frequency = pd.read_csv(args.frequency_input, dtype=str, encoding="utf-8-sig").fillna("")
+        progress(f"lifecycle: loading skill pool from {args.skill_pool}")
+        skill_pool = pd.read_csv(args.skill_pool, dtype=str, encoding="utf-8-sig").fillna("")
+        lifecycle = SkillLifecycleStore(args.output).rebuild(
+            frequency=frequency,
+            skill_pool=skill_pool,
+            as_of_month=args.as_of_month,
+            write=True,
+        )
+        progress(f"lifecycle: rows={len(lifecycle)}")
+        print(json.dumps({"rows": len(lifecycle), "output": str(args.output)}, ensure_ascii=False, indent=2))
+        return
+
+    if args.command == "rebuild-migration":
+        progress(f"migration: loading frequency table from {args.frequency_input}")
+        frequency = pd.read_csv(args.frequency_input, dtype=str, encoding="utf-8-sig").fillna("")
+        progress(f"migration: loading skill pool from {args.skill_pool}")
+        skill_pool = pd.read_csv(args.skill_pool, dtype=str, encoding="utf-8-sig").fillna("")
+        migration, spread = SkillMigrationStore(
+            args.migration_output,
+            args.spread_output,
+        ).rebuild(
+            frequency=frequency,
+            skill_pool=skill_pool,
+            write=True,
+        )
+        progress(f"migration: migration_rows={len(migration)}, spread_rows={len(spread)}")
+        print(
+            json.dumps(
+                {
+                    "migration_rows": len(migration),
+                    "spread_rows": len(spread),
+                    "migration_output": str(args.migration_output),
+                    "spread_output": str(args.spread_output),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+
+    if args.command == "rebuild-profile":
+        progress(f"job_profile: loading frequency table from {args.frequency_input}")
+        frequency = pd.read_csv(args.frequency_input, dtype=str, encoding="utf-8-sig").fillna("")
+        progress(f"job_profile: loading skill pool from {args.skill_pool}")
+        skill_pool = pd.read_csv(args.skill_pool, dtype=str, encoding="utf-8-sig").fillna("")
+        snapshots, diffs = JobProfileStore(
+            args.snapshot_output,
+            args.diff_output,
+        ).rebuild(
+            frequency=frequency,
+            skill_pool=skill_pool,
+            write=True,
+        )
+        progress(f"job_profile: snapshot_rows={len(snapshots)}, diff_rows={len(diffs)}")
+        print(
+            json.dumps(
+                {
+                    "snapshot_rows": len(snapshots),
+                    "diff_rows": len(diffs),
+                    "snapshot_output": str(args.snapshot_output),
+                    "diff_output": str(args.diff_output),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
         return
 
     if args.command == "analyze-event-stream":
@@ -566,6 +724,15 @@ def main() -> None:
             taxonomy=taxonomy,
             frequency_store=FrequencyStore(args.event_stream, args.frequency_output),
             skill_pool_store=SkillPoolStore(skill_pool_path),
+            skill_lifecycle_store=SkillLifecycleStore(args.skill_lifecycle),
+            skill_migration_store=SkillMigrationStore(
+                args.skill_migration,
+                args.skill_job_monthly_spread,
+            ),
+            job_profile_store=JobProfileStore(
+                args.job_profile_snapshots,
+                args.job_profile_diff,
+            ),
             database_store=SQLiteJobUpdateStore(args.database),
             similarity=similarity,
             route_adjudicator=route_adjudicator,
@@ -632,6 +799,11 @@ def add_database_csv_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--event-stream", type=Path, default=BASE_EVENT_STREAM)
     parser.add_argument("--frequency-output", type=Path, default=BASE_FREQUENCY_OUTPUT)
     parser.add_argument("--skill-pool", type=Path, default=BASE_SKILL_POOL)
+    parser.add_argument("--skill-lifecycle", type=Path, default=BASE_SKILL_LIFECYCLE)
+    parser.add_argument("--skill-migration", type=Path, default=BASE_SKILL_MIGRATION)
+    parser.add_argument("--skill-job-monthly-spread", type=Path, default=BASE_SKILL_JOB_MONTHLY_SPREAD)
+    parser.add_argument("--job-profile-snapshots", type=Path, default=BASE_JOB_PROFILE_SNAPSHOTS)
+    parser.add_argument("--job-profile-diff", type=Path, default=BASE_JOB_PROFILE_DIFF)
 
 
 def add_title_cleaning_args(parser: argparse.ArgumentParser) -> None:
@@ -706,6 +878,11 @@ def ensure_database_initialized(args: argparse.Namespace, progress) -> None:
         event_stream_path=args.event_stream,
         frequency_path=args.frequency_output,
         skill_pool_path=resolve_skill_pool_path(args),
+        lifecycle_path=args.skill_lifecycle,
+        migration_path=args.skill_migration,
+        spread_path=args.skill_job_monthly_spread,
+        profile_snapshot_path=args.job_profile_snapshots,
+        profile_diff_path=args.job_profile_diff,
     )
 
 
@@ -846,9 +1023,19 @@ def serialize_process_result(result) -> dict[str, Any]:
             "monthly_rows": result.update.monthly_rows,
             "frequency_rows": result.update.frequency_rows,
             "skill_pool_rows": result.update.skill_pool_rows,
+            "lifecycle_rows": result.update.lifecycle_rows,
+            "migration_rows": result.update.migration_rows,
+            "spread_rows": result.update.spread_rows,
+            "profile_snapshot_rows": result.update.profile_snapshot_rows,
+            "profile_diff_rows": result.update.profile_diff_rows,
             "event_stream_path": result.update.event_stream_path,
             "frequency_path": result.update.frequency_path,
             "skill_pool_path": result.update.skill_pool_path,
+            "lifecycle_path": result.update.lifecycle_path,
+            "migration_path": result.update.migration_path,
+            "spread_path": result.update.spread_path,
+            "profile_snapshot_path": result.update.profile_snapshot_path,
+            "profile_diff_path": result.update.profile_diff_path,
         }
     return payload
 

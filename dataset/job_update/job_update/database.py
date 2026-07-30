@@ -10,7 +10,10 @@ from typing import Any
 import pandas as pd
 
 from .frequency_store import FREQUENCY_COLUMNS
+from .job_profile import JOB_PROFILE_DIFF_COLUMNS, JOB_PROFILE_SNAPSHOT_COLUMNS
 from .models import JobPosting, JobRoute, NormalizedSkill, ProcessResult
+from .skill_lifecycle import LIFECYCLE_COLUMNS
+from .skill_migration import SKILL_JOB_MONTHLY_SPREAD_COLUMNS, SKILL_MIGRATION_COLUMNS
 from .skill_pool_store import SKILL_POOL_COLUMNS
 from .text import clean_text
 
@@ -38,18 +41,33 @@ class SQLiteJobUpdateStore:
         event_stream_path: Path,
         frequency_path: Path,
         skill_pool_path: Path,
+        lifecycle_path: Path,
+        migration_path: Path,
+        spread_path: Path,
+        profile_snapshot_path: Path | None = None,
+        profile_diff_path: Path | None = None,
     ) -> dict[str, int]:
         self.migrate()
         standard_jobs = _read_csv(title_dictionary_path, STANDARD_JOB_COLUMNS)
         events = _read_csv(event_stream_path, EVENT_EXPORT_COLUMNS)
         frequency = _read_csv(frequency_path, FREQUENCY_COLUMNS)
         skill_pool = _read_csv(skill_pool_path, SKILL_POOL_COLUMNS)
+        lifecycle = _read_csv(lifecycle_path, LIFECYCLE_COLUMNS)
+        migration = _read_csv(migration_path, SKILL_MIGRATION_COLUMNS)
+        spread = _read_csv(spread_path, SKILL_JOB_MONTHLY_SPREAD_COLUMNS)
+        profile_snapshots = _read_optional_csv(profile_snapshot_path, JOB_PROFILE_SNAPSHOT_COLUMNS)
+        profile_diffs = _read_optional_csv(profile_diff_path, JOB_PROFILE_DIFF_COLUMNS)
 
         with self._connect() as conn:
             self._replace_standard_jobs(conn, standard_jobs)
             self._replace_existing_job_postings(conn, events)
             self._replace_dataframe(conn, "job_skill_monthly_frequency", frequency, FREQUENCY_COLUMNS)
             self._replace_dataframe(conn, "skill_pool", skill_pool, SKILL_POOL_COLUMNS)
+            self._replace_dataframe(conn, "skill_lifecycle", lifecycle, LIFECYCLE_COLUMNS)
+            self._replace_dataframe(conn, "skill_migration", migration, SKILL_MIGRATION_COLUMNS)
+            self._replace_dataframe(conn, "skill_job_monthly_spread", spread, SKILL_JOB_MONTHLY_SPREAD_COLUMNS)
+            self._replace_dataframe(conn, "job_profile_snapshots", profile_snapshots, JOB_PROFILE_SNAPSHOT_COLUMNS)
+            self._replace_dataframe(conn, "job_profile_diff", profile_diffs, JOB_PROFILE_DIFF_COLUMNS)
             conn.execute("DELETE FROM job_routes")
             conn.execute("DELETE FROM skill_mentions")
             conn.commit()
@@ -58,6 +76,11 @@ class SQLiteJobUpdateStore:
             "job_postings": len(events),
             "job_skill_monthly_frequency": len(frequency),
             "skill_pool": len(skill_pool),
+            "skill_lifecycle": len(lifecycle),
+            "skill_migration": len(migration),
+            "skill_job_monthly_spread": len(spread),
+            "job_profile_snapshots": len(profile_snapshots),
+            "job_profile_diff": len(profile_diffs),
         }
 
     def export_to_csv(
@@ -67,12 +90,24 @@ class SQLiteJobUpdateStore:
         event_stream_path: Path,
         frequency_path: Path,
         skill_pool_path: Path,
+        lifecycle_path: Path,
+        migration_path: Path,
+        spread_path: Path,
+        profile_snapshot_path: Path | None = None,
+        profile_diff_path: Path | None = None,
     ) -> dict[str, int]:
         self.migrate()
         title_dictionary_path.parent.mkdir(parents=True, exist_ok=True)
         event_stream_path.parent.mkdir(parents=True, exist_ok=True)
         frequency_path.parent.mkdir(parents=True, exist_ok=True)
         skill_pool_path.parent.mkdir(parents=True, exist_ok=True)
+        lifecycle_path.parent.mkdir(parents=True, exist_ok=True)
+        migration_path.parent.mkdir(parents=True, exist_ok=True)
+        spread_path.parent.mkdir(parents=True, exist_ok=True)
+        if profile_snapshot_path is not None:
+            profile_snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+        if profile_diff_path is not None:
+            profile_diff_path.parent.mkdir(parents=True, exist_ok=True)
 
         with self._connect() as conn:
             standard_jobs = pd.read_sql_query(
@@ -113,16 +148,60 @@ class SQLiteJobUpdateStore:
                 f"SELECT {', '.join(SKILL_POOL_COLUMNS)} FROM skill_pool ORDER BY normalized_skill",
                 conn,
             )
+            lifecycle = pd.read_sql_query(
+                f"SELECT {', '.join(LIFECYCLE_COLUMNS)} FROM skill_lifecycle ORDER BY standard_job, skill",
+                conn,
+            )
+            migration = pd.read_sql_query(
+                f"SELECT {', '.join(SKILL_MIGRATION_COLUMNS)} FROM skill_migration ORDER BY skill",
+                conn,
+            )
+            spread = pd.read_sql_query(
+                f"""
+                SELECT {', '.join(SKILL_JOB_MONTHLY_SPREAD_COLUMNS)}
+                FROM skill_job_monthly_spread
+                ORDER BY skill, standard_job, month
+                """,
+                conn,
+            )
+            profile_snapshots = pd.read_sql_query(
+                f"""
+                SELECT {', '.join(JOB_PROFILE_SNAPSHOT_COLUMNS)}
+                FROM job_profile_snapshots
+                ORDER BY standard_job, month, skill
+                """,
+                conn,
+            )
+            profile_diffs = pd.read_sql_query(
+                f"""
+                SELECT {', '.join(JOB_PROFILE_DIFF_COLUMNS)}
+                FROM job_profile_diff
+                ORDER BY standard_job, from_month, to_month, change_type, skill
+                """,
+                conn,
+            )
 
         standard_jobs.to_csv(title_dictionary_path, index=False, encoding="utf-8-sig")
         events.to_csv(event_stream_path, index=False, encoding="utf-8-sig")
         frequency.to_csv(frequency_path, index=False, encoding="utf-8-sig")
         skill_pool.to_csv(skill_pool_path, index=False, encoding="utf-8-sig")
+        lifecycle.to_csv(lifecycle_path, index=False, encoding="utf-8-sig")
+        migration.to_csv(migration_path, index=False, encoding="utf-8-sig")
+        spread.to_csv(spread_path, index=False, encoding="utf-8-sig")
+        if profile_snapshot_path is not None:
+            profile_snapshots.to_csv(profile_snapshot_path, index=False, encoding="utf-8-sig")
+        if profile_diff_path is not None:
+            profile_diffs.to_csv(profile_diff_path, index=False, encoding="utf-8-sig")
         return {
             "standard_jobs": len(standard_jobs),
             "job_postings": len(events),
             "job_skill_monthly_frequency": len(frequency),
             "skill_pool": len(skill_pool),
+            "skill_lifecycle": len(lifecycle),
+            "skill_migration": len(migration),
+            "skill_job_monthly_spread": len(spread),
+            "job_profile_snapshots": len(profile_snapshots),
+            "job_profile_diff": len(profile_diffs),
         }
 
     def sync_after_process(
@@ -131,6 +210,11 @@ class SQLiteJobUpdateStore:
         result: ProcessResult,
         frequency: pd.DataFrame | None = None,
         skill_pool: pd.DataFrame | None = None,
+        lifecycle: pd.DataFrame | None = None,
+        migration: pd.DataFrame | None = None,
+        spread: pd.DataFrame | None = None,
+        profile_snapshots: pd.DataFrame | None = None,
+        profile_diffs: pd.DataFrame | None = None,
     ) -> None:
         self.migrate()
         with self._connect() as conn:
@@ -142,6 +226,16 @@ class SQLiteJobUpdateStore:
                 self._replace_dataframe(conn, "job_skill_monthly_frequency", frequency, FREQUENCY_COLUMNS)
             if skill_pool is not None:
                 self._replace_dataframe(conn, "skill_pool", skill_pool, SKILL_POOL_COLUMNS)
+            if lifecycle is not None:
+                self._replace_dataframe(conn, "skill_lifecycle", lifecycle, LIFECYCLE_COLUMNS)
+            if migration is not None:
+                self._replace_dataframe(conn, "skill_migration", migration, SKILL_MIGRATION_COLUMNS)
+            if spread is not None:
+                self._replace_dataframe(conn, "skill_job_monthly_spread", spread, SKILL_JOB_MONTHLY_SPREAD_COLUMNS)
+            if profile_snapshots is not None:
+                self._replace_dataframe(conn, "job_profile_snapshots", profile_snapshots, JOB_PROFILE_SNAPSHOT_COLUMNS)
+            if profile_diffs is not None:
+                self._replace_dataframe(conn, "job_profile_diff", profile_diffs, JOB_PROFILE_DIFF_COLUMNS)
             conn.commit()
 
     def upsert_standard_job(
@@ -274,8 +368,136 @@ class SQLiteJobUpdateStore:
                     sources TEXT NOT NULL DEFAULT '',
                     updated_at TEXT NOT NULL DEFAULT ''
                 );
+
+                CREATE TABLE IF NOT EXISTS skill_lifecycle (
+                    month TEXT NOT NULL,
+                    standard_job TEXT NOT NULL,
+                    skill TEXT NOT NULL,
+                    kg_display_skill TEXT NOT NULL DEFAULT '',
+                    lifecycle_status TEXT NOT NULL DEFAULT '',
+                    first_seen_month TEXT NOT NULL DEFAULT '',
+                    last_seen_month TEXT NOT NULL DEFAULT '',
+                    age_months INTEGER NOT NULL DEFAULT 0,
+                    months_since_last_seen INTEGER NOT NULL DEFAULT 0,
+                    current_monthly_skill_count INTEGER NOT NULL DEFAULT 0,
+                    current_monthly_skill_frequency REAL NOT NULL DEFAULT 0,
+                    cumulative_skill_count INTEGER NOT NULL DEFAULT 0,
+                    cumulative_skill_frequency REAL NOT NULL DEFAULT 0,
+                    recent_3m_skill_count INTEGER NOT NULL DEFAULT 0,
+                    recent_6m_skill_count INTEGER NOT NULL DEFAULT 0,
+                    recent_3m_active_months INTEGER NOT NULL DEFAULT 0,
+                    recent_6m_active_months INTEGER NOT NULL DEFAULT 0,
+                    prev_3m_skill_count INTEGER NOT NULL DEFAULT 0,
+                    prev_6m_skill_count INTEGER NOT NULL DEFAULT 0,
+                    mom_frequency_change REAL NOT NULL DEFAULT 0,
+                    recent_3m_vs_prev_3m_change REAL NOT NULL DEFAULT 0,
+                    recent_6m_frequency_stddev REAL NOT NULL DEFAULT 0,
+                    covered_job_count INTEGER NOT NULL DEFAULT 0,
+                    recent_3m_covered_job_count INTEGER NOT NULL DEFAULT 0,
+                    prev_3m_covered_job_count INTEGER NOT NULL DEFAULT 0,
+                    recent_3m_covered_job_count_change INTEGER NOT NULL DEFAULT 0,
+                    lifecycle_reason TEXT NOT NULL DEFAULT '',
+                    updated_at TEXT NOT NULL DEFAULT '',
+                    PRIMARY KEY (month, standard_job, skill)
+                );
+
+                CREATE TABLE IF NOT EXISTS skill_migration (
+                    skill TEXT PRIMARY KEY,
+                    kg_display_skill TEXT NOT NULL DEFAULT '',
+                    skill_type TEXT NOT NULL DEFAULT '',
+                    first_seen_month TEXT NOT NULL DEFAULT '',
+                    first_seen_standard_jobs TEXT NOT NULL DEFAULT '',
+                    first_seen_job_count INTEGER NOT NULL DEFAULT 0,
+                    is_left_censored INTEGER NOT NULL DEFAULT 0,
+                    migration_confidence TEXT NOT NULL DEFAULT '',
+                    migration_interpretation TEXT NOT NULL DEFAULT '',
+                    latest_seen_month TEXT NOT NULL DEFAULT '',
+                    latest_covered_job_count INTEGER NOT NULL DEFAULT 0,
+                    cumulative_covered_job_count INTEGER NOT NULL DEFAULT 0,
+                    spread_job_count INTEGER NOT NULL DEFAULT 0,
+                    spread_standard_jobs TEXT NOT NULL DEFAULT '',
+                    all_standard_jobs TEXT NOT NULL DEFAULT '',
+                    peak_monthly_covered_job_count INTEGER NOT NULL DEFAULT 0,
+                    peak_monthly_covered_job_month TEXT NOT NULL DEFAULT '',
+                    total_skill_mentions INTEGER NOT NULL DEFAULT 0,
+                    migration_path TEXT NOT NULL DEFAULT '',
+                    updated_at TEXT NOT NULL DEFAULT ''
+                );
+
+                CREATE TABLE IF NOT EXISTS skill_job_monthly_spread (
+                    month TEXT NOT NULL,
+                    skill TEXT NOT NULL,
+                    kg_display_skill TEXT NOT NULL DEFAULT '',
+                    standard_job TEXT NOT NULL,
+                    monthly_jd_count INTEGER NOT NULL DEFAULT 0,
+                    monthly_skill_count INTEGER NOT NULL DEFAULT 0,
+                    monthly_skill_frequency REAL NOT NULL DEFAULT 0,
+                    cumulative_jd_count INTEGER NOT NULL DEFAULT 0,
+                    cumulative_skill_count INTEGER NOT NULL DEFAULT 0,
+                    cumulative_skill_frequency REAL NOT NULL DEFAULT 0,
+                    job_first_seen_month TEXT NOT NULL DEFAULT '',
+                    skill_first_seen_month TEXT NOT NULL DEFAULT '',
+                    months_since_skill_first_seen INTEGER NOT NULL DEFAULT 0,
+                    is_first_seen_job INTEGER NOT NULL DEFAULT 0,
+                    is_new_job_for_skill INTEGER NOT NULL DEFAULT 0,
+                    covered_job_count_this_month INTEGER NOT NULL DEFAULT 0,
+                    cumulative_covered_job_count INTEGER NOT NULL DEFAULT 0,
+                    monthly_frequency_change REAL NOT NULL DEFAULT 0,
+                    cumulative_frequency_change REAL NOT NULL DEFAULT 0,
+                    is_left_censored INTEGER NOT NULL DEFAULT 0,
+                    updated_at TEXT NOT NULL DEFAULT '',
+                    PRIMARY KEY (month, skill, standard_job)
+                );
+
+                CREATE TABLE IF NOT EXISTS job_profile_snapshots (
+                    month TEXT NOT NULL,
+                    standard_job TEXT NOT NULL,
+                    skill TEXT NOT NULL,
+                    kg_display_skill TEXT NOT NULL DEFAULT '',
+                    monthly_jd_count INTEGER NOT NULL DEFAULT 0,
+                    monthly_skill_count INTEGER NOT NULL DEFAULT 0,
+                    monthly_skill_frequency REAL NOT NULL DEFAULT 0,
+                    cumulative_jd_count INTEGER NOT NULL DEFAULT 0,
+                    cumulative_skill_count INTEGER NOT NULL DEFAULT 0,
+                    cumulative_skill_frequency REAL NOT NULL DEFAULT 0,
+                    snapshot_skill_status TEXT NOT NULL DEFAULT '',
+                    is_core_skill INTEGER NOT NULL DEFAULT 0,
+                    rank_in_month TEXT NOT NULL DEFAULT '',
+                    updated_at TEXT NOT NULL DEFAULT '',
+                    PRIMARY KEY (month, standard_job, skill)
+                );
+
+                CREATE TABLE IF NOT EXISTS job_profile_diff (
+                    standard_job TEXT NOT NULL,
+                    from_month TEXT NOT NULL,
+                    to_month TEXT NOT NULL,
+                    skill TEXT NOT NULL,
+                    kg_display_skill TEXT NOT NULL DEFAULT '',
+                    change_type TEXT NOT NULL DEFAULT '',
+                    from_monthly_jd_count INTEGER NOT NULL DEFAULT 0,
+                    to_monthly_jd_count INTEGER NOT NULL DEFAULT 0,
+                    from_monthly_skill_count INTEGER NOT NULL DEFAULT 0,
+                    to_monthly_skill_count INTEGER NOT NULL DEFAULT 0,
+                    from_monthly_skill_frequency REAL NOT NULL DEFAULT 0,
+                    to_monthly_skill_frequency REAL NOT NULL DEFAULT 0,
+                    frequency_delta REAL NOT NULL DEFAULT 0,
+                    frequency_delta_ratio REAL NOT NULL DEFAULT 0,
+                    from_cumulative_skill_count INTEGER NOT NULL DEFAULT 0,
+                    to_cumulative_skill_count INTEGER NOT NULL DEFAULT 0,
+                    from_cumulative_skill_frequency REAL NOT NULL DEFAULT 0,
+                    to_cumulative_skill_frequency REAL NOT NULL DEFAULT 0,
+                    is_stable_core INTEGER NOT NULL DEFAULT 0,
+                    updated_at TEXT NOT NULL DEFAULT '',
+                    PRIMARY KEY (standard_job, from_month, to_month, skill, change_type)
+                );
                 """
             )
+            _ensure_columns(conn, "skill_migration", SKILL_MIGRATION_COLUMNS)
+            _ensure_columns(conn, "skill_job_monthly_spread", SKILL_JOB_MONTHLY_SPREAD_COLUMNS)
+            _ensure_columns(conn, "job_profile_snapshots", JOB_PROFILE_SNAPSHOT_COLUMNS)
+            _ensure_columns(conn, "job_profile_diff", JOB_PROFILE_DIFF_COLUMNS)
+            _create_read_model_indexes(conn)
+            _create_read_model_views(conn)
             conn.commit()
 
     def _connect(self) -> sqlite3.Connection:
@@ -497,5 +719,130 @@ def _read_csv(path: Path, columns: list[str]) -> pd.DataFrame:
     return frame[columns]
 
 
+def _read_optional_csv(path: Path | None, columns: list[str]) -> pd.DataFrame:
+    if path is None or not path.exists():
+        return pd.DataFrame(columns=columns)
+    return _read_csv(path, columns)
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def _ensure_columns(conn: sqlite3.Connection, table_name: str, columns: list[str]) -> None:
+    existing = {
+        str(row["name"])
+        for row in conn.execute(f"PRAGMA table_info({table_name})").fetchall()
+    }
+    for column in columns:
+        if column in existing:
+            continue
+        conn.execute(f"ALTER TABLE {table_name} ADD COLUMN {column} TEXT NOT NULL DEFAULT ''")
+
+
+def _create_read_model_views(conn: sqlite3.Connection) -> None:
+    conn.executescript(
+        """
+        DROP VIEW IF EXISTS job_skill_trend;
+        DROP VIEW IF EXISTS emerging_skill_alerts;
+        DROP VIEW IF EXISTS deprecated_skill_alerts;
+
+        CREATE VIEW job_skill_trend AS
+        SELECT
+            l.month AS as_of_month,
+            l.standard_job,
+            l.skill,
+            l.kg_display_skill,
+            l.lifecycle_status,
+            l.first_seen_month,
+            l.last_seen_month,
+            l.age_months,
+            l.months_since_last_seen,
+            l.current_monthly_skill_count,
+            l.current_monthly_skill_frequency,
+            l.cumulative_skill_count,
+            l.cumulative_skill_frequency,
+            l.recent_3m_skill_count,
+            l.recent_6m_skill_count,
+            l.recent_3m_active_months,
+            l.recent_6m_active_months,
+            l.mom_frequency_change,
+            l.recent_3m_vs_prev_3m_change,
+            l.covered_job_count,
+            l.recent_3m_covered_job_count,
+            l.recent_3m_covered_job_count_change,
+            m.first_seen_standard_jobs AS migration_origin_jobs,
+            m.spread_standard_jobs AS migration_spread_jobs,
+            m.latest_covered_job_count AS migration_latest_covered_job_count,
+            m.cumulative_covered_job_count AS migration_cumulative_covered_job_count,
+            m.migration_path,
+            m.total_skill_mentions,
+            l.lifecycle_reason,
+            l.updated_at
+        FROM skill_lifecycle AS l
+        LEFT JOIN skill_migration AS m
+            ON lower(l.skill) = lower(m.skill);
+
+        CREATE VIEW emerging_skill_alerts AS
+        SELECT
+            as_of_month,
+            standard_job,
+            skill,
+            kg_display_skill,
+            lifecycle_status AS alert_type,
+            current_monthly_skill_count,
+            current_monthly_skill_frequency,
+            recent_3m_skill_count,
+            recent_6m_skill_count,
+            recent_3m_covered_job_count,
+            recent_3m_covered_job_count_change,
+            cumulative_skill_count,
+            cumulative_skill_frequency,
+            migration_origin_jobs,
+            migration_path,
+            lifecycle_reason,
+            updated_at
+        FROM job_skill_trend
+        WHERE lifecycle_status = '新兴技能';
+
+        CREATE VIEW deprecated_skill_alerts AS
+        SELECT
+            as_of_month,
+            standard_job,
+            skill,
+            kg_display_skill,
+            lifecycle_status AS alert_type,
+            current_monthly_skill_count,
+            current_monthly_skill_frequency,
+            months_since_last_seen,
+            recent_3m_skill_count,
+            recent_6m_skill_count,
+            cumulative_skill_count,
+            cumulative_skill_frequency,
+            migration_origin_jobs,
+            migration_path,
+            lifecycle_reason,
+            updated_at
+        FROM job_skill_trend
+        WHERE lifecycle_status IN ('衰退技能', '废弃技能');
+        """
+    )
+
+
+def _create_read_model_indexes(conn: sqlite3.Connection) -> None:
+    conn.executescript(
+        """
+        CREATE INDEX IF NOT EXISTS idx_job_profile_snapshots_job_month
+            ON job_profile_snapshots (standard_job, month);
+        CREATE INDEX IF NOT EXISTS idx_job_profile_snapshots_skill
+            ON job_profile_snapshots (skill);
+        CREATE INDEX IF NOT EXISTS idx_job_profile_diff_job_month_pair
+            ON job_profile_diff (standard_job, from_month, to_month);
+        CREATE INDEX IF NOT EXISTS idx_job_profile_diff_change_type
+            ON job_profile_diff (change_type);
+        CREATE INDEX IF NOT EXISTS idx_skill_lifecycle_status
+            ON skill_lifecycle (lifecycle_status);
+        CREATE INDEX IF NOT EXISTS idx_skill_migration_skill
+            ON skill_migration (skill);
+        """
+    )
