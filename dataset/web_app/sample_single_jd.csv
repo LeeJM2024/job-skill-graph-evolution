@@ -1,0 +1,2 @@
+﻿month,job_title,responsibility,requirement
+2026-07,大模型应用工程师,"负责企业知识库问答、智能客服和业务流程助手等大模型应用的方案设计与工程落地；基于 RAG、Prompt Engineering、Function Calling 和 Agent 工作流构建可复用能力模块；对接向量数据库、模型 API 和后端业务系统，完成接口联调、效果评估与线上问题排查；持续跟踪用户反馈和调用日志，优化检索召回、回答准确率和响应时延。","本科及以上学历，计算机、软件工程、人工智能等相关专业；熟悉 Python 或 Java，具备后端接口开发和工程化交付经验；理解大语言模型应用开发流程，熟悉 RAG、Embedding、向量检索、Prompt 优化、LangChain 或同类框架；熟悉 MySQL、Redis、RESTful API，有 Docker、Linux 使用经验；具备良好的问题拆解、文档撰写和跨团队沟通能力。"

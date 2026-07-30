@@ -27,6 +27,7 @@ from .services.job_service import (
     reject_update,
     submit_one_dry_run,
 )
+from .services import analytics_service
 from .services.paths import FRONTEND_ROOT
 from .services.pipeline_service import list_runs, read_pipeline_result, run_existing, run_full_pipeline
 
@@ -151,6 +152,60 @@ def api_backup() -> dict[str, object]:
 @app.get("/api/database/backups")
 def api_backups() -> list[dict[str, object]]:
     return list_backups()
+
+
+@app.get("/api/analytics/jobs")
+def api_analytics_jobs() -> list[str]:
+    return analytics_service.list_jobs()
+
+
+@app.get("/api/analytics/months")
+def api_analytics_months() -> list[str]:
+    return analytics_service.list_months()
+
+
+@app.get("/api/analytics/overview")
+def api_analytics_overview() -> dict[str, Any]:
+    return analytics_service.overview()
+
+
+@app.get("/api/analytics/job-trend")
+def api_analytics_job_trend(
+    standard_job: str | None = None,
+    top_n: int = 8,
+    month_start: str | None = None,
+    month_end: str | None = None,
+) -> dict[str, Any]:
+    return analytics_service.job_trend(
+        standard_job,
+        top_n=top_n,
+        month_start=month_start,
+        month_end=month_end,
+    )
+
+
+@app.get("/api/analytics/lifecycle")
+def api_analytics_lifecycle(
+    standard_job: str | None = None,
+    status: str | None = None,
+    limit: int = 120,
+) -> dict[str, Any]:
+    return analytics_service.lifecycle(standard_job, status=status, limit=limit)
+
+
+@app.get("/api/analytics/skill-migration")
+def api_analytics_skill_migration(skill: str | None = None, limit: int = 20) -> dict[str, Any]:
+    return analytics_service.migration(skill, limit=limit)
+
+
+@app.get("/api/analytics/monthly-rank")
+def api_analytics_monthly_rank(
+    month: str | None = None,
+    type: str = "emerging",
+    standard_job: str | None = None,
+    limit: int = 20,
+) -> dict[str, Any]:
+    return analytics_service.monthly_rank(month, rank_type=type, standard_job=standard_job, limit=limit)
 
 
 if __name__ == "__main__":
