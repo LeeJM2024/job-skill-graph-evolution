@@ -30,6 +30,7 @@ tmp/
 temp/
 *.tmp
 *.temp
+dataset/web_app/backups/
 
 # Step 1 generated data
 data/raw/*.jsonl
