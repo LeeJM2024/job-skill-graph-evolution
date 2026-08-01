@@ -173,6 +173,47 @@
             <div id="skill-line-legend" class="legend-row"></div>
           </div>
 
+          <div class="panel">
+            <div class="panel-title-row">
+              <div>
+                <h3>岗位画像对比</h3>
+                <p id="profile-compare-summary" class="muted">选择岗位和起止月份后，展示旧画像与新画像的能力变化。</p>
+              </div>
+            </div>
+            <div id="profile-change-metrics" class="metric-grid compact-metrics profile-metrics"></div>
+            <div class="profile-compare-grid">
+              <div>
+                <div class="profile-card-head"><strong id="profile-from-title">旧画像</strong><span class="muted">Top 能力</span></div>
+                <div id="profile-from-list" class="profile-list"></div>
+              </div>
+              <div>
+                <div class="profile-card-head"><strong id="profile-to-title">新画像</strong><span class="muted">Top 能力</span></div>
+                <div id="profile-to-list" class="profile-list"></div>
+              </div>
+            </div>
+            <div id="profile-change-flow" class="change-flow"></div>
+            <div class="profile-tabs" role="tablist" aria-label="岗位画像变化类型">
+              <button class="profile-tab active" data-profile-change="added" type="button">新增</button>
+              <button class="profile-tab" data-profile-change="removed" type="button">删除</button>
+              <button class="profile-tab" data-profile-change="modified" type="button">修改</button>
+              <button class="profile-tab" data-profile-change="stable_core" type="button">稳定核心</button>
+            </div>
+            <div class="table-wrap profile-change-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>能力项</th>
+                    <th>类型</th>
+                    <th>旧频率</th>
+                    <th>新频率</th>
+                    <th>变化幅度</th>
+                  </tr>
+                </thead>
+                <tbody id="profile-change-table"></tbody>
+              </table>
+            </div>
+          </div>
+
           <div class="analytics-grid">
             <div class="panel lifecycle-panel">
               <div class="panel-title-row">

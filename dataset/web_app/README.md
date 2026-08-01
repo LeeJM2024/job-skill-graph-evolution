@@ -27,7 +27,7 @@ http://127.0.0.1:8787
 - 首页概览：汇总最新月份、标准岗位数、技能数、待审核数量、新增/下降技能数量和备份记录。
 - 数据流测试：调用数据流生成系统或已有 run，再调用 `job_update.cli run-data-stream`。
 - 结果展示：读取 comparison / analysis 输出，展示通过状态、岗位需求正确率、技能频率正确率、差异预览和图表。
-- 时序分析：读取 base 分析结果，展示岗位技能趋势、生命周期、迁移路径、月度新增和衰退技能榜单。
+- 时序分析：读取 base 分析结果，展示岗位技能趋势、岗位画像对比、生命周期、迁移路径、月度新增和衰退技能榜单。
 - 单条 JD 更新：岗位名称、月份、岗位职责、岗位要求分框输入，并在页面右侧展示处理结果详情。
 - 批量 CSV：逐条进入同一套岗位判断和审核流程。
 - 人工审核：既有岗位可确认入库；疑似新岗位可人工补充标准岗位名、大族和匹配关键词后入库。
@@ -88,6 +88,7 @@ http://127.0.0.1:8787
 - 查看该岗位下技能生命周期状态分布和判断依据。
 - 搜索或选择技能，查看技能从首现岗位到后续扩散岗位的迁移路径。
 - 查看指定月份的新增/上升技能榜单和衰退/消失技能榜单。
+- 对比起始月份和结束月份的岗位画像，明确展示新增、删除、频率上升、频率下降和稳定核心能力项。
 
 数据来源：
 
@@ -97,6 +98,7 @@ dataset/job_update/data/base/skill_lifecycle.csv
 dataset/job_update/data/base/skill_migration.csv
 dataset/job_update/data/base/skill_job_monthly_spread.csv
 dataset/job_update/data/base/job_profile_diff.csv
+dataset/job_update/data/base/job_profile_snapshots.csv
 ```
 
 相关接口：
@@ -109,9 +111,10 @@ GET /api/analytics/job-trend
 GET /api/analytics/lifecycle
 GET /api/analytics/skill-migration
 GET /api/analytics/monthly-rank
+GET /api/analytics/profile-compare
 ```
 
-当前第一版使用原生 SVG 和 HTML 表格/榜单展示，不依赖额外前端构建流程。
+当前第一版使用原生 SVG 和 HTML 表格/榜单展示，不依赖额外前端构建流程。岗位画像对比模块会读取 `job_profile_snapshots.csv` 展示旧/新画像 Top 能力，并读取 `job_profile_diff.csv` 明确标注新增、删除、修改和稳定核心能力项。
 
 ## 单条 JD 处理逻辑
 

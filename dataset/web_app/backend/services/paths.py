@@ -20,6 +20,7 @@ BASE_SKILL_LIFECYCLE = BASE_DATA_DIR / "skill_lifecycle.csv"
 BASE_SKILL_MIGRATION = BASE_DATA_DIR / "skill_migration.csv"
 BASE_SKILL_MONTHLY_SPREAD = BASE_DATA_DIR / "skill_job_monthly_spread.csv"
 BASE_JOB_PROFILE_DIFF = BASE_DATA_DIR / "job_profile_diff.csv"
+BASE_JOB_PROFILE_SNAPSHOTS = BASE_DATA_DIR / "job_profile_snapshots.csv"
 
 BACKUP_ROOT = WEB_APP_ROOT / "backups"
 RUN_FULL_SCRIPT = DATASET_ROOT / "run_full_pipeline.py"

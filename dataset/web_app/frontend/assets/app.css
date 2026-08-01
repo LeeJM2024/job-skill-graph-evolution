@@ -496,6 +496,147 @@ textarea {
   padding: 8px 10px;
 }
 
+.profile-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 14px 0;
+}
+
+.profile-compare-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.profile-card-head {
+  align-items: center;
+  background: #f5f8f7;
+  border: 1px solid var(--line);
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+}
+
+.profile-list {
+  border: 1px solid var(--line);
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+  display: grid;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.profile-skill {
+  display: grid;
+  gap: 6px 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 10px 12px;
+  position: relative;
+}
+
+.profile-skill + .profile-skill {
+  border-top: 1px solid var(--line);
+}
+
+.profile-skill strong,
+.profile-skill span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-skill span {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.profile-skill em {
+  color: var(--accent);
+  font-style: normal;
+  font-weight: 800;
+}
+
+.profile-skill i {
+  background: #8bbfb4;
+  border-radius: 999px;
+  bottom: 0;
+  display: block;
+  height: 3px;
+  left: 0;
+  position: absolute;
+}
+
+.change-flow {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 16px 0;
+}
+
+.change-flow-item {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 11px;
+}
+
+.change-flow-item span {
+  color: var(--muted);
+  display: block;
+  font-size: 12px;
+}
+
+.change-flow-item strong {
+  display: block;
+  font-size: 22px;
+  margin-top: 4px;
+}
+
+.change-flow-item i {
+  background: var(--accent-2);
+  border-radius: 999px;
+  display: block;
+  height: 5px;
+  margin-top: 9px;
+}
+
+.change-flow-item.added i,
+.change-flow-item.increased i {
+  background: var(--ok);
+}
+
+.change-flow-item.removed i,
+.change-flow-item.decreased i {
+  background: var(--danger);
+}
+
+.profile-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 12px;
+}
+
+.profile-tab {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  min-height: 36px;
+  padding: 8px 12px;
+}
+
+.profile-tab.active {
+  background: #25403d;
+  color: white;
+}
+
+.profile-change-table {
+  max-height: 360px;
+}
+
 .rank-list {
   display: grid;
   gap: 9px;
@@ -911,7 +1052,10 @@ dialog::backdrop {
   .jd-workspace,
   .process-steps,
   .detail-grid,
-  .status-grid {
+  .status-grid,
+  .profile-compare-grid,
+  .change-flow,
+  .profile-metrics {
     grid-template-columns: 1fr;
   }
 

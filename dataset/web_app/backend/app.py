@@ -208,6 +208,21 @@ def api_analytics_monthly_rank(
     return analytics_service.monthly_rank(month, rank_type=type, standard_job=standard_job, limit=limit)
 
 
+@app.get("/api/analytics/profile-compare")
+def api_analytics_profile_compare(
+    standard_job: str | None = None,
+    from_month: str | None = None,
+    to_month: str | None = None,
+    limit: int = 80,
+) -> dict[str, Any]:
+    return analytics_service.profile_compare(
+        standard_job,
+        from_month=from_month,
+        to_month=to_month,
+        limit=limit,
+    )
+
+
 if __name__ == "__main__":
     import uvicorn
 

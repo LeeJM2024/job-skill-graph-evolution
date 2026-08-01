@@ -8,6 +8,8 @@ const state = {
     jobs: [],
     months: [],
     migrationSkills: [],
+    profileCompare: null,
+    profileChangeTab: "added",
     loaded: false,
   },
 };
@@ -45,6 +47,29 @@ function signedPercent(value) {
   if (!Number.isFinite(number)) return "0.00%";
   const sign = number > 0 ? "+" : "";
   return `${sign}${(number * 100).toFixed(2)}%`;
+}
+
+function numberText(value, digits = 2) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "0";
+  return number.toFixed(digits);
+}
+
+function changeTone(changeType) {
+  if (changeType === "新增技能" || changeType === "频率上升技能") return "ok";
+  if (changeType === "消失技能" || changeType === "频率下降技能") return "danger";
+  return "warn";
+}
+
+function changeLabel(key) {
+  return {
+    added: "新增能力",
+    removed: "删除能力",
+    increased: "频率上升",
+    decreased: "频率下降",
+    modified: "修改能力",
+    stable_core: "稳定核心",
+  }[key] || key;
 }
 
 function escapeHtml(value) {
@@ -452,6 +477,83 @@ function renderMigration(payload) {
   `;
 }
 
+function renderProfileCompare(payload) {
+  state.analytics.profileCompare = payload;
+  const summary = payload.summary || {};
+  $("#profile-compare-summary").textContent = `${payload.standard_job || ""} · ${payload.from_month || ""} 对比 ${payload.to_month || ""}`;
+  $("#profile-from-title").textContent = `${payload.from_month || ""} 旧画像`;
+  $("#profile-to-title").textContent = `${payload.to_month || ""} 新画像`;
+  $("#profile-change-metrics").innerHTML = [
+    metric("新增能力", summary.added ?? 0, "ok"),
+    metric("删除能力", summary.removed ?? 0, "danger"),
+    metric("修改能力", summary.modified ?? 0, "warn"),
+    metric("稳定核心", summary.stable_core ?? 0),
+  ].join("");
+  renderProfileList("#profile-from-list", payload.from_profile || []);
+  renderProfileList("#profile-to-list", payload.to_profile || []);
+  renderProfileFlow(summary);
+  renderProfileChangeTable(state.analytics.profileChangeTab);
+}
+
+function renderProfileList(selector, rows) {
+  $(selector).innerHTML = rows.slice(0, 18)
+    .map((row) => {
+      const frequency = Math.max(0, Math.min(1, Number(row.monthly_skill_frequency) || 0));
+      return `
+        <div class="profile-skill">
+          <div>
+            <strong>${escapeHtml(row.skill)}</strong>
+            <span>${escapeHtml(row.kg_display_skill || row.snapshot_skill_status || "")}</span>
+          </div>
+          <em>${percent(row.monthly_skill_frequency)}</em>
+          <i style="width:${Math.max(4, frequency * 100)}%"></i>
+        </div>
+      `;
+    })
+    .join("") || `<p class="muted">暂无岗位画像。</p>`;
+}
+
+function renderProfileFlow(summary) {
+  const items = [
+    ["added", summary.added ?? 0],
+    ["removed", summary.removed ?? 0],
+    ["increased", summary.increased ?? 0],
+    ["decreased", summary.decreased ?? 0],
+    ["stable_core", summary.stable_core ?? 0],
+  ];
+  const max = Math.max(...items.map(([, value]) => Number(value) || 0), 1);
+  $("#profile-change-flow").innerHTML = items.map(([key, value]) => `
+    <div class="change-flow-item ${key}">
+      <span>${changeLabel(key)}</span>
+      <strong>${value}</strong>
+      <i style="width:${Math.max(6, (Number(value) || 0) / max * 100)}%"></i>
+    </div>
+  `).join("");
+}
+
+function profileRowsForTab(tab) {
+  const changes = state.analytics.profileCompare?.changes || {};
+  if (tab === "modified") {
+    return [...(changes.increased || []), ...(changes.decreased || [])];
+  }
+  return changes[tab] || [];
+}
+
+function renderProfileChangeTable(tab) {
+  state.analytics.profileChangeTab = tab;
+  $$(".profile-tab").forEach((button) => button.classList.toggle("active", button.dataset.profileChange === tab));
+  const rows = profileRowsForTab(tab).slice(0, 120);
+  $("#profile-change-table").innerHTML = rows.map((row) => `
+    <tr>
+      <td><strong>${escapeHtml(row.skill)}</strong><div class="muted">${escapeHtml(row.kg_display_skill || "")}</div></td>
+      <td><span class="tag ${changeTone(row.change_type)}">${escapeHtml(row.change_type || "")}</span></td>
+      <td>${percent(row.from_monthly_skill_frequency)}</td>
+      <td>${percent(row.to_monthly_skill_frequency)}</td>
+      <td>${signedPercent(row.frequency_delta)}</td>
+    </tr>
+  `).join("") || `<tr><td colspan="5">暂无${changeLabel(tab)}记录。</td></tr>`;
+}
+
 function processStepsHtml(item) {
   const route = item?.result?.route || {};
   const skills = item?.result?.skills || [];
@@ -741,16 +843,24 @@ async function refreshAnalytics() {
     top_n: String(topN),
   });
   const rankParams = new URLSearchParams({ month: monthEnd, standard_job: job, limit: "12" });
-  const [trend, lifecycleData, migrationData, emerging, declining, overviewData] = await Promise.all([
+  const compareParams = new URLSearchParams({
+    standard_job: job,
+    from_month: monthStart,
+    to_month: monthEnd,
+    limit: "80",
+  });
+  const [trend, lifecycleData, migrationData, emerging, declining, overviewData, profileCompare] = await Promise.all([
     api(`/api/analytics/job-trend?${params}`),
     api(`/api/analytics/lifecycle?standard_job=${encodeURIComponent(job)}&limit=80`),
     api(`/api/analytics/skill-migration?limit=25`),
     api(`/api/analytics/monthly-rank?${rankParams}&type=emerging`),
     api(`/api/analytics/monthly-rank?${rankParams}&type=declining`),
     api("/api/analytics/overview"),
+    api(`/api/analytics/profile-compare?${compareParams}`),
   ]);
   renderAnalyticsMetrics(overviewData);
   renderLineChart(trend);
+  renderProfileCompare(profileCompare);
   renderLifecycle(lifecycleData);
   renderMigration(migrationData);
   $("#emerging-month").textContent = emerging.month || "";
@@ -815,6 +925,10 @@ function bindEvents() {
   $("#overview-open-analytics").addEventListener("click", () => switchView("analytics"));
   $("#overview-refresh").addEventListener("click", async () => {
     await Promise.all([refreshOverview(), refreshReview(), refreshBackups()]);
+  });
+
+  $$(".profile-tab").forEach((button) => {
+    button.addEventListener("click", () => renderProfileChangeTable(button.dataset.profileChange));
   });
 
   $("#refresh-runs").addEventListener("click", refreshRuns);
