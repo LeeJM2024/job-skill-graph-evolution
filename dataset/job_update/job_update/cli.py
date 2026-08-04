@@ -20,12 +20,14 @@ from .analysis import (
     write_analysis_outputs,
 )
 from .comparison import compare_answer_tables, write_comparison_outputs
+from .current_profile_store import CurrentProfileStore
 from .database import SQLiteJobUpdateStore
 from .frequency_store import FrequencyStore, rebuild_frequency_table
 from .job_profile_store import JobProfileStore
 from .models import JobPosting, SkillMention
 from .output_runs import PROJECT_ROOT, resolve_run_output_dir, write_current_run_marker
 from .route_adjudication import LLMRouteAdjudicator
+from .review_queue import create_pending_reviews, serialize_process_result as serialize_review_process_result
 from .service import JobUpdateSystem
 from .skill_extraction import ExistingSkillExtractAdapter, ManualSkillKeywordExtractor, ManualSkillNormalizeAdapter
 from .skill_lifecycle_store import SkillLifecycleStore
@@ -53,6 +55,7 @@ BASE_SKILL_MIGRATION = BASE_DATA_DIR / "skill_migration.csv"
 BASE_SKILL_JOB_MONTHLY_SPREAD = BASE_DATA_DIR / "skill_job_monthly_spread.csv"
 BASE_JOB_PROFILE_SNAPSHOTS = BASE_DATA_DIR / "job_profile_snapshots.csv"
 BASE_JOB_PROFILE_DIFF = BASE_DATA_DIR / "job_profile_diff.csv"
+BASE_CURRENT_PROFILE = BASE_DATA_DIR / "job_current_profile_system.csv"
 BASE_DATABASE = BASE_DATA_DIR / "job_update.db"
 
 
@@ -87,6 +90,13 @@ def main() -> None:
     rebuild_profile.add_argument("--skill-pool", type=Path, default=BASE_SKILL_POOL)
     rebuild_profile.add_argument("--snapshot-output", type=Path, default=BASE_JOB_PROFILE_SNAPSHOTS)
     rebuild_profile.add_argument("--diff-output", type=Path, default=BASE_JOB_PROFILE_DIFF)
+
+    rebuild_current_profile = subparsers.add_parser(
+        "rebuild-current-profile",
+        help="Rebuild the current system job-skill profile from monthly snapshots.",
+    )
+    rebuild_current_profile.add_argument("--snapshot-input", type=Path, default=BASE_JOB_PROFILE_SNAPSHOTS)
+    rebuild_current_profile.add_argument("--output", type=Path, default=BASE_CURRENT_PROFILE)
 
     rebuild_skill_pool = subparsers.add_parser("rebuild-skill-pool", help="Rebuild skill pool CSV from an event stream.")
     rebuild_skill_pool.add_argument("--event-stream", type=Path, default=BASE_EVENT_STREAM)
@@ -215,6 +225,7 @@ def main() -> None:
     process.add_argument("--skill-job-monthly-spread", type=Path, default=BASE_SKILL_JOB_MONTHLY_SPREAD)
     process.add_argument("--job-profile-snapshots", type=Path, default=BASE_JOB_PROFILE_SNAPSHOTS)
     process.add_argument("--job-profile-diff", type=Path, default=BASE_JOB_PROFILE_DIFF)
+    process.add_argument("--current-profile", type=Path, default=BASE_CURRENT_PROFILE)
     process.add_argument("--job-id", default=None, help="Optional. Generated automatically when omitted.")
     process.add_argument("--month", required=True)
     process.add_argument("--job-title", required=True)
@@ -238,6 +249,7 @@ def main() -> None:
         help="Semicolon-separated raw skill keywords. They are normalized via skill_extract before use.",
     )
     process.add_argument("--dry-run", action="store_true")
+    process.add_argument("--mode", choices=["auto", "manual"], default="auto")
     process.add_argument("--skill-provider", choices=["deepseek", "gpt"], default="deepseek")
     process.add_argument("--skill-model", default=None)
     process.add_argument("--skill-base-url", default=None)
@@ -261,6 +273,7 @@ def main() -> None:
     submit.add_argument("--job-id", default=None, help="Optional. Generated automatically when omitted.")
     submit.add_argument("--source", default="user_submission")
     submit.add_argument("--dry-run", action="store_true")
+    submit.add_argument("--mode", choices=["auto", "manual"], default="auto")
     submit.add_argument("--title-dictionary", type=Path, default=BASE_TITLE_DICTIONARY)
     submit.add_argument("--event-stream", type=Path, default=BASE_EVENT_STREAM)
     submit.add_argument("--frequency-output", type=Path, default=BASE_FREQUENCY_OUTPUT)
@@ -270,6 +283,7 @@ def main() -> None:
     submit.add_argument("--skill-job-monthly-spread", type=Path, default=BASE_SKILL_JOB_MONTHLY_SPREAD)
     submit.add_argument("--job-profile-snapshots", type=Path, default=BASE_JOB_PROFILE_SNAPSHOTS)
     submit.add_argument("--job-profile-diff", type=Path, default=BASE_JOB_PROFILE_DIFF)
+    submit.add_argument("--current-profile", type=Path, default=BASE_CURRENT_PROFILE)
     submit.add_argument("--database", type=Path, default=BASE_DATABASE)
     submit.add_argument("--category-threshold", type=float, default=0.58)
     submit.add_argument("--job-threshold", type=float, default=0.82)
@@ -435,6 +449,24 @@ def main() -> None:
                     "diff_rows": len(diffs),
                     "snapshot_output": str(args.snapshot_output),
                     "diff_output": str(args.diff_output),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+
+    if args.command == "rebuild-current-profile":
+        progress(f"current_profile: loading snapshots from {args.snapshot_input}")
+        snapshots = pd.read_csv(args.snapshot_input, dtype=str, encoding="utf-8-sig").fillna("")
+        current = CurrentProfileStore(args.output).rebuild(snapshots=snapshots, write=True)
+        progress(f"current_profile: rows={len(current)}")
+        print(
+            json.dumps(
+                {
+                    "rows": len(current),
+                    "snapshot_input": str(args.snapshot_input),
+                    "output": str(args.output),
                 },
                 ensure_ascii=False,
                 indent=2,
@@ -733,6 +765,7 @@ def main() -> None:
                 args.job_profile_snapshots,
                 args.job_profile_diff,
             ),
+            current_profile_store=CurrentProfileStore(args.current_profile),
             database_store=SQLiteJobUpdateStore(args.database),
             similarity=similarity,
             route_adjudicator=route_adjudicator,
@@ -759,10 +792,41 @@ def main() -> None:
             skills=skills,
             metadata={"source": args.source},
         )
-        progress(f"process: dry_run={args.dry_run}")
-        result = system.process(posting, write=not args.dry_run)
+        progress(f"process: mode={args.mode}, dry_run={args.dry_run}")
+        result = system.process(
+            posting,
+            write=not args.dry_run and args.mode == "auto",
+            collect_skills_for_review=args.mode == "manual",
+        )
+        review_bundle = None
+        if not args.dry_run and (args.mode == "manual" or result.route.status != "existing_job"):
+            progress("review_queue: writing pending job and skill review items")
+            review_bundle = create_pending_reviews(
+                store=SQLiteJobUpdateStore(args.database),
+                submission_mode=args.mode,
+                input_payload={
+                    "month": args.month,
+                    "job_title": args.job_title,
+                    "responsibility": args.responsibility,
+                    "requirement": args.requirement,
+                    "source": args.source,
+                },
+                result=result,
+                skill_pool_path=skill_pool_path,
+                always_queue_job=args.mode == "manual",
+            )
         progress(f"done: {args.command} completed")
-        print(json.dumps(serialize_process_result(result), ensure_ascii=False, indent=2))
+        output = (
+            serialize_review_process_result(result, skill_pool_path=skill_pool_path)
+            if args.mode == "manual" or review_bundle is not None
+            else serialize_process_result(result)
+        )
+        if review_bundle is not None:
+            output["review_queue"] = {
+                "job_review_id": review_bundle["job_review"]["item_id"] if review_bundle["job_review"] else "",
+                "skill_review_ids": [item["item_id"] for item in review_bundle["skill_reviews"]],
+            }
+        print(json.dumps(output, ensure_ascii=False, indent=2))
         return
 
 
@@ -998,6 +1062,9 @@ def serialize_route(route) -> dict[str, Any]:
         "best_job": serialize_candidate(route.best_job),
         "selected_categories": [serialize_candidate(item) for item in route.selected_categories],
         "selected_jobs": [serialize_candidate(item) for item in route.selected_jobs],
+        "top_categories": [serialize_candidate(item) for item in route.top_categories],
+        "top_jobs": [serialize_candidate(item) for item in route.top_jobs],
+        "adjudication": route.adjudication,
     }
 
 
@@ -1007,6 +1074,16 @@ def serialize_process_result(result) -> dict[str, Any]:
         "job_title": result.posting.job_title,
         "routing_job_title": result.posting.routing_job_title,
         "route": serialize_route(result.route),
+        "skills": [
+            {
+                "normalized_skill": skill.normalized_skill,
+                "kg_display_skill": skill.kg_display_skill,
+                "skill_type": skill.skill_type or "",
+                "confidence": skill.confidence,
+                "metadata": skill.metadata,
+            }
+            for skill in result.normalized_skills
+        ],
         "updated": result.update is not None,
     }
     if result.update is not None:
