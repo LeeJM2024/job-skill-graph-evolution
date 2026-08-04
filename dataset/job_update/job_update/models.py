@@ -59,6 +59,11 @@ class JobRoute:
     best_category: ScoredCandidate | None = None
     best_job: ScoredCandidate | None = None
     reason: str = ""
+    # Full ranked candidates are retained for human review. selected_* keeps
+    # the candidates used by the automatic routing decision.
+    top_categories: list[ScoredCandidate] = field(default_factory=list)
+    top_jobs: list[ScoredCandidate] = field(default_factory=list)
+    adjudication: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(slots=True)
@@ -74,6 +79,7 @@ class ExistingJobUpdate:
     spread_rows: int = 0
     profile_snapshot_rows: int = 0
     profile_diff_rows: int = 0
+    current_profile_rows: int = 0
     event_stream_path: str | None = None
     frequency_path: str | None = None
     skill_pool_path: str | None = None
@@ -82,6 +88,7 @@ class ExistingJobUpdate:
     spread_path: str | None = None
     profile_snapshot_path: str | None = None
     profile_diff_path: str | None = None
+    current_profile_path: str | None = None
 
 
 @dataclass(slots=True)
@@ -89,4 +96,6 @@ class ProcessResult:
     route: JobRoute
     posting: JobPosting
     update: ExistingJobUpdate | None = None
+    # Populated for manual review even when the route is not an existing job.
+    normalized_skills: list[NormalizedSkill] = field(default_factory=list)
 

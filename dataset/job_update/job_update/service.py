@@ -6,9 +6,10 @@ import time
 from typing import Callable
 
 from .database import SQLiteJobUpdateStore
+from .current_profile_store import CurrentProfileStore
 from .frequency_store import FrequencyStore
 from .job_profile_store import JobProfileStore
-from .models import ExistingJobUpdate, JobPosting, JobRoute, ProcessResult, ScoredCandidate
+from .models import ExistingJobUpdate, JobPosting, JobRoute, NormalizedSkill, ProcessResult, ScoredCandidate
 from .route_adjudication import RouteAdjudicator
 from .similarity import SimilarityBackend, Text2VecSimilarity
 from .skill_extraction import SkillExtractor
@@ -29,6 +30,7 @@ class JobUpdateSystem:
     skill_lifecycle_store: SkillLifecycleStore | None = None
     skill_migration_store: SkillMigrationStore | None = None
     job_profile_store: JobProfileStore | None = None
+    current_profile_store: CurrentProfileStore | None = None
     database_store: SQLiteJobUpdateStore | None = None
     similarity: SimilarityBackend | None = None
     route_adjudicator: RouteAdjudicator | None = None
@@ -47,11 +49,52 @@ class JobUpdateSystem:
     use_taxonomy_gap_guard: bool = False
     progress: Callable[[str], None] | None = None
 
-    def process(self, posting: JobPosting, write: bool = True) -> ProcessResult:
-        similarity = self.similarity or Text2VecSimilarity()
+    def process(
+        self,
+        posting: JobPosting,
+        write: bool = True,
+        *,
+        collect_skills_for_review: bool = False,
+        confirmed_standard_job: str = "",
+        confirmed_standard_category: str = "",
+    ) -> ProcessResult:
+        """Process a posting, optionally applying a human-confirmed route.
+
+        Human review uses the same write path as automatic processing.  The
+        only difference is that the selected route is supplied by a reviewer
+        instead of inferred again from the title.
+        """
         normalizer = self.skill_normalizer or PassthroughSkillNormalizer()
         routing_job_title = posting.routing_job_title.strip() or posting.job_title
-        if self.title_cleaner is not None and not posting.routing_job_title.strip():
+        if confirmed_standard_job:
+            routing_job_title = posting.routing_job_title.strip() or posting.job_title
+            category_candidate = ScoredCandidate(
+                confirmed_standard_category,
+                1.0,
+                {"source": "human_review"},
+            )
+            job_candidate = ScoredCandidate(
+                confirmed_standard_job,
+                1.0,
+                {"category": confirmed_standard_category, "source": "human_review"},
+            )
+            route = JobRoute(
+                status="existing_job",
+                selected_categories=[category_candidate],
+                selected_jobs=[job_candidate],
+                best_category=category_candidate,
+                best_job=job_candidate,
+                reason="human review confirmed standard job",
+                top_categories=[category_candidate],
+                top_jobs=[job_candidate],
+            )
+            posting.routing_job_title = routing_job_title
+            self._progress(
+                f"routing: using human-confirmed route {confirmed_standard_category} / {confirmed_standard_job}"
+            )
+        else:
+            route = None
+        if route is None and self.title_cleaner is not None and not posting.routing_job_title.strip():
             self._progress("title_cleaning: calling configured LLM title cleaner")
             routing_job_title = self._run_with_heartbeat(
                 "title_cleaning",
@@ -59,8 +102,14 @@ class JobUpdateSystem:
             )
             self._progress(f"title_cleaning: raw={posting.job_title}, cleaned={routing_job_title}")
         posting.routing_job_title = routing_job_title
-        self._progress("routing: comparing cleaned job title with standard categories and jobs")
-        route = self._route_posting(posting, routing_job_title, similarity)
+        if route is None:
+            similarity = self.similarity or Text2VecSimilarity()
+            self._progress("routing: comparing cleaned job title with standard categories and jobs")
+            route = self._route_posting(posting, routing_job_title, similarity)
+            # The automatic decision may use a narrower candidate set, while
+            # reviewers need to see the globally ranked Top-K alternatives.
+            route.top_categories = self.taxonomy.score_categories(routing_job_title, similarity)[:5]
+            route.top_jobs = self.taxonomy.score_jobs(routing_job_title, similarity)[:10]
         if self.use_taxonomy_gap_guard:
             gap_decision = detect_taxonomy_gap(
                 raw_job_title=posting.job_title,
@@ -86,31 +135,39 @@ class JobUpdateSystem:
             f"status={route.status}, best_category={best_category}({best_category_score:.4f}), "
             f"best_job={best_job}({best_job_score:.4f})"
         )
+        should_collect_skills = route.status == "existing_job" or collect_skills_for_review
+        normalized_skills: list[NormalizedSkill] = []
+        if should_collect_skills:
+            if not posting.skills:
+                if self.skill_extractor is None:
+                    raise ValueError("process-one requires skill_extract output; no skill_extractor was configured")
+                self._progress("skills: calling configured skill provider")
+                posting.skills.extend(
+                    self._run_with_heartbeat(
+                        "skills",
+                        lambda: self.skill_extractor.extract(posting),
+                    )
+                )
+                self._progress(f"skills: extracted {len(posting.skills)} final normalized skills")
+            else:
+                self._progress(f"skills: using {len(posting.skills)} supplied final normalized skills")
+
+            self._progress("skills: validating final normalized skills")
+            normalized_skills = normalizer.normalize(posting, posting.skills)
+            self._progress(f"skills: accepted {len(normalized_skills)} unique normalized skills")
+
         if route.status != "existing_job" or route.best_job is None:
             self._progress("done: not an existing job, frequency and skill pool will not be updated")
-            result = ProcessResult(route=route, posting=posting, update=None)
+            result = ProcessResult(
+                route=route,
+                posting=posting,
+                update=None,
+                normalized_skills=normalized_skills,
+            )
             if write and self.database_store is not None:
                 self._progress("database: writing route log")
                 self.database_store.sync_after_process(result=result)
             return result
-
-        if not posting.skills:
-            if self.skill_extractor is None:
-                raise ValueError("process-one requires skill_extract output; no skill_extractor was configured")
-            self._progress("skills: calling configured skill provider")
-            posting.skills.extend(
-                self._run_with_heartbeat(
-                    "skills",
-                    lambda: self.skill_extractor.extract(posting),
-                )
-            )
-            self._progress(f"skills: extracted {len(posting.skills)} final normalized skills")
-        else:
-            self._progress(f"skills: using {len(posting.skills)} supplied final normalized skills")
-
-        self._progress("skills: validating final normalized skills")
-        normalized_skills = normalizer.normalize(posting, posting.skills)
-        self._progress(f"skills: accepted {len(normalized_skills)} unique normalized skills")
 
         mode = "dry-run rebuild" if not write else "calculate update"
         self._progress(f"frequency: loading event stream and rebuilding monthly/cumulative table ({mode})")
@@ -178,6 +235,8 @@ class JobUpdateSystem:
         profile_diff_rows = 0
         profile_snapshots = None
         profile_diffs = None
+        current_profile_rows = 0
+        current_profile = None
         if self.job_profile_store is not None:
             mode = "dry-run rebuild" if not write else "calculate update"
             self._progress(f"job_profile: rebuilding profile snapshots and diffs ({mode})")
@@ -194,6 +253,18 @@ class JobUpdateSystem:
         else:
             self._progress("job_profile: no profile path configured, skipped")
 
+        if self.current_profile_store is not None and profile_snapshots is not None:
+            mode = "dry-run rebuild" if not write else "calculate update"
+            self._progress(f"current_profile: rebuilding current system profile ({mode})")
+            current_profile = self.current_profile_store.rebuild(
+                snapshots=profile_snapshots,
+                write=False,
+            )
+            current_profile_rows = len(current_profile)
+            self._progress(f"current_profile: rows={current_profile_rows}")
+        elif self.current_profile_store is not None:
+            self._progress("current_profile: profile snapshots unavailable, skipped")
+
         if write:
             self._progress("write: writing event stream and frequency table")
             self.frequency_store.write_tables(events, frequency)
@@ -209,6 +280,9 @@ class JobUpdateSystem:
             if self.job_profile_store is not None and profile_snapshots is not None and profile_diffs is not None:
                 self._progress("write: writing job profile snapshots and diffs")
                 self.job_profile_store.write_tables(profile_snapshots, profile_diffs)
+            if self.current_profile_store is not None and current_profile is not None:
+                self._progress("write: writing current system job profile")
+                self.current_profile_store.write(current_profile)
         else:
             self._progress("write: dry-run, no files were written")
 
@@ -230,6 +304,7 @@ class JobUpdateSystem:
             spread_rows=spread_rows,
             profile_snapshot_rows=profile_snapshot_rows,
             profile_diff_rows=profile_diff_rows,
+            current_profile_rows=current_profile_rows,
             event_stream_path=str(self.frequency_store.event_stream_path),
             frequency_path=str(self.frequency_store.frequency_path)
             if self.frequency_store.frequency_path is not None
@@ -252,8 +327,16 @@ class JobUpdateSystem:
             profile_diff_path=str(self.job_profile_store.diff_path)
             if self.job_profile_store is not None
             else None,
+            current_profile_path=str(self.current_profile_store.current_profile_path)
+            if self.current_profile_store is not None
+            else None,
         )
-        result = ProcessResult(route=route, posting=posting, update=update)
+        result = ProcessResult(
+            route=route,
+            posting=posting,
+            update=update,
+            normalized_skills=normalized_skills,
+        )
         if write and self.database_store is not None:
             self._progress(
                 "database: syncing processed posting, route, skills, frequency, "
@@ -355,6 +438,14 @@ class JobUpdateSystem:
             f"status={decision.route_status}, selected={decision.selected_standard_job or 'none'}, "
             f"confidence={decision.confidence:.2f}"
         )
+        adjudication = {
+            "route_status": decision.route_status,
+            "selected_standard_job": decision.selected_standard_job,
+            "selected_category": decision.selected_category,
+            "confidence": decision.confidence,
+            "evidence": decision.evidence,
+            "reason": decision.reason,
+        }
         accepted_job = self._accepted_llm_job(decision.selected_standard_job, all_jobs)
         if decision.route_status == "existing_job" and accepted_job is not None:
             accepted_rank = all_jobs.index(accepted_job) + 1
@@ -370,6 +461,7 @@ class JobUpdateSystem:
                     best_category=best_category,
                     best_job=accepted_job,
                     reason=f"LLM adjudication accepted: {decision.reason}",
+                    adjudication=adjudication,
                 )
 
         if decision.route_status in {"potential_new_job", "new_family"} and best_job.score >= self.llm_uncertain_take_top1_threshold:
@@ -383,6 +475,7 @@ class JobUpdateSystem:
                     "LLM uncertain, accepted text2vec top1 because "
                     f"best_job_score={best_job.score:.4f} >= {self.llm_uncertain_take_top1_threshold}"
                 ),
+                adjudication=adjudication,
             )
 
         return JobRoute(
@@ -392,6 +485,7 @@ class JobUpdateSystem:
             best_category=best_category,
             best_job=best_job,
             reason=decision.reason or "LLM adjudication did not accept an existing job",
+            adjudication=adjudication,
         )
 
     @staticmethod
