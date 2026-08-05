@@ -223,6 +223,28 @@ def api_analytics_profile_compare(
     )
 
 
+@app.get("/api/optimization/profile")
+def api_optimization_profile(
+    standard_job: str | None = None,
+    limit: int = 500,
+) -> dict[str, Any]:
+    return analytics_service.optimization_profile(standard_job=standard_job, limit=limit)
+
+
+@app.get("/api/optimization/normalize-skill")
+def api_optimization_normalize_skill(skill: str) -> dict[str, Any]:
+    return analytics_service.normalize_optimization_skill(skill)
+
+
+@app.get("/api/optimization/sources")
+def api_optimization_sources(
+    keyword: str | None = None,
+    scope: str | None = None,
+    limit: int = 80,
+) -> dict[str, Any]:
+    return analytics_service.optimization_sources(keyword=keyword, scope=scope, limit=limit)
+
+
 if __name__ == "__main__":
     import uvicorn
 

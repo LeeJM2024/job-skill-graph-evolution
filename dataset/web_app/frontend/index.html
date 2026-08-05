@@ -20,6 +20,7 @@
           <button class="nav-item active" data-view="overview">首页概览</button>
           <button class="nav-item" data-view="manual">单条 JD 更新</button>
           <button class="nav-item" data-view="analytics">时序分析</button>
+          <button class="nav-item" data-view="optimization">人工优化</button>
           <button class="nav-item" data-view="auto">数据流测试</button>
           <button class="nav-item" data-view="backups">备份记录</button>
         </nav>
@@ -179,6 +180,7 @@
                 <h3>岗位画像对比</h3>
                 <p id="profile-compare-summary" class="muted">选择岗位和起止月份后，展示旧画像与新画像的能力变化。</p>
               </div>
+              <button id="open-optimization-from-profile" class="ghost-btn">进入人工优化</button>
             </div>
             <div id="profile-change-metrics" class="metric-grid compact-metrics profile-metrics"></div>
             <div class="profile-compare-grid">
@@ -261,6 +263,115 @@
               </div>
               <div id="declining-rank" class="rank-list"></div>
             </div>
+          </div>
+        </section>
+
+        <section id="view-optimization" class="view">
+          <div class="section-head">
+            <div>
+              <h2>人工优化</h2>
+              <p>输入岗位后查看当前技能画像，在页面内完成人工新增、删除和属性修改，并预览本次人工调整。</p>
+            </div>
+            <div class="actions">
+              <button id="optimization-refresh" class="secondary-btn">重新加载岗位</button>
+              <button id="optimization-save-draft" class="primary-btn">预览本次变更</button>
+            </div>
+          </div>
+
+          <div class="control-row">
+            <label class="wide">
+              标准岗位
+              <input id="optimization-job" list="optimization-job-options" placeholder="例如：Java开发工程师" />
+              <datalist id="optimization-job-options"></datalist>
+            </label>
+            <button id="optimization-load" class="secondary-btn">查看岗位技能</button>
+          </div>
+
+          <div id="optimization-summary" class="metric-grid"></div>
+
+          <div class="optimization-workspace">
+            <div class="panel">
+              <div class="panel-title-row">
+                <div>
+                  <h3>当前岗位技能</h3>
+                  <p id="optimization-profile-note" class="muted">先输入岗位并点击查看。</p>
+                </div>
+                <span id="optimization-count" class="muted"></span>
+              </div>
+              <div class="table-wrap optimization-skill-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>技能</th>
+                      <th>类别</th>
+                      <th>状态</th>
+                      <th>核心</th>
+                      <th>来源</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="optimization-skill-table"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <h3>新增技能</h3>
+              <p class="muted">输入一个技能，系统会先归一化成标准名称，再由你确认是否加入当前岗位画像。</p>
+              <div class="inline-form">
+                <input id="optimization-new-skill" placeholder="例如：Spring Cloud" />
+                <button id="optimization-normalize" class="secondary-btn">归一化</button>
+              </div>
+              <div id="optimization-normalize-result" class="confirm-box muted">等待输入技能。</div>
+
+              <div class="edit-divider"></div>
+
+              <h3>修改技能属性</h3>
+              <p class="muted">点击技能行里的“修改”后，在这里调整属性。</p>
+              <div class="edit-grid">
+                <label>
+                  技能
+                  <input id="optimization-edit-skill" disabled placeholder="未选择技能" />
+                </label>
+                <label>
+                  类别
+                  <input id="optimization-edit-category" placeholder="例如：编程语言" />
+                </label>
+                <label>
+                  状态
+                  <select id="optimization-edit-status">
+                    <option value="稳定核心技能">稳定核心技能</option>
+                    <option value="活跃技能">活跃技能</option>
+                    <option value="观察中">观察中</option>
+                    <option value="人工新增技能">人工新增技能</option>
+                  </select>
+                </label>
+                <label>
+                  是否核心
+                  <select id="optimization-edit-core">
+                    <option value="1">是</option>
+                    <option value="0">否</option>
+                  </select>
+                </label>
+                <label class="wide">
+                  备注
+                  <textarea id="optimization-edit-note" rows="3" placeholder="说明为什么修改。"></textarea>
+                </label>
+              </div>
+              <button id="optimization-apply-edit" class="primary-btn">应用修改</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title-row">
+              <div>
+                <h3>变更记录</h3>
+                <p class="muted">这里展示你在页面内做过的调整；点击“预览本次变更”可查看即将保存的结构化内容，当前不会写入文件。</p>
+              </div>
+              <span id="optimization-change-count" class="muted"></span>
+            </div>
+            <div id="optimization-change-list" class="change-list"></div>
+            <pre id="optimization-draft" class="log-box">暂无变更。</pre>
           </div>
         </section>
 

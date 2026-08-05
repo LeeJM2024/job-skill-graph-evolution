@@ -1,17 +1,34 @@
 from __future__ import annotations
 
+from functools import lru_cache
+import sys
 from typing import Any
 
 import pandas as pd
 
 from .paths import (
     BASE_FREQUENCY_OUTPUT,
+    BASE_CURRENT_PROFILE,
+    BASE_DATABASE,
+    BASE_EVENT_STREAM,
     BASE_JOB_PROFILE_DIFF,
     BASE_JOB_PROFILE_SNAPSHOTS,
+    BASE_SKILL_POOL,
     BASE_SKILL_LIFECYCLE,
     BASE_SKILL_MIGRATION,
     BASE_SKILL_MONTHLY_SPREAD,
+    BASE_TITLE_DICTIONARY,
+    DATA_STREAM_SKILL_DICTIONARY,
+    DATA_STREAM_TITLE_DICTIONARY,
+    DATASET_ROOT,
+    SKILL_ALIAS_DICTIONARY,
+    SKILL_DISPLAY_DICTIONARY,
+    SKILL_NORMALIZED_DICTIONARY,
 )
+
+
+if str(DATASET_ROOT) not in sys.path:
+    sys.path.insert(0, str(DATASET_ROOT))
 
 
 STATUS_ORDER = ["新兴技能", "活跃技能", "稳定核心技能", "衰退技能", "废弃技能", "观察中"]
@@ -282,10 +299,313 @@ def profile_compare(
     }
 
 
+def optimization_profile(standard_job: str | None = None, limit: int = 500) -> dict[str, Any]:
+    frame = _read_csv(BASE_CURRENT_PROFILE)
+    if frame.empty:
+        return {
+            "standard_job": standard_job or "",
+            "jobs": [],
+            "skills": [],
+            "summary": {
+                "job_count": 0,
+                "skill_count": 0,
+                "source_month": "",
+                "source_type": "",
+            },
+        }
+
+    jobs = sorted(frame["standard_job"].dropna().astype(str).unique().tolist())
+    job = _resolve_job(frame, standard_job)
+    filtered = frame[frame["standard_job"].astype(str) == job].copy() if job else frame.head(0).copy()
+    for column in [
+        "monthly_jd_count",
+        "monthly_skill_count",
+        "monthly_skill_frequency",
+        "cumulative_jd_count",
+        "cumulative_skill_count",
+        "cumulative_skill_frequency",
+        "is_core_skill",
+        "rank_in_month",
+    ]:
+        filtered[column] = _number(filtered, column)
+    if "manual_status" not in filtered.columns:
+        filtered["manual_status"] = "系统识别"
+    if "manual_note" not in filtered.columns:
+        filtered["manual_note"] = ""
+    rows = (
+        filtered.sort_values(
+            ["is_core_skill", "monthly_skill_frequency", "monthly_skill_count", "rank_in_month", "skill"],
+            ascending=[False, False, False, True, True],
+        )
+        .head(_clamp(limit, 1, 1000))
+        .to_dict(orient="records")
+    )
+    source_months = sorted(filtered["source_month"].dropna().astype(str).unique().tolist()) if "source_month" in filtered.columns else []
+    source_types = sorted(filtered["source_type"].dropna().astype(str).unique().tolist()) if "source_type" in filtered.columns else []
+    return {
+        "standard_job": job,
+        "jobs": jobs,
+        "skills": [_clean_record(row) for row in rows],
+        "summary": {
+            "job_count": len(jobs),
+            "skill_count": int(len(filtered)),
+            "source_month": "、".join(source_months),
+            "source_type": "、".join(source_types),
+        },
+    }
+
+
+def normalize_optimization_skill(skill: str) -> dict[str, Any]:
+    raw = str(skill or "").strip()
+    if not raw:
+        return {"input": "", "normalized_skill": "", "kg_display_skill": "", "matched": False, "message": "请输入技能名称。"}
+
+    row = {
+        "job_id": "web_optimization_manual_skill",
+        "job_title": "人工优化",
+        "skill_keyword": raw,
+        "span_text": raw,
+        "normalized_skill_candidate": "",
+        "evidence_field": "manual_optimization",
+        "evidence_sentence": raw,
+    }
+    normalizer = _skill_extract_normalizer()
+    normalized_rows, local_stats = normalizer.normalize_rows([row])
+    normalized_row = normalized_rows[0] if normalized_rows else row
+    api_stats: dict[str, int] = {}
+    api_error = ""
+    if str(normalized_row.get("normalization_status")) == "unresolved":
+        try:
+            from skill_extract import extract_job_skills_api as extract_api
+            from skill_extract.normalizer import DEFAULT_CACHE
+
+            extract_api.load_env_file()
+            normalized_rows, api_counter = normalizer.normalize_unknowns_with_api(
+                normalized_rows,
+                provider="deepseek",
+                cache_path=DEFAULT_CACHE,
+                batch_size=1,
+                allow_new_skills=True,
+            )
+            normalized_row = normalized_rows[0] if normalized_rows else normalized_row
+            api_stats = dict(api_counter)
+        except Exception as exc:
+            api_error = str(exc)
+
+    return _normalization_response(
+        raw,
+        normalized_row,
+        local_stats=dict(local_stats),
+        api_stats=api_stats,
+        api_error=api_error,
+    )
+
+
+@lru_cache(maxsize=1)
+def _skill_extract_normalizer():
+    from skill_extract.normalizer import SkillNormalizer
+
+    return SkillNormalizer()
+
+
+def _normalization_response(
+    raw: str,
+    row: dict[str, Any],
+    *,
+    local_stats: dict[str, int],
+    api_stats: dict[str, int],
+    api_error: str,
+) -> dict[str, Any]:
+    normalized_skill = str(row.get("normalized_skill") or "").strip()
+    kg_display_skill = str(row.get("kg_display_skill") or "").strip()
+    status = str(row.get("normalization_status") or "").strip()
+    method = str(row.get("normalization_method") or "").strip()
+    reason = str(row.get("normalization_reason") or "").strip()
+    proposed = str(row.get("proposed_normalized_skill") or "").strip()
+    matched = bool(normalized_skill and kg_display_skill and status in {"normalized", "new_skill_candidate"})
+    if matched:
+        if status == "new_skill_candidate":
+            message = "归一化 API 判断为可新增技能，请确认是否加入当前岗位画像。"
+        elif method.startswith("llm_"):
+            message = "已通过归一化 API 映射到标准技能，请确认是否加入当前岗位画像。"
+        else:
+            message = "已通过项目归一化词典映射到标准技能，请确认是否加入当前岗位画像。"
+    elif api_error:
+        message = f"本地词典未命中，归一化 API 暂不可用：{api_error}"
+    else:
+        message = reason or "本地词典和归一化 API 均未给出可用标准技能，请先维护词典或人工复核。"
+    return {
+        "input": raw,
+        "normalized_skill": normalized_skill,
+        "kg_display_skill": kg_display_skill,
+        "matched": matched,
+        "match_source": method or ("归一化 API" if api_stats else "项目归一化模块"),
+        "message": message,
+        "normalization_status": status,
+        "normalization_method": method,
+        "normalization_confidence": row.get("normalization_confidence") or "",
+        "needs_review": str(row.get("needs_review") or "").lower() == "true",
+        "proposed_normalized_skill": proposed,
+        "normalization_reason": reason,
+        "local_stats": local_stats,
+        "api_stats": api_stats,
+        "api_error": api_error,
+    }
+
+
+def optimization_sources(keyword: str | None = None, scope: str | None = None, limit: int = 80) -> dict[str, Any]:
+    configs = [
+        {
+            "key": "skill_alias",
+            "name": "技能泛抽取词典",
+            "path": SKILL_ALIAS_DICTIONARY,
+            "purpose": "维护原始写法、别名到标准技能名和展示大类的映射。",
+            "required_columns": ["skill_keyword", "normalized_skill", "kg_display_skill"],
+        },
+        {
+            "key": "skill_normalized",
+            "name": "技能归一化词典",
+            "path": SKILL_NORMALIZED_DICTIONARY,
+            "purpose": "维护合法的最终标准技能名清单。",
+            "required_columns": ["skill"],
+        },
+        {
+            "key": "skill_display",
+            "name": "技能展示词典",
+            "path": SKILL_DISPLAY_DICTIONARY,
+            "purpose": "维护标准技能名到知识图谱展示大类的映射。",
+            "required_columns": ["skill", "kg_display_skill"],
+        },
+        {
+            "key": "runtime_job_dictionary",
+            "name": "当前运行标准岗位词典",
+            "path": BASE_TITLE_DICTIONARY,
+            "purpose": "维护当前 Web 与 job_update 路由使用的标准岗位、大族和匹配关键词。",
+            "required_columns": ["standard_job_title", "standard_category", "match_keywords"],
+        },
+        {
+            "key": "stream_job_dictionary",
+            "name": "数据流标准岗位词典",
+            "path": DATA_STREAM_TITLE_DICTIONARY,
+            "purpose": "与当前运行岗位词典保持一致，用于以后重建初始基础数据集。",
+            "required_columns": ["standard_job_title", "standard_category", "match_keywords"],
+        },
+        {
+            "key": "stream_skill_alias",
+            "name": "数据流技能泛抽取词典",
+            "path": DATA_STREAM_SKILL_DICTIONARY,
+            "purpose": "与技能体系保持一致，用于以后重建初始基础数据集。",
+            "required_columns": ["skill_keyword", "normalized_skill", "kg_display_skill"],
+        },
+    ]
+    selected_configs = [item for item in configs if not scope or item["key"] == scope]
+    sources = [_source_preview(item, keyword=keyword, limit=limit) for item in selected_configs]
+    return {
+        "principle": "只维护源头词典，不直接修改事件流、频率、技能池、岗位画像或 SQLite 结果文件。",
+        "workflow": [
+            "发现新技能或别名：同步维护技能三词典。",
+            "发现新标准岗位或岗位关键词问题：维护当前标准岗位词典，并同步数据流输入词典。",
+            "真实 JD 更新：走 submit-one / Web 审核入库流程，由系统自动派生运行结果。",
+            "词典正式变更后：按需执行 python -m job_update.cli init-db 同步 SQLite。",
+        ],
+        "forbidden_files": [
+            str(BASE_EVENT_STREAM),
+            str(BASE_FREQUENCY_OUTPUT),
+            str(BASE_SKILL_POOL),
+            str(BASE_SKILL_LIFECYCLE),
+            str(BASE_SKILL_MIGRATION),
+            str(BASE_SKILL_MONTHLY_SPREAD),
+            str(BASE_JOB_PROFILE_SNAPSHOTS),
+            str(BASE_JOB_PROFILE_DIFF),
+            str(BASE_DATABASE),
+        ],
+        "sync_checks": _optimization_sync_checks(),
+        "sources": sources,
+    }
+
+
 def _read_csv(path) -> pd.DataFrame:
     if not path.exists():
         return pd.DataFrame()
     return pd.read_csv(path, dtype=str, encoding="utf-8-sig").fillna("")
+
+
+def _source_preview(config: dict[str, Any], *, keyword: str | None, limit: int) -> dict[str, Any]:
+    frame = _read_csv(config["path"])
+    columns = frame.columns.tolist()
+    filtered = _filter_keyword(frame, keyword)
+    return {
+        "key": config["key"],
+        "name": config["name"],
+        "path": str(config["path"]),
+        "purpose": config["purpose"],
+        "required_columns": config["required_columns"],
+        "columns": columns,
+        "row_count": int(len(frame)),
+        "matched_count": int(len(filtered)),
+        "missing_columns": [column for column in config["required_columns"] if column not in columns],
+        "rows": [_clean_record(row) for row in filtered.head(_clamp(limit, 1, 300)).to_dict(orient="records")],
+    }
+
+
+def _filter_keyword(frame: pd.DataFrame, keyword: str | None) -> pd.DataFrame:
+    if frame.empty or not keyword:
+        return frame
+    needle = str(keyword).strip().lower()
+    if not needle:
+        return frame
+    mask = frame.astype(str).apply(lambda column: column.str.lower().str.contains(needle, regex=False, na=False)).any(axis=1)
+    return frame[mask].copy()
+
+
+def _optimization_sync_checks() -> list[dict[str, Any]]:
+    runtime_jobs = _read_csv(BASE_TITLE_DICTIONARY)
+    stream_jobs = _read_csv(DATA_STREAM_TITLE_DICTIONARY)
+    alias = _read_csv(SKILL_ALIAS_DICTIONARY)
+    normalized = _read_csv(SKILL_NORMALIZED_DICTIONARY)
+    display = _read_csv(SKILL_DISPLAY_DICTIONARY)
+    stream_alias = _read_csv(DATA_STREAM_SKILL_DICTIONARY)
+
+    runtime_job_set = _row_signature_set(runtime_jobs, ["standard_job_title", "standard_category", "match_keywords"])
+    stream_job_set = _row_signature_set(stream_jobs, ["standard_job_title", "standard_category", "match_keywords"])
+    alias_skills = _value_set(alias, "normalized_skill")
+    normalized_skills = _value_set(normalized, "skill")
+    display_skills = _value_set(display, "skill")
+    stream_alias_skills = _value_set(stream_alias, "normalized_skill")
+    return [
+        {
+            "name": "当前岗位词典与数据流岗位词典",
+            "status": "通过" if runtime_job_set == stream_job_set else "需同步",
+            "detail": f"当前 {len(runtime_job_set)} 条，数据流 {len(stream_job_set)} 条，差异 {len(runtime_job_set ^ stream_job_set)} 条",
+        },
+        {
+            "name": "泛抽取技能是否都在归一化词典中",
+            "status": "通过" if alias_skills <= normalized_skills else "需补齐",
+            "detail": f"泛抽取标准技能 {len(alias_skills)} 个，缺失 {len(alias_skills - normalized_skills)} 个",
+        },
+        {
+            "name": "展示词典是否覆盖归一化技能",
+            "status": "通过" if normalized_skills <= display_skills else "需补齐",
+            "detail": f"归一化技能 {len(normalized_skills)} 个，展示映射缺失 {len(normalized_skills - display_skills)} 个",
+        },
+        {
+            "name": "数据流技能词典是否覆盖当前技能体系",
+            "status": "通过" if alias_skills <= stream_alias_skills else "需同步",
+            "detail": f"当前标准技能 {len(alias_skills)} 个，数据流缺失 {len(alias_skills - stream_alias_skills)} 个",
+        },
+    ]
+
+
+def _row_signature_set(frame: pd.DataFrame, columns: list[str]) -> set[tuple[str, ...]]:
+    if frame.empty or any(column not in frame.columns for column in columns):
+        return set()
+    return {tuple(str(row[column]).strip() for column in columns) for row in frame.to_dict(orient="records")}
+
+
+def _value_set(frame: pd.DataFrame, column: str) -> set[str]:
+    if frame.empty or column not in frame.columns:
+        return set()
+    return {str(value).strip() for value in frame[column].dropna().tolist() if str(value).strip()}
 
 
 def _resolve_job(frame: pd.DataFrame, standard_job: str | None) -> str:

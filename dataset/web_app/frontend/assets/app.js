@@ -12,6 +12,17 @@ const state = {
     profileChangeTab: "added",
     loaded: false,
   },
+  optimization: {
+    jobs: [],
+    skills: [],
+    originalSkills: [],
+    changes: [],
+    pendingNormalized: null,
+    editingSkill: "",
+    currentJob: "",
+    summary: {},
+    loaded: false,
+  },
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -88,6 +99,12 @@ function switchView(viewName) {
     refreshAnalytics().catch((error) => {
       $("#trend-summary").textContent = error.message;
     });
+  }
+  if (viewName === "optimization" && !state.optimization.loaded) {
+    refreshOptimizationProfile()
+      .catch((error) => {
+        $("#optimization-draft").textContent = error.message;
+      });
   }
 }
 
@@ -554,6 +571,254 @@ function renderProfileChangeTable(tab) {
   `).join("") || `<tr><td colspan="5">暂无${changeLabel(tab)}记录。</td></tr>`;
 }
 
+function renderOptimizationProfile(payload) {
+  state.optimization.jobs = payload.jobs || [];
+  state.optimization.skills = (payload.skills || []).map((row) => ({
+    ...row,
+    manual_status: row.manual_status || "系统识别",
+    manual_note: row.manual_note || "",
+  }));
+  state.optimization.originalSkills = state.optimization.skills.map((row) => ({ ...row }));
+  state.optimization.currentJob = payload.standard_job || "";
+  state.optimization.summary = payload.summary || {};
+  state.optimization.changes = [];
+  state.optimization.pendingNormalized = null;
+  state.optimization.editingSkill = "";
+  state.optimization.loaded = true;
+
+  $("#optimization-job").value = state.optimization.currentJob;
+  $("#optimization-job-options").innerHTML = state.optimization.jobs
+    .map((job) => `<option value="${escapeHtml(job)}"></option>`)
+    .join("");
+  renderOptimizationSkills();
+  renderOptimizationChanges();
+  resetOptimizationEdit();
+  $("#optimization-normalize-result").textContent = "等待输入技能。";
+  $("#optimization-draft").textContent = "暂无变更。";
+}
+
+function renderOptimizationSkills() {
+  const skills = state.optimization.skills.filter((row) => row.manual_status !== "人工删除");
+  const summary = state.optimization.summary || {};
+  $("#optimization-summary").innerHTML = [
+    metric("标准岗位", escapeHtml(state.optimization.currentJob || "未选择")),
+    metric("当前技能数", skills.length),
+    metric("来源月份", summary.source_month || "无"),
+    metric("人工变更", state.optimization.changes.length),
+  ].join("");
+  $("#optimization-count").textContent = `${skills.length} 个技能`;
+  $("#optimization-profile-note").textContent = state.optimization.currentJob
+    ? `当前读取 job_current_profile_system.csv，来源：${summary.source_type || "system"}。`
+    : "先输入岗位并点击查看。";
+  $("#optimization-skill-table").innerHTML = skills.map((row) => `
+    <tr class="${row.manual_status === "人工新增" ? "manual-added-row" : row.manual_status === "人工修改" ? "manual-edited-row" : ""}">
+      <td><strong>${escapeHtml(row.skill)}</strong><div class="muted">${escapeHtml(row.manual_note || "")}</div></td>
+      <td>${escapeHtml(row.kg_display_skill || "未标注")}</td>
+      <td><span class="tag ${row.snapshot_skill_status === "人工新增技能" ? "warn" : "ok"}">${escapeHtml(row.snapshot_skill_status || "系统识别")}</span></td>
+      <td>${String(row.is_core_skill) === "1" ? "是" : "否"}</td>
+      <td><span class="tag ${row.manual_status === "系统识别" ? "" : "warn"}">${escapeHtml(row.manual_status || "系统识别")}</span></td>
+      <td>
+        <div class="row-actions">
+          <button class="ghost-btn" type="button" data-optimization-edit="${escapeHtml(row.skill)}">修改</button>
+          <button class="ghost-btn danger-btn" type="button" data-optimization-delete="${escapeHtml(row.skill)}">删除</button>
+        </div>
+      </td>
+    </tr>
+  `).join("") || `<tr><td colspan="6">没有找到该岗位的技能画像。</td></tr>`;
+
+  $$("[data-optimization-edit]").forEach((button) => {
+    button.addEventListener("click", () => beginOptimizationEdit(button.dataset.optimizationEdit));
+  });
+  $$("[data-optimization-delete]").forEach((button) => {
+    button.addEventListener("click", () => deleteOptimizationSkill(button.dataset.optimizationDelete));
+  });
+}
+
+function renderOptimizationChanges() {
+  const changes = state.optimization.changes;
+  $("#optimization-change-count").textContent = `${changes.length} 条变更`;
+  $("#optimization-change-list").innerHTML = changes.map((change, index) => `
+    <article class="change-item">
+      <span>${index + 1}</span>
+      <div>
+        <strong>${changeActionText(change.action)}：${escapeHtml(change.skill)}</strong>
+        <p>${escapeHtml(change.detail || change.note || "等待写入人工修正表。")}</p>
+      </div>
+    </article>
+  `).join("") || `<p class="muted">暂无人工变更。</p>`;
+}
+
+function changeActionText(action) {
+  return { add: "新增", delete: "删除", update: "修改" }[action] || action;
+}
+
+function resetOptimizationEdit() {
+  $("#optimization-edit-skill").value = "";
+  $("#optimization-edit-category").value = "";
+  $("#optimization-edit-status").value = "稳定核心技能";
+  $("#optimization-edit-core").value = "1";
+  $("#optimization-edit-note").value = "";
+}
+
+function beginOptimizationEdit(skill) {
+  const row = state.optimization.skills.find((item) => item.skill === skill);
+  if (!row) return;
+  state.optimization.editingSkill = skill;
+  $("#optimization-edit-skill").value = row.skill || "";
+  $("#optimization-edit-category").value = row.kg_display_skill || "";
+  $("#optimization-edit-status").value = row.snapshot_skill_status || "观察中";
+  $("#optimization-edit-core").value = String(row.is_core_skill) === "1" ? "1" : "0";
+  $("#optimization-edit-note").value = row.manual_note || "";
+}
+
+function applyOptimizationEdit() {
+  const skill = state.optimization.editingSkill;
+  if (!skill) {
+    $("#optimization-draft").textContent = "请先在技能列表中选择一项技能。";
+    return;
+  }
+  const row = state.optimization.skills.find((item) => item.skill === skill);
+  if (!row) return;
+  const before = { ...row };
+  row.kg_display_skill = $("#optimization-edit-category").value.trim();
+  row.snapshot_skill_status = $("#optimization-edit-status").value;
+  row.is_core_skill = $("#optimization-edit-core").value;
+  row.manual_note = $("#optimization-edit-note").value.trim();
+  if (row.manual_status !== "人工新增") {
+    row.manual_status = "人工修改";
+    row.source_type = "manual_update";
+  }
+  state.optimization.changes.push({
+    action: "update",
+    standard_job: state.optimization.currentJob,
+    skill,
+    before,
+    after: { ...row },
+    detail: "修改技能类别、状态、核心标记或备注。",
+    note: row.manual_note,
+  });
+  renderOptimizationSkills();
+  renderOptimizationChanges();
+}
+
+async function normalizeOptimizationSkill() {
+  const raw = $("#optimization-new-skill").value.trim();
+  if (!raw) {
+    $("#optimization-normalize-result").textContent = "请先输入技能名称。";
+    return;
+  }
+  const result = await api(`/api/optimization/normalize-skill?skill=${encodeURIComponent(raw)}`);
+  state.optimization.pendingNormalized = result;
+  const canConfirm = Boolean(result.normalized_skill && result.kg_display_skill && result.matched);
+  const exists = state.optimization.skills.some(
+    (row) => row.skill === result.normalized_skill && row.manual_status !== "人工删除",
+  );
+  $("#optimization-normalize-result").innerHTML = `
+    <div class="confirm-title">
+      <strong>${escapeHtml(result.normalized_skill || raw)}</strong>
+      <span class="tag ${result.matched ? "ok" : "warn"}">${escapeHtml(result.match_source || "用户输入")}</span>
+    </div>
+    <p>${escapeHtml(result.message || "")}</p>
+    <p>类别：${escapeHtml(result.kg_display_skill || "未标注")}</p>
+    ${result.normalization_reason ? `<p>依据：${escapeHtml(result.normalization_reason)}</p>` : ""}
+    ${
+      exists
+        ? `<p class="tag warn">该技能已在当前岗位画像中，无需重复添加。</p>`
+        : !canConfirm
+          ? `<p class="tag danger">暂不能加入：没有可靠的标准技能名和类别。</p>`
+        : `<button id="optimization-confirm-add" class="primary-btn" type="button">确认加入岗位画像</button>`
+    }
+  `;
+  $("#optimization-confirm-add")?.addEventListener("click", confirmOptimizationAdd);
+}
+
+function confirmOptimizationAdd() {
+  const candidate = state.optimization.pendingNormalized;
+  if (!candidate?.normalized_skill) return;
+  const skill = candidate.normalized_skill;
+  const existing = state.optimization.skills.find((row) => row.skill === skill);
+  const newRow = {
+    standard_job: state.optimization.currentJob,
+    skill,
+    kg_display_skill: candidate.kg_display_skill || "",
+    monthly_jd_count: 0,
+    monthly_skill_count: 0,
+    monthly_skill_frequency: 0,
+    cumulative_jd_count: 0,
+    cumulative_skill_count: 0,
+    cumulative_skill_frequency: 0,
+    snapshot_skill_status: "人工新增技能",
+    is_core_skill: 0,
+    rank_in_month: "",
+    source_month: state.optimization.summary.source_month || "",
+    source_type: "manual_add",
+    manual_status: "人工新增",
+    manual_note: `由“${candidate.input}”归一化后人工加入。`,
+  };
+  if (existing) {
+    Object.assign(existing, newRow);
+  } else {
+    state.optimization.skills.push(newRow);
+  }
+  state.optimization.changes.push({
+    action: "add",
+    standard_job: state.optimization.currentJob,
+    skill,
+    normalized_from: candidate.input,
+    after: newRow,
+    detail: `新增技能，初始化统计字段，标记为人工新增技能。`,
+  });
+  $("#optimization-new-skill").value = "";
+  $("#optimization-normalize-result").textContent = "已加入当前页面画像。";
+  state.optimization.pendingNormalized = null;
+  renderOptimizationSkills();
+  renderOptimizationChanges();
+}
+
+function deleteOptimizationSkill(skill) {
+  const row = state.optimization.skills.find((item) => item.skill === skill);
+  if (!row) return;
+  if (!window.confirm(`确认从“${state.optimization.currentJob}”中删除“${skill}”？`)) return;
+  row.manual_status = "人工删除";
+  row.source_type = "manual_delete";
+  state.optimization.changes.push({
+    action: "delete",
+    standard_job: state.optimization.currentJob,
+    skill,
+    before: { ...row },
+    detail: "从当前生效画像中移除该技能；历史快照不被修改。",
+  });
+  renderOptimizationSkills();
+  renderOptimizationChanges();
+}
+
+function buildOptimizationDraft() {
+  return {
+    standard_job: state.optimization.currentJob,
+    preview_type: "人工优化变更预览",
+    base_profile_file: "dataset/job_update/data/base/job_current_profile_system.csv",
+    target_manual_file: "dataset/job_update/data/base/job_profile_manual_overrides.csv",
+    effective_profile_file: "dataset/job_update/data/base/job_current_profile_effective.csv",
+    write_policy: "当前仅预览本次页面调整，不直接写入系统画像文件。",
+    changes: state.optimization.changes,
+    effective_preview: state.optimization.skills.filter((row) => row.manual_status !== "人工删除"),
+  };
+}
+
+async function refreshOptimizationProfile() {
+  const params = new URLSearchParams();
+  const job = $("#optimization-job").value.trim();
+  if (job) params.set("standard_job", job);
+  params.set("limit", "500");
+  renderOptimizationProfile(await api(`/api/optimization/profile?${params}`));
+}
+
+async function openOptimizationForJob(job) {
+  switchView("optimization");
+  $("#optimization-job").value = job || $("#analytics-job").value || "";
+  await refreshOptimizationProfile();
+}
+
 function processStepsHtml(item) {
   const route = item?.result?.route || {};
   const skills = item?.result?.skills || [];
@@ -929,6 +1194,26 @@ function bindEvents() {
 
   $$(".profile-tab").forEach((button) => {
     button.addEventListener("click", () => renderProfileChangeTable(button.dataset.profileChange));
+  });
+  $("#open-optimization-from-profile").addEventListener("click", () => {
+    openOptimizationForJob($("#analytics-job").value);
+  });
+  $("#optimization-load").addEventListener("click", refreshOptimizationProfile);
+  $("#optimization-refresh").addEventListener("click", refreshOptimizationProfile);
+  $("#optimization-normalize").addEventListener("click", normalizeOptimizationSkill);
+  $("#optimization-apply-edit").addEventListener("click", applyOptimizationEdit);
+  $("#optimization-job").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") refreshOptimizationProfile();
+  });
+  $("#optimization-new-skill").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") normalizeOptimizationSkill();
+  });
+  $("#optimization-save-draft").addEventListener("click", () => {
+    if (!state.optimization.changes.length) {
+      $("#optimization-draft").textContent = "暂无可预览的变更。请先新增、删除或修改一个技能。";
+      return;
+    }
+    $("#optimization-draft").textContent = JSON.stringify(buildOptimizationDraft(), null, 2);
   });
 
   $("#refresh-runs").addEventListener("click", refreshRuns);

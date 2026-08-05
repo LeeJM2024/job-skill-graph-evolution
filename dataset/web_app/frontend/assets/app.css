@@ -703,6 +703,11 @@ textarea {
   padding: 12px;
 }
 
+.flow-steps strong,
+.flow-steps p {
+  grid-column: 2;
+}
+
 .flow-steps span,
 .process-step span {
   background: var(--accent);
@@ -1018,6 +1023,172 @@ dialog::backdrop {
   gap: 12px;
 }
 
+.optimization-grid,
+.draft-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.optimization-workspace {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.65fr);
+}
+
+.optimization-skill-wrap {
+  max-height: 560px;
+}
+
+.optimization-skill-wrap table {
+  min-width: 860px;
+}
+
+.optimization-skill-wrap th:nth-child(6),
+.optimization-skill-wrap td:nth-child(6) {
+  width: 160px;
+}
+
+.row-actions,
+.inline-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.inline-form {
+  align-items: center;
+  margin: 14px 0;
+}
+
+.inline-form input {
+  flex: 1;
+  min-width: 180px;
+}
+
+.danger-btn {
+  border-color: #f1b4b4;
+  color: var(--danger);
+}
+
+.confirm-box {
+  border: 1px dashed #b8c8c5;
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 58px;
+  background: #fbfdfc;
+}
+
+.confirm-title {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.edit-divider {
+  border-top: 1px solid var(--line);
+  margin: 18px 0;
+}
+
+.edit-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 14px 0;
+}
+
+.edit-grid .wide {
+  grid-column: 1 / -1;
+}
+
+.manual-added-row td {
+  background: #fffaf0;
+}
+
+.manual-edited-row td {
+  background: #f4f8ff;
+}
+
+.change-list {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.change-item {
+  align-items: flex-start;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 30px minmax(0, 1fr);
+  padding: 10px;
+  background: #fbfdfc;
+}
+
+.change-item > span {
+  background: #e6eeec;
+  border-radius: 6px;
+  color: #31504c;
+  display: grid;
+  font-size: 12px;
+  font-weight: 800;
+  height: 28px;
+  place-items: center;
+  width: 28px;
+}
+
+.change-item p {
+  font-size: 12px;
+}
+
+.compact-flow {
+  gap: 8px;
+}
+
+.compact-flow div {
+  grid-template-columns: 30px 1fr;
+  padding: 10px;
+}
+
+.source-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.source-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: #fbfdfc;
+}
+
+.source-table {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-top: 12px;
+  max-height: 360px;
+}
+
+.source-table table {
+  min-width: 920px;
+}
+
+.source-table td {
+  max-width: 320px;
+  overflow-wrap: anywhere;
+}
+
+.draft-grid {
+  margin-bottom: 12px;
+}
+
+.draft-grid .wide {
+  grid-column: 1 / -1;
+}
+
 @media (max-width: 980px) {
   #app {
     grid-template-columns: 1fr;
@@ -1053,9 +1224,13 @@ dialog::backdrop {
   .process-steps,
   .detail-grid,
   .status-grid,
-  .profile-compare-grid,
-  .change-flow,
-  .profile-metrics {
+    .profile-compare-grid,
+    .change-flow,
+    .profile-metrics,
+    .optimization-grid,
+    .optimization-workspace,
+    .draft-grid,
+    .edit-grid {
     grid-template-columns: 1fr;
   }
 
