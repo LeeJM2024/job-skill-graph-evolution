@@ -22,13 +22,15 @@ from .paths import (
     DATA_STREAM_TITLE_DICTIONARY,
     DATASET_ROOT,
     SKILL_ALIAS_DICTIONARY,
-    SKILL_DISPLAY_DICTIONARY,
-    SKILL_NORMALIZED_DICTIONARY,
+    SKILL_EXTRACT_ROOT,
 )
+from .paths import domain_file, resolve_domain
+from .profile_override_service import apply_profile_overrides
 
 
-if str(DATASET_ROOT) not in sys.path:
-    sys.path.insert(0, str(DATASET_ROOT))
+for path in (DATASET_ROOT, SKILL_EXTRACT_ROOT.parent):
+    if str(path) not in sys.path:
+        sys.path.insert(0, str(path))
 
 
 STATUS_ORDER = ["新兴技能", "活跃技能", "稳定核心技能", "衰退技能", "废弃技能", "观察中"]
@@ -69,25 +71,26 @@ DIFF_NUMBER_COLUMNS = [
 ]
 
 
-def list_jobs() -> list[str]:
-    frame = _read_csv(BASE_FREQUENCY_OUTPUT)
+def list_jobs(domain: str = "company") -> list[str]:
+    frame = _read_csv(domain_file(domain, "frequency"))
     if frame.empty or "standard_job" not in frame.columns:
         return []
     return sorted(frame["standard_job"].dropna().astype(str).unique().tolist())
 
 
-def list_months() -> list[str]:
-    frame = _read_csv(BASE_FREQUENCY_OUTPUT)
+def list_months(domain: str = "company") -> list[str]:
+    frame = _read_csv(domain_file(domain, "frequency"))
     if frame.empty or "month" not in frame.columns:
         return []
     return sorted(frame["month"].dropna().astype(str).unique().tolist())
 
 
-def overview() -> dict[str, Any]:
-    frequency = _read_csv(BASE_FREQUENCY_OUTPUT)
-    lifecycle = _read_csv(BASE_SKILL_LIFECYCLE)
-    migration = _read_csv(BASE_SKILL_MIGRATION)
-    diff = _read_csv(BASE_JOB_PROFILE_DIFF)
+def overview(domain: str = "company") -> dict[str, Any]:
+    domain = resolve_domain(domain)
+    frequency = _read_csv(domain_file(domain, "frequency"))
+    lifecycle = _read_csv(domain_file(domain, "lifecycle"))
+    migration = _read_csv(domain_file(domain, "migration"))
+    diff = _read_csv(domain_file(domain, "diff"))
     latest_month = _latest_month(frequency, "month")
     return {
         "latest_month": latest_month,
@@ -107,8 +110,9 @@ def job_trend(
     top_n: int = 8,
     month_start: str | None = None,
     month_end: str | None = None,
+    domain: str = "company",
 ) -> dict[str, Any]:
-    frame = _read_csv(BASE_FREQUENCY_OUTPUT)
+    frame = _read_csv(domain_file(domain, "frequency"))
     if frame.empty:
         return {"standard_job": standard_job or "", "months": [], "series": []}
 
@@ -149,8 +153,8 @@ def job_trend(
     return {"standard_job": job, "months": months, "series": series}
 
 
-def lifecycle(standard_job: str | None = None, status: str | None = None, limit: int = 120) -> dict[str, Any]:
-    frame = _read_csv(BASE_SKILL_LIFECYCLE)
+def lifecycle(standard_job: str | None = None, status: str | None = None, limit: int = 120, domain: str = "company") -> dict[str, Any]:
+    frame = _read_csv(domain_file(domain, "lifecycle"))
     if frame.empty:
         return {"standard_job": standard_job or "", "summary": [], "rows": []}
 
@@ -176,9 +180,9 @@ def lifecycle(standard_job: str | None = None, status: str | None = None, limit:
     return {"standard_job": job, "summary": summary, "rows": [_clean_record(row) for row in rows]}
 
 
-def migration(skill: str | None = None, limit: int = 20) -> dict[str, Any]:
-    migration_frame = _read_csv(BASE_SKILL_MIGRATION)
-    spread_frame = _read_csv(BASE_SKILL_MONTHLY_SPREAD)
+def migration(skill: str | None = None, limit: int = 20, domain: str = "company") -> dict[str, Any]:
+    migration_frame = _read_csv(domain_file(domain, "migration"))
+    spread_frame = _read_csv(domain_file(domain, "spread"))
     if migration_frame.empty:
         return {"skills": [], "selected": None, "spread": []}
 
@@ -212,8 +216,9 @@ def monthly_rank(
     rank_type: str = "emerging",
     standard_job: str | None = None,
     limit: int = 20,
+    domain: str = "company",
 ) -> dict[str, Any]:
-    frame = _read_csv(BASE_JOB_PROFILE_DIFF)
+    frame = _read_csv(domain_file(domain, "diff"))
     if frame.empty:
         return {"month": month or "", "type": rank_type, "rows": []}
 
@@ -245,9 +250,10 @@ def profile_compare(
     from_month: str | None = None,
     to_month: str | None = None,
     limit: int = 80,
+    domain: str = "company",
 ) -> dict[str, Any]:
-    snapshots = _read_csv(BASE_JOB_PROFILE_SNAPSHOTS)
-    diff = _read_csv(BASE_JOB_PROFILE_DIFF)
+    snapshots = _read_csv(domain_file(domain, "snapshot"))
+    diff = _read_csv(domain_file(domain, "diff"))
     if snapshots.empty:
         return _empty_profile_compare(standard_job or "", from_month or "", to_month or "")
 
@@ -299,8 +305,10 @@ def profile_compare(
     }
 
 
-def optimization_profile(standard_job: str | None = None, limit: int = 500) -> dict[str, Any]:
-    frame = _read_csv(BASE_CURRENT_PROFILE)
+def optimization_profile(standard_job: str | None = None, limit: int = 500, domain: str = "company") -> dict[str, Any]:
+    domain = resolve_domain(domain)
+    frame = _read_csv(domain_file(domain, "current"))
+    frame, override_count = apply_profile_overrides(frame, domain=domain)
     if frame.empty:
         return {
             "standard_job": standard_job or "",
@@ -311,6 +319,7 @@ def optimization_profile(standard_job: str | None = None, limit: int = 500) -> d
                 "skill_count": 0,
                 "source_month": "",
                 "source_type": "",
+                "manual_override_count": 0,
             },
         }
 
@@ -349,13 +358,15 @@ def optimization_profile(standard_job: str | None = None, limit: int = 500) -> d
         "summary": {
             "job_count": len(jobs),
             "skill_count": int(len(filtered)),
+            "manual_override_count": override_count,
             "source_month": "、".join(source_months),
             "source_type": "、".join(source_types),
         },
     }
 
 
-def normalize_optimization_skill(skill: str) -> dict[str, Any]:
+def normalize_optimization_skill(skill: str, domain: str = "company") -> dict[str, Any]:
+    domain = resolve_domain(domain)
     raw = str(skill or "").strip()
     if not raw:
         return {"input": "", "normalized_skill": "", "kg_display_skill": "", "matched": False, "message": "请输入技能名称。"}
@@ -369,7 +380,7 @@ def normalize_optimization_skill(skill: str) -> dict[str, Any]:
         "evidence_field": "manual_optimization",
         "evidence_sentence": raw,
     }
-    normalizer = _skill_extract_normalizer()
+    normalizer = _skill_extract_normalizer(domain)
     normalized_rows, local_stats = normalizer.normalize_rows([row])
     normalized_row = normalized_rows[0] if normalized_rows else row
     api_stats: dict[str, int] = {}
@@ -379,13 +390,23 @@ def normalize_optimization_skill(skill: str) -> dict[str, Any]:
             from skill_extract import extract_job_skills_api as extract_api
             from skill_extract.normalizer import DEFAULT_CACHE
 
+            cache_path = DEFAULT_CACHE
+            prompt_appendix = ""
+            if domain == "government":
+                from government_job_update.core.config import DEFAULT_SKILL_NORMALIZATION_CACHE
+                from government_job_update.core.skill_extraction import GOVERNMENT_NORMALIZATION_PROMPT_APPENDIX
+
+                cache_path = DEFAULT_SKILL_NORMALIZATION_CACHE
+                prompt_appendix = GOVERNMENT_NORMALIZATION_PROMPT_APPENDIX
+
             extract_api.load_env_file()
             normalized_rows, api_counter = normalizer.normalize_unknowns_with_api(
                 normalized_rows,
                 provider="deepseek",
-                cache_path=DEFAULT_CACHE,
+                cache_path=cache_path,
                 batch_size=1,
                 allow_new_skills=True,
+                prompt_appendix=prompt_appendix,
             )
             normalized_row = normalized_rows[0] if normalized_rows else normalized_row
             api_stats = dict(api_counter)
@@ -401,10 +422,15 @@ def normalize_optimization_skill(skill: str) -> dict[str, Any]:
     )
 
 
-@lru_cache(maxsize=1)
-def _skill_extract_normalizer():
+@lru_cache(maxsize=2)
+def _skill_extract_normalizer(domain: str = "company"):
     from skill_extract.normalizer import SkillNormalizer
+    if resolve_domain(domain) == "government":
+        from government_job_update.core.config import DEFAULT_SKILL_EXTRACTION_DICTIONARY
 
+        return SkillNormalizer(
+            extraction_dictionary=DEFAULT_SKILL_EXTRACTION_DICTIONARY,
+        )
     return SkillNormalizer()
 
 
@@ -480,7 +506,7 @@ def optimization_sources(keyword: str | None = None, scope: str | None = None, l
             "key": "runtime_job_dictionary",
             "name": "当前运行标准岗位词典",
             "path": BASE_TITLE_DICTIONARY,
-            "purpose": "维护当前 Web 与 job_update 路由使用的标准岗位、大族和匹配关键词。",
+            "purpose": "维护当前 Web 与公司岗位路由使用的标准岗位、大族和匹配关键词。",
             "required_columns": ["standard_job_title", "standard_category", "match_keywords"],
         },
         {
@@ -506,7 +532,7 @@ def optimization_sources(keyword: str | None = None, scope: str | None = None, l
             "发现新技能或别名：同步维护技能三词典。",
             "发现新标准岗位或岗位关键词问题：维护当前标准岗位词典，并同步数据流输入词典。",
             "真实 JD 更新：走 submit-one / Web 审核入库流程，由系统自动派生运行结果。",
-            "词典正式变更后：按需执行 python -m job_update.cli init-db 同步 SQLite。",
+            "词典正式变更后：按需执行 python -m core.cli init-db 同步 SQLite。",
         ],
         "forbidden_files": [
             str(BASE_EVENT_STREAM),

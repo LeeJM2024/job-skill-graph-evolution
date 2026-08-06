@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
 from datetime import datetime
 import hashlib
 import os
@@ -17,6 +16,11 @@ from .paths import (
     BASE_EVENT_STREAM,
     BASE_FREQUENCY_OUTPUT,
     BASE_SKILL_POOL,
+    BASE_SKILL_LIFECYCLE,
+    BASE_SKILL_MIGRATION,
+    BASE_SKILL_MONTHLY_SPREAD,
+    BASE_JOB_PROFILE_DIFF,
+    BASE_JOB_PROFILE_SNAPSHOTS,
     BASE_TITLE_DICTIONARY,
     DATASET_ROOT,
     JOB_UPDATE_ROOT,
@@ -26,25 +30,25 @@ for path in (DATASET_ROOT, JOB_UPDATE_ROOT):
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
-from job_update.database import SQLiteJobUpdateStore
-from job_update.frequency_store import FrequencyStore
-from job_update.models import (
-    ExistingJobUpdate,
-    JobPosting,
-    JobRoute,
-    NormalizedSkill,
-    ProcessResult,
-    ScoredCandidate,
+from company_job_update.core.database import SQLiteJobUpdateStore
+from company_job_update.core.frequency_store import FrequencyStore
+from company_job_update.core.models import JobPosting, ProcessResult
+from company_job_update.core.route_adjudication import LLMRouteAdjudicator
+from company_job_update.core.service import JobUpdateSystem
+from company_job_update.core.similarity import Text2VecSimilarity
+from company_job_update.core.skill_extraction import ExistingSkillExtractAdapter
+from company_job_update.core.skill_pool_store import SkillPoolStore
+from company_job_update.core.skill_lifecycle_store import SkillLifecycleStore
+from company_job_update.core.skill_migration_store import SkillMigrationStore
+from company_job_update.core.job_profile_store import JobProfileStore
+from company_job_update.core.review_queue import (
+    create_pending_reviews,
+    serialize_process_result as serialize_review_process_result,
+    skill_mentions_from_decisions,
 )
-from job_update.route_adjudication import LLMRouteAdjudicator
-from job_update.service import JobUpdateSystem
-from job_update.similarity import Text2VecSimilarity
-from job_update.skill_extraction import ExistingSkillExtractAdapter
-from job_update.skill_normalizer import PassthroughSkillNormalizer
-from job_update.skill_pool_store import SkillPoolStore
-from job_update.taxonomy import JobTaxonomy
-from job_update.text import clean_text
-from job_update.title_cleaning import LLMTitleCleaner
+from company_job_update.core.taxonomy import JobTaxonomy
+from company_job_update.core.text import clean_text
+from company_job_update.core.title_cleaning import LLMTitleCleaner
 
 
 CATEGORY_THRESHOLD = 0.58
@@ -59,35 +63,75 @@ LLM_UNCERTAIN_TAKE_TOP1_THRESHOLD = 0.82
 TEXT2VEC_MODEL = os.getenv("JOB_UPDATE_TEXT2VEC_MODEL", "shibing624/text2vec-base-chinese")
 
 
-@dataclass
-class ReviewItem:
-    item_id: str
-    input: dict[str, str]
-    result: dict[str, Any]
-    status: str = "pending"
-    created_at: str = ""
-    updated_at: str = ""
-
-
-REVIEW_ITEMS: dict[str, ReviewItem] = {}
-ACTIVE_REVIEW_STATUSES = {"pending"}
 _SIMILARITY: Text2VecSimilarity | None = None
 _TITLE_CLEANER: LLMTitleCleaner | None = None
 _ROUTE_ADJUDICATOR: LLMRouteAdjudicator | None = None
 _SKILL_EXTRACTOR: ExistingSkillExtractAdapter | None = None
-_SKILL_NORMALIZER = PassthroughSkillNormalizer()
 
 
 def submit_one_dry_run(payload: dict[str, str]) -> dict[str, Any]:
+    """Preview a JD, then either merge automatically or create review tasks."""
     progress: list[str] = []
-    posting = _posting_from_payload(payload, source="web_app_dry_run")
-    result = _build_system(progress).process(posting, write=False)
-    serialized = _serialize_process_result(result)
-    serialized["progress"] = progress
-    item = _store_review_item(payload, serialized)
-    response = asdict(item)
-    response["needs_review"] = serialized["route"]["status"] != "existing_job"
-    return response
+    mode = clean_text(payload.get("processing_mode")).lower() or "auto"
+    if mode not in {"auto", "manual"}:
+        raise ValueError("processing_mode must be auto or manual")
+    _ensure_database_initialized()
+    posting = _posting_from_payload(payload, source=f"web_app_{mode}")
+    preview = _build_system(progress).process(
+        posting,
+        write=False,
+        collect_skills_for_review=True,
+    )
+    input_payload = _input_payload(payload, posting)
+    store = SQLiteJobUpdateStore(BASE_DATABASE)
+
+    if mode == "auto" and preview.route.status == "existing_job" and preview.route.best_job is not None:
+        category = preview.route.best_category.name if preview.route.best_category else ""
+        # Evaluate new-skill status before the official write changes skill_pool.
+        queued = create_pending_reviews(
+            store=store,
+            submission_mode=mode,
+            input_payload=input_payload,
+            result=preview,
+            skill_pool_path=BASE_SKILL_POOL,
+            always_queue_job=False,
+        )
+        applied = _build_system(progress).process(
+            posting,
+            write=True,
+            confirmed_standard_job=preview.route.best_job.name,
+            confirmed_standard_category=category,
+        )
+        result_payload = serialize_review_process_result(applied, skill_pool_path=BASE_SKILL_POOL)
+        result_payload["progress"] = progress
+        result_payload["merge_result"] = _merge_summary(applied)
+        item = store.create_review_item(
+            review_id=str(uuid4()),
+            review_type="job",
+            submission_mode=mode,
+            status="auto_merged",
+            job_id=posting.job_id,
+            input_payload=input_payload,
+            result_payload=result_payload,
+        )
+        item["needs_review"] = bool(queued["skill_reviews"])
+        item["skill_review_ids"] = [row["item_id"] for row in queued["skill_reviews"]]
+        return item
+
+    queued = create_pending_reviews(
+        store=store,
+        submission_mode=mode,
+        input_payload=input_payload,
+        result=preview,
+        skill_pool_path=BASE_SKILL_POOL,
+        always_queue_job=True,
+    )
+    item = queued["job_review"]
+    item["result"]["progress"] = progress
+    store.update_review_item(item["item_id"], result_payload=item["result"])
+    item["needs_review"] = True
+    item["skill_review_ids"] = [row["item_id"] for row in queued["skill_reviews"]]
+    return item
 
 
 def import_csv(frame: pd.DataFrame) -> dict[str, Any]:
@@ -97,39 +141,65 @@ def import_csv(frame: pd.DataFrame) -> dict[str, Any]:
 
 
 def get_review_items() -> list[dict[str, Any]]:
-    active_items = [
-        item
-        for item in REVIEW_ITEMS.values()
-        if item.status in ACTIVE_REVIEW_STATUSES
-    ]
-    return [asdict(item) for item in sorted(active_items, key=lambda value: value.created_at, reverse=True)]
+    _ensure_database_initialized()
+    return SQLiteJobUpdateStore(BASE_DATABASE).list_review_items(status="pending")
 
 
 def reject_update(item_id: str) -> dict[str, Any]:
-    item = _get_item(item_id)
-    item.status = "rejected"
-    item.updated_at = _now()
-    return asdict(item)
+    return SQLiteJobUpdateStore(BASE_DATABASE).update_review_item(
+        item_id,
+        status="rejected",
+        decision_payload={"action": "reject_update"},
+    )
 
 
-def confirm_existing(item_id: str, merge_database: bool) -> dict[str, Any]:
-    item = _get_item(item_id)
-    if not merge_database:
-        item.status = "confirmed_no_update"
-        item.updated_at = _now()
-        return asdict(item)
-
-    if item.result.get("route", {}).get("status") != "existing_job":
-        raise ValueError("Only existing_job review items can be merged with confirm_existing")
-
+def confirm_existing(
+    item_id: str,
+    *,
+    merge_database: bool,
+    standard_job_title: str = "",
+    standard_category: str = "",
+    skills: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    item = SQLiteJobUpdateStore(BASE_DATABASE).get_review_item(item_id)
+    if item["review_type"] != "job":
+        raise ValueError("Only a job review can confirm an existing standard job")
+    route = item["result"].get("route") or {}
+    selected_job = clean_text(standard_job_title) or clean_text((route.get("best_job") or {}).get("name"))
+    category = clean_text(standard_category) or _category_for_job(selected_job, route)
+    if not selected_job or not category:
+        raise ValueError("Select an existing standard job and its job family before confirming")
+    taxonomy = JobTaxonomy.from_csv(BASE_TITLE_DICTIONARY)
+    known = {job.title: job.category for job in taxonomy.jobs}
+    if selected_job not in known:
+        raise ValueError("The selected job is not in the formal dictionary; submit it as a new-job maintenance request")
+    category = known[selected_job]
+    reviewed_skills = skills or item["result"].get("skills") or []
+    mentions = skill_mentions_from_decisions(reviewed_skills)
+    posting = _posting_from_payload({**item["input"], "job_id": item["job_id"]}, source="web_app_human_confirmed")
+    posting.routing_job_title = clean_text(item["result"].get("routing_job_title"))
+    posting.skills = mentions
     backup = create_backup(f"confirm existing job {item_id}")
-    _ensure_database_initialized()
-    result = _write_confirmed_existing_update(item.input, item.result)
-    item.status = "merged_existing_job"
-    item.updated_at = _now()
-    item.result["merge_result"] = result
-    item.result["backup"] = backup
-    return asdict(item)
+    applied = _build_system([]).process(
+        posting,
+        write=True,
+        confirmed_standard_job=selected_job,
+        confirmed_standard_category=category,
+    )
+    result_payload = serialize_review_process_result(applied, skill_pool_path=BASE_SKILL_POOL)
+    result_payload["merge_result"] = _merge_summary(applied)
+    result_payload["backup"] = backup
+    return SQLiteJobUpdateStore(BASE_DATABASE).update_review_item(
+        item_id,
+        status="merged_existing_job",
+        decision_payload={
+            "action": "confirm_existing",
+            "standard_job_title": selected_job,
+            "standard_category": category,
+            "skills": reviewed_skills,
+        },
+        result_payload=result_payload,
+    )
 
 
 def confirm_new_job(
@@ -139,33 +209,87 @@ def confirm_new_job(
     standard_job_title: str,
     match_keywords: str,
     merge_database: bool,
+    skills: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
-    item = _get_item(item_id)
+    store = SQLiteJobUpdateStore(BASE_DATABASE)
+    item = store.get_review_item(item_id)
+    if item["review_type"] != "job":
+        raise ValueError("Only a job review can submit a new job proposal")
     manual_review = {
         "standard_category": clean_text(standard_category),
         "standard_job_title": clean_text(standard_job_title),
         "match_keywords": clean_text(match_keywords) or clean_text(standard_job_title),
     }
-    if not merge_database:
-        item.status = "confirmed_new_no_update"
-        item.updated_at = _now()
-        item.result["manual_review"] = manual_review
-        return asdict(item)
-
-    backup = create_backup(f"confirm new job {item_id}")
-    _ensure_database_initialized()
-    _upsert_standard_job(
-        manual_review["standard_job_title"],
-        manual_review["standard_category"],
-        manual_review["match_keywords"],
+    if not manual_review["standard_category"] or not manual_review["standard_job_title"]:
+        raise ValueError("standard_category and standard_job_title are required")
+    maintenance = store.create_review_item(
+        review_id=str(uuid4()),
+        review_type="dictionary_maintenance",
+        submission_mode=item["submission_mode"],
+        job_id=item["job_id"],
+        parent_review_id=item_id,
+        input_payload=item["input"],
+        result_payload={
+            "proposal_type": "new_standard_job",
+            "proposal": manual_review,
+            "skills": skills or item["result"].get("skills") or [],
+            "source_job_review_id": item_id,
+        },
     )
-    result = _write_human_confirmed_new_job(item.input, item.result, manual_review)
-    item.status = "merged_new_job"
-    item.updated_at = _now()
-    item.result["manual_review"] = manual_review
-    item.result["merge_result"] = result
-    item.result["backup"] = backup
-    return asdict(item)
+    result_payload = dict(item["result"])
+    result_payload["manual_review"] = manual_review
+    result_payload["dictionary_maintenance_review_id"] = maintenance["item_id"]
+    return store.update_review_item(
+        item_id,
+        status="submitted_dictionary_maintenance",
+        decision_payload={"action": "submit_new_job_maintenance", **manual_review},
+        result_payload=result_payload,
+    )
+
+
+def review_skill(
+    item_id: str,
+    *,
+    decision: str,
+    normalized_skill: str,
+    kg_display_skill: str,
+    skill_type: str,
+) -> dict[str, Any]:
+    store = SQLiteJobUpdateStore(BASE_DATABASE)
+    item = store.get_review_item(item_id)
+    if item["review_type"] != "skill":
+        raise ValueError("This endpoint only accepts a skill review item")
+    skill = dict(item["result"].get("skill") or {})
+    if decision == "mapped":
+        skill["normalized_skill"] = clean_text(normalized_skill)
+        skill["kg_display_skill"] = clean_text(kg_display_skill)
+        if not skill["normalized_skill"] or not skill["kg_display_skill"]:
+            raise ValueError("A mapped skill needs normalized_skill and kg_display_skill")
+    if skill_type:
+        skill["skill_type"] = clean_text(skill_type)
+    skill["decision"] = decision
+    maintenance_id = ""
+    if decision == "new_skill":
+        maintenance = store.create_review_item(
+            review_id=str(uuid4()),
+            review_type="dictionary_maintenance",
+            submission_mode=item["submission_mode"],
+            job_id=item["job_id"],
+            parent_review_id=item_id,
+            input_payload=item["input"],
+            result_payload={"proposal_type": "new_skill", "proposal": skill},
+        )
+        maintenance_id = maintenance["item_id"]
+    item_result = dict(item["result"])
+    item_result["skill"] = skill
+    if maintenance_id:
+        item_result["dictionary_maintenance_review_id"] = maintenance_id
+    return store.update_review_item(
+        item_id,
+        status="reviewed_skill",
+        decision_payload={"action": decision, "skill": skill},
+        result_payload=item_result,
+    )
 
 
 def _build_system(progress_messages: list[str]) -> JobUpdateSystem:
@@ -173,6 +297,15 @@ def _build_system(progress_messages: list[str]) -> JobUpdateSystem:
         taxonomy=JobTaxonomy.from_csv(BASE_TITLE_DICTIONARY),
         frequency_store=FrequencyStore(BASE_EVENT_STREAM, BASE_FREQUENCY_OUTPUT),
         skill_pool_store=SkillPoolStore(BASE_SKILL_POOL),
+        skill_lifecycle_store=SkillLifecycleStore(BASE_SKILL_LIFECYCLE),
+        skill_migration_store=SkillMigrationStore(
+            BASE_SKILL_MIGRATION,
+            BASE_SKILL_MONTHLY_SPREAD,
+        ),
+        job_profile_store=JobProfileStore(
+            BASE_JOB_PROFILE_SNAPSHOTS,
+            BASE_JOB_PROFILE_DIFF,
+        ),
         database_store=SQLiteJobUpdateStore(BASE_DATABASE),
         similarity=_similarity(),
         route_adjudicator=_route_adjudicator(),
@@ -206,151 +339,42 @@ def _posting_from_payload(payload: dict[str, str], *, source: str) -> JobPosting
     )
 
 
-def _write_confirmed_existing_update(payload: dict[str, str], result: dict[str, Any]) -> dict[str, Any]:
-    route = _route_from_result(result)
-    if route.best_job is None:
-        raise ValueError("Cannot merge existing job without a selected standard job")
-    category = route.best_category.name if route.best_category is not None else ""
-    skills = _normalized_skills_from_result(result)
-    posting = _posting_from_payload({**payload, "job_id": result.get("job_id", "")}, source="web_app_review")
-    posting.routing_job_title = clean_text(result.get("routing_job_title"))
-    return _append_confirmed_update(
-        posting=posting,
-        route=route,
-        standard_category=category,
-        standard_job=route.best_job.name,
-        normalized_skills=skills,
-    )
-
-
-def _write_human_confirmed_new_job(
-    payload: dict[str, str],
-    result: dict[str, Any],
-    manual_review: dict[str, str],
-) -> dict[str, Any]:
-    posting = _posting_from_payload({**payload, "job_id": result.get("job_id", "")}, source="web_app_new_job_review")
-    posting.routing_job_title = manual_review["standard_job_title"]
-    mentions = _skill_extractor().extract(posting)
-    normalized_skills = _SKILL_NORMALIZER.normalize(posting, mentions)
-    category_candidate = ScoredCandidate(manual_review["standard_category"], 1.0, {"source": "human_review"})
-    job_candidate = ScoredCandidate(manual_review["standard_job_title"], 1.0, {"source": "human_review"})
-    route = JobRoute(
-        status="existing_job",
-        selected_categories=[category_candidate],
-        selected_jobs=[job_candidate],
-        best_category=category_candidate,
-        best_job=job_candidate,
-        reason="human review confirmed a new standard job",
-    )
-    return _append_confirmed_update(
-        posting=posting,
-        route=route,
-        standard_category=manual_review["standard_category"],
-        standard_job=manual_review["standard_job_title"],
-        normalized_skills=normalized_skills,
-    )
-
-
-def _append_confirmed_update(
-    *,
-    posting: JobPosting,
-    route: JobRoute,
-    standard_category: str,
-    standard_job: str,
-    normalized_skills: list[NormalizedSkill],
-) -> dict[str, Any]:
-    if not normalized_skills:
-        raise ValueError("No normalized skills were available; refusing to write an empty skill update")
-
-    frequency_store = FrequencyStore(BASE_EVENT_STREAM, BASE_FREQUENCY_OUTPUT)
-    skill_pool_store = SkillPoolStore(BASE_SKILL_POOL)
-    events, frequency = frequency_store.append_existing_job(
-        posting=posting,
-        standard_job=standard_job,
-        normalized_skills=normalized_skills,
-        write=False,
-    )
-    skill_pool = skill_pool_store.update(
-        posting=posting,
-        standard_category=standard_category,
-        standard_job=standard_job,
-        normalized_skills=normalized_skills,
-        write=False,
-    )
-    frequency_store.write_tables(events, frequency)
-    skill_pool_store.write_pool(skill_pool)
-
-    monthly_rows = len(
-        frequency[
-            (frequency["standard_job"] == standard_job)
-            & (frequency["month"] == posting.month)
-        ]
-    )
-    update = ExistingJobUpdate(
-        standard_job=standard_job,
-        month=posting.month,
-        normalized_skills=normalized_skills,
-        monthly_rows=monthly_rows,
-        frequency_rows=len(frequency),
-        skill_pool_rows=len(skill_pool),
-        event_stream_path=str(BASE_EVENT_STREAM),
-        frequency_path=str(BASE_FREQUENCY_OUTPUT),
-        skill_pool_path=str(BASE_SKILL_POOL),
-    )
-    SQLiteJobUpdateStore(BASE_DATABASE).sync_after_process(
-        result=ProcessResult(route=route, posting=posting, update=update),
-        frequency=frequency,
-        skill_pool=skill_pool,
-    )
+def _input_payload(payload: dict[str, Any], posting: JobPosting) -> dict[str, str]:
     return {
         "job_id": posting.job_id,
-        "standard_category": standard_category,
-        "standard_job": standard_job,
-        "skill_count": len(normalized_skills),
-        "event_rows": len(events),
-        "frequency_rows": len(frequency),
-        "skill_pool_rows": len(skill_pool),
+        "month": posting.month,
+        "job_title": posting.job_title,
+        "responsibility": posting.job_responsibility,
+        "requirement": posting.job_requirement,
+        "source": clean_text(payload.get("source")) or str(posting.metadata.get("source") or ""),
     }
 
 
-def _upsert_standard_job(standard_job_title: str, standard_category: str, match_keywords: str) -> None:
-    title = clean_text(standard_job_title)
-    category = clean_text(standard_category)
-    keywords = clean_text(match_keywords) or title
-    if not title or not category:
-        raise ValueError("standard_category and standard_job_title are required")
+def _category_for_job(job_title: str, route: dict[str, Any]) -> str:
+    for candidate in route.get("top_jobs") or route.get("selected_jobs") or []:
+        if clean_text(candidate.get("name")) == job_title:
+            return clean_text((candidate.get("metadata") or {}).get("category"))
+    return clean_text(((route.get("best_category") or {}).get("name")))
 
-    frame = _read_csv(BASE_TITLE_DICTIONARY)
-    row = {
-        "standard_job_title": title,
-        "standard_category": category,
-        "match_keywords": keywords,
+
+def _merge_summary(result: ProcessResult) -> dict[str, Any]:
+    update = result.update
+    if update is None:
+        return {}
+    return {
+        "job_id": result.posting.job_id,
+        "standard_job": update.standard_job,
+        "standard_category": result.route.best_category.name if result.route.best_category else "",
+        "skill_count": len(update.normalized_skills),
+        "event_rows": "updated",
+        "frequency_rows": update.frequency_rows,
+        "skill_pool_rows": update.skill_pool_rows,
+        "lifecycle_rows": update.lifecycle_rows,
+        "migration_rows": update.migration_rows,
+        "spread_rows": update.spread_rows,
+        "profile_snapshot_rows": update.profile_snapshot_rows,
+        "profile_diff_rows": update.profile_diff_rows,
     }
-    if frame.empty:
-        frame = pd.DataFrame([row])
-    else:
-        for column in row:
-            if column not in frame.columns:
-                frame[column] = ""
-        key = frame["standard_job_title"].astype(str).str.strip().str.casefold()
-        existing = key == title.casefold()
-        if existing.any():
-            index = frame.index[existing][0]
-            for column, value in row.items():
-                frame.at[index, column] = value
-        else:
-            frame = pd.concat([frame, pd.DataFrame([row])], ignore_index=True)
-
-    frame[["standard_job_title", "standard_category", "match_keywords"]].to_csv(
-        BASE_TITLE_DICTIONARY,
-        index=False,
-        encoding="utf-8-sig",
-    )
-    SQLiteJobUpdateStore(BASE_DATABASE).upsert_standard_job(
-        standard_job_title=title,
-        standard_category=category,
-        match_keywords=keywords,
-    )
 
 
 def _normalize_import_frame(frame: pd.DataFrame) -> pd.DataFrame:
@@ -367,139 +391,6 @@ def _normalize_import_frame(frame: pd.DataFrame) -> pd.DataFrame:
     if "job_title" not in output or not output["job_title"].astype(str).str.strip().any():
         raise ValueError("CSV must include job_title / 岗位名称 column")
     return output[output["job_title"].astype(str).str.strip() != ""].reset_index(drop=True)
-
-
-def _store_review_item(payload: dict[str, str], result: dict[str, Any]) -> ReviewItem:
-    now = _now()
-    item = ReviewItem(
-        item_id=str(uuid4()),
-        input={
-            "month": clean_text(payload.get("month")) or datetime.now().strftime("%Y-%m"),
-            "job_title": clean_text(payload.get("job_title")),
-            "responsibility": clean_text(payload.get("responsibility")),
-            "requirement": clean_text(payload.get("requirement")),
-        },
-        result=result,
-        created_at=now,
-        updated_at=now,
-    )
-    REVIEW_ITEMS[item.item_id] = item
-    return item
-
-
-def _get_item(item_id: str) -> ReviewItem:
-    if item_id not in REVIEW_ITEMS:
-        raise KeyError(f"Review item not found: {item_id}")
-    return REVIEW_ITEMS[item_id]
-
-
-def _serialize_process_result(result: ProcessResult) -> dict[str, Any]:
-    skills = []
-    if result.update is not None:
-        skills = [_skill_to_dict(skill) for skill in result.update.normalized_skills]
-    payload: dict[str, Any] = {
-        "job_id": result.posting.job_id,
-        "job_title": result.posting.job_title,
-        "routing_job_title": result.posting.routing_job_title,
-        "route": _route_to_dict(result.route),
-        "skills": skills,
-        "updated": result.update is not None,
-    }
-    if result.update is not None:
-        payload["update"] = {
-            "standard_job": result.update.standard_job,
-            "month": result.update.month,
-            "skills": skills,
-            "monthly_rows": result.update.monthly_rows,
-            "frequency_rows": result.update.frequency_rows,
-            "skill_pool_rows": result.update.skill_pool_rows,
-            "event_stream_path": result.update.event_stream_path,
-            "frequency_path": result.update.frequency_path,
-            "skill_pool_path": result.update.skill_pool_path,
-        }
-    return payload
-
-
-def _route_to_dict(route: JobRoute) -> dict[str, Any]:
-    return {
-        "status": route.status,
-        "reason": route.reason,
-        "best_category": _candidate_to_dict(route.best_category),
-        "best_job": _candidate_to_dict(route.best_job),
-        "selected_categories": [_candidate_to_dict(item) for item in route.selected_categories],
-        "selected_jobs": [_candidate_to_dict(item) for item in route.selected_jobs],
-    }
-
-
-def _route_from_result(result: dict[str, Any]) -> JobRoute:
-    route = result.get("route") or {}
-    return JobRoute(
-        status=route.get("status") or "potential_new_job",
-        reason=clean_text(route.get("reason")),
-        best_category=_candidate_from_dict(route.get("best_category")),
-        best_job=_candidate_from_dict(route.get("best_job")),
-        selected_categories=[
-            candidate
-            for candidate in (_candidate_from_dict(item) for item in route.get("selected_categories", []))
-            if candidate is not None
-        ],
-        selected_jobs=[
-            candidate
-            for candidate in (_candidate_from_dict(item) for item in route.get("selected_jobs", []))
-            if candidate is not None
-        ],
-    )
-
-
-def _candidate_to_dict(candidate: ScoredCandidate | None) -> dict[str, Any] | None:
-    if candidate is None:
-        return None
-    return {"name": candidate.name, "score": round(float(candidate.score), 6), "metadata": candidate.metadata}
-
-
-def _candidate_from_dict(value: Any) -> ScoredCandidate | None:
-    if not isinstance(value, dict):
-        return None
-    name = clean_text(value.get("name"))
-    if not name:
-        return None
-    return ScoredCandidate(
-        name=name,
-        score=_float_value(value.get("score")),
-        metadata=value.get("metadata") if isinstance(value.get("metadata"), dict) else {},
-    )
-
-
-def _normalized_skills_from_result(result: dict[str, Any]) -> list[NormalizedSkill]:
-    raw_skills = result.get("skills") or result.get("update", {}).get("skills") or []
-    skills = [_normalized_skill_from_dict(item) for item in raw_skills if isinstance(item, dict)]
-    if not skills:
-        raise ValueError("No normalized skills were produced by the formal skill_extract flow")
-    return skills
-
-
-def _normalized_skill_from_dict(item: dict[str, Any]) -> NormalizedSkill:
-    name = clean_text(item.get("normalized_skill"))
-    family = clean_text(item.get("kg_display_skill"))
-    if not name or not family:
-        raise ValueError("Each skill must include normalized_skill and kg_display_skill")
-    return NormalizedSkill(
-        normalized_skill=name,
-        kg_display_skill=family,
-        skill_type=clean_text(item.get("skill_type")) or None,
-        confidence=_optional_float(item.get("confidence")),
-        metadata=item.get("metadata") if isinstance(item.get("metadata"), dict) else {"source": "web_app_review"},
-    )
-
-
-def _skill_to_dict(skill: NormalizedSkill) -> dict[str, Any]:
-    return {
-        "normalized_skill": skill.normalized_skill,
-        "kg_display_skill": skill.kg_display_skill,
-        "skill_type": skill.skill_type or "",
-        "confidence": skill.confidence,
-        "metadata": skill.metadata,
-    }
 
 
 def _similarity() -> Text2VecSimilarity:
@@ -569,13 +460,12 @@ def _ensure_database_initialized() -> None:
         event_stream_path=BASE_EVENT_STREAM,
         frequency_path=BASE_FREQUENCY_OUTPUT,
         skill_pool_path=BASE_SKILL_POOL,
+        lifecycle_path=BASE_SKILL_LIFECYCLE,
+        migration_path=BASE_SKILL_MIGRATION,
+        spread_path=BASE_SKILL_MONTHLY_SPREAD,
+        profile_snapshot_path=BASE_JOB_PROFILE_SNAPSHOTS,
+        profile_diff_path=BASE_JOB_PROFILE_DIFF,
     )
-
-
-def _read_csv(path) -> pd.DataFrame:
-    if not path.exists():
-        return pd.DataFrame()
-    return pd.read_csv(path, dtype=str, encoding="utf-8-sig").fillna("")
 
 
 def _generate_job_id(month: str, job_title: str) -> str:
@@ -588,23 +478,3 @@ def _generate_job_id(month: str, job_title: str) -> str:
 def _progress(messages: list[str], message: str) -> None:
     messages.append(message)
     print(f"[web_job_update] {message}", flush=True)
-
-
-def _float_value(value: Any) -> float:
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return 0.0
-
-
-def _optional_float(value: Any) -> float | None:
-    if value in (None, ""):
-        return None
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
-
-
-def _now() -> str:
-    return datetime.now().isoformat(timespec="seconds")

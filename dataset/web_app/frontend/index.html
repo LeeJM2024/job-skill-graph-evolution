@@ -32,7 +32,7 @@
             <h1>岗位技能演化系统</h1>
             <p>从 JD 输入、岗位匹配、技能抽取到时序演化分析，展示完整动态更新闭环。</p>
           </div>
-          <div id="health" class="status-pill">检查中</div>
+          <div class="actions"><label>数据源 <select id="domain-select"><option value="company">公司岗位</option><option value="government">政府技术岗位</option></select></label><div id="health" class="status-pill">检查中</div></div>
         </section>
 
         <section id="view-overview" class="view active">
@@ -274,15 +274,16 @@
             </div>
             <div class="actions">
               <button id="optimization-refresh" class="secondary-btn">重新加载岗位</button>
-              <button id="optimization-save-draft" class="primary-btn">预览本次变更</button>
+              <button id="optimization-save-draft" class="primary-btn">保存本次变更</button>
             </div>
           </div>
 
           <div class="control-row">
             <label class="wide">
               标准岗位
-              <input id="optimization-job" list="optimization-job-options" placeholder="例如：Java开发工程师" />
-              <datalist id="optimization-job-options"></datalist>
+              <select id="optimization-job">
+                <option value="">请选择标准岗位</option>
+              </select>
             </label>
             <button id="optimization-load" class="secondary-btn">查看岗位技能</button>
           </div>
@@ -366,7 +367,7 @@
             <div class="panel-title-row">
               <div>
                 <h3>变更记录</h3>
-                <p class="muted">这里展示你在页面内做过的调整；点击“预览本次变更”可查看即将保存的结构化内容，当前不会写入文件。</p>
+                <p class="muted">这里展示你在页面内做过的调整；保存后会写入当前数据源的 SQLite 人工覆盖层，并在岗位画像中即时生效。</p>
               </div>
               <span id="optimization-change-count" class="muted"></span>
             </div>
@@ -386,6 +387,12 @@
           <div class="jd-workspace">
             <form id="job-form" class="panel form-panel">
               <h3>JD 输入</h3>
+              <label>处理模式
+                <select name="processing_mode">
+                  <option value="auto">自动模式</option>
+                  <option value="manual">人工确认模式</option>
+                </select>
+              </label>
               <label>月份<input name="month" value="2026-07" /></label>
               <label>岗位名称<input name="job_title" required placeholder="例如：大模型应用工程师" /></label>
               <label>岗位职责<textarea name="responsibility" rows="5"></textarea></label>

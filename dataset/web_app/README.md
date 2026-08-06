@@ -1,6 +1,6 @@
 # 岗位技能更新系统 Web 控制台
 
-本地 Web 应用，用于演示和审核 `dataset/job_update` 的既有岗位更新流程。
+本地 Web 应用，用于演示和审核 `dataset/job_update/company_job_update` 的既有岗位更新流程。
 
 ## 启动
 
@@ -25,7 +25,7 @@ http://127.0.0.1:8787
 ## 当前能力
 
 - 首页概览：汇总最新月份、标准岗位数、技能数、待审核数量、新增/下降技能数量和备份记录。
-- 数据流测试：调用数据流生成系统或已有 run，再调用 `job_update.cli run-data-stream`。
+- 数据流测试：调用数据流生成系统或已有 run，再调用 `core.cli run-data-stream`。
 - 结果展示：读取 comparison / analysis 输出，展示通过状态、岗位需求正确率、技能频率正确率、差异预览和图表。
 - 时序分析：读取 base 分析结果，展示岗位技能趋势、岗位画像对比、生命周期、迁移路径、月度新增和衰退技能榜单。
 - 人工优化：读取当前系统岗位画像，支持页面内新增、删除、修改岗位技能，并预览本次人工调整。
@@ -95,12 +95,12 @@ http://127.0.0.1:8787
 数据来源：
 
 ```text
-dataset/job_update/data/base/job_skill_monthly_frequency.csv
-dataset/job_update/data/base/skill_lifecycle.csv
-dataset/job_update/data/base/skill_migration.csv
-dataset/job_update/data/base/skill_job_monthly_spread.csv
-dataset/job_update/data/base/job_profile_diff.csv
-dataset/job_update/data/base/job_profile_snapshots.csv
+dataset/job_update/company_job_update/data/base/job_skill_monthly_frequency.csv
+dataset/job_update/company_job_update/data/base/skill_lifecycle.csv
+dataset/job_update/company_job_update/data/base/skill_migration.csv
+dataset/job_update/company_job_update/data/base/skill_job_monthly_spread.csv
+dataset/job_update/company_job_update/data/base/job_profile_diff.csv
+dataset/job_update/company_job_update/data/base/job_profile_snapshots.csv
 ```
 
 相关接口：
@@ -144,7 +144,7 @@ GET /api/optimization/normalize-skill
 
 ## 单条 JD 处理逻辑
 
-Web 单条 JD 判断已经对齐正式 `job_update` 主流程：
+Web 单条 JD 判断已经对齐正式 `core` 主流程：
 
 ```text
 岗位标题清洗

@@ -45,7 +45,7 @@ def run_existing(run_id: str, month_start: str, month_end: str, pass_threshold: 
     command = [
         sys.executable,
         "-m",
-        "job_update.cli",
+        "core.cli",
         "run-data-stream",
         "--run-dir",
         str(run_dir),

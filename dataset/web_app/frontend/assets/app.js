@@ -1,4 +1,5 @@
 const state = {
+  domain: "company",
   currentPipeline: null,
   currentReviewItem: null,
   reviewItems: [],
@@ -29,7 +30,8 @@ const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 
 async function api(path, options = {}) {
-  const response = await fetch(path, {
+  const separator = path.includes("?") ? "&" : "?";
+  const response = await fetch(`${path}${separator}domain=${encodeURIComponent(state.domain)}`, {
     headers: options.body instanceof FormData ? undefined : { "Content-Type": "application/json" },
     ...options,
   });
@@ -237,6 +239,14 @@ function renderReviewItems(items) {
   state.reviewItems = activeItems;
   $("#review-list").innerHTML = activeItems
     .map((item) => {
+      if (item.review_type === "skill") {
+        const skill = item.result?.skill || {};
+        return `<article class="review-item"><div><h3>技能待审核：${escapeHtml(skill.normalized_skill || skill.raw_skill || "")}</h3><p>${escapeHtml(item.input?.job_title || "")} / ${escapeHtml(skill.kg_display_skill || "未归类")}</p><div class="tag-row"><span class="tag warn">技能待审核</span>${skill.is_new_skill_candidate ? '<span class="tag">新技能候选</span>' : ""}${skill.is_low_confidence ? '<span class="tag">低置信度</span>' : ""}</div></div><button class="secondary-btn" data-review="${item.item_id}">审核</button></article>`;
+      }
+      if (item.review_type === "dictionary_maintenance") {
+        const proposal = item.result?.proposal || {};
+        return `<article class="review-item"><div><h3>词典维护待审核</h3><p>${escapeHtml(proposal.standard_job_title || proposal.normalized_skill || "待补充")}</p><div class="tag-row"><span class="tag warn">词典维护</span></div></div><button class="secondary-btn" data-review="${item.item_id}">查看</button></article>`;
+      }
       const route = item.result?.route || {};
       const bestCategory = route.best_category?.name || "未命中";
       const bestJob = route.best_job?.name || "未命中";
@@ -271,9 +281,88 @@ function skillsHtml(skills) {
   `;
 }
 
+function topCandidatesHtml(route) {
+  const categories = route?.top_categories || route?.selected_categories || [];
+  const jobs = route?.top_jobs || route?.selected_jobs || [];
+  const row = (candidate) => `
+    <li><strong>${escapeHtml(candidate.name)}</strong>
+      <span>${Number(candidate.score || 0).toFixed(3)}</span>
+      <small>${escapeHtml(candidate.metadata?.match_keywords || candidate.metadata?.aggregation_method || "")}</small>
+    </li>`;
+  const adjudication = route?.adjudication || {};
+  return `
+    <div class="candidate-grid">
+      <div><h5>岗位大族 Top-K</h5><ol class="candidate-list">${categories.map(row).join("") || "<li>无候选</li>"}</ol></div>
+      <div><h5>标准岗位 Top-K</h5><ol class="candidate-list">${jobs.map(row).join("") || "<li>无候选</li>"}</ol></div>
+    </div>
+    ${adjudication.route_status ? `<p class="muted">LLM 建议：${escapeHtml(adjudication.route_status)} / ${escapeHtml(adjudication.selected_standard_job || "未选择")}，置信度 ${Number(adjudication.confidence || 0).toFixed(2)}。${escapeHtml(adjudication.reason || "")}</p>` : ""}`;
+}
+
+function reviewedSkillsPayload(skills) {
+  const reviewed = (skills || []).map((skill, index) => {
+    const normalized = document.querySelector(`[data-skill-normalized="${index}"]`);
+    const family = document.querySelector(`[data-skill-family="${index}"]`);
+    const invalid = document.querySelector(`[data-skill-invalid="${index}"]`);
+    return {
+      ...skill,
+      normalized_skill: normalized ? normalized.value : skill.normalized_skill,
+      kg_display_skill: family ? family.value : skill.kg_display_skill,
+      decision: invalid?.checked ? "invalid" : "confirmed",
+    };
+  });
+  $$('[data-manual-skill]').forEach((input) => {
+    const index = input.dataset.manualSkill;
+    const normalized_skill = input.value.trim();
+    const family = document.querySelector(`[data-manual-skill-family="${index}"]`)?.value.trim() || "";
+    if (normalized_skill) {
+      reviewed.push({
+        raw_skill: normalized_skill,
+        normalized_skill,
+        kg_display_skill: family,
+        skill_type: "manual",
+        confidence: 1,
+        normalization_method: "manual_input",
+        decision: "confirmed",
+      });
+    }
+  });
+  return reviewed;
+}
+
+function appendManualReviewSkillRow() {
+  const container = $("#manual-review-skills");
+  if (!container) return;
+  const index = container.children.length;
+  container.insertAdjacentHTML("beforeend", `
+    <div class="manual-skill-row">
+      <input data-manual-skill="${index}" placeholder="手动输入规范技能名" />
+      <input data-manual-skill-family="${index}" placeholder="技能大类" />
+      <button class="ghost-btn" type="button" data-remove-manual-skill="${index}">删除</button>
+    </div>
+  `);
+  container.querySelector(`[data-remove-manual-skill="${index}"]`).addEventListener("click", (event) => {
+    event.currentTarget.parentElement.remove();
+  });
+}
+
 function openReviewDialog(itemId) {
   const item = state.reviewItems.find((entry) => entry.item_id === itemId);
   if (!item) return;
+  if (item.review_type === "skill") {
+    openSkillReviewDialog(item);
+    return;
+  }
+  if (item.review_type === "dictionary_maintenance") {
+    $("#dialog-title").textContent = "词典维护待审核";
+    $("#dialog-content").innerHTML = `<pre class="log-box">${escapeHtml(JSON.stringify(item.result || {}, null, 2))}</pre>`;
+    $("#review-dialog").showModal();
+    return;
+  }
+  if (item.review_type === "job") {
+    switchView("manual");
+    renderJobResult(item);
+    return;
+  }
   const route = item.result?.route || {};
   const isExisting = route.status === "existing_job";
   $("#dialog-title").textContent = isExisting ? "确认已有岗位" : "人工确认新岗位";
@@ -352,6 +441,40 @@ function openReviewDialog(itemId) {
       $("#review-dialog").close();
     });
   }
+  $("#review-dialog").showModal();
+}
+
+function openSkillReviewDialog(item) {
+  const skill = item.result?.skill || {};
+  $("#dialog-title").textContent = "技能人工审核";
+  $("#dialog-content").innerHTML = `
+    <div class="new-job-grid">
+      <label>原始技能<input value="${escapeHtml(skill.raw_skill || "")}" disabled /></label>
+      <label>归一化技能<input id="review-skill-name" value="${escapeHtml(skill.normalized_skill || "")}" /></label>
+      <label>技能大类<input id="review-skill-family" value="${escapeHtml(skill.kg_display_skill || "")}" /></label>
+    </div>
+    <div class="dialog-actions">
+      <button class="secondary-btn" id="review-skill-confirm" type="button">确认</button>
+      <button class="secondary-btn" id="review-skill-map" type="button">映射为已有技能</button>
+      <button class="secondary-btn" id="review-skill-new" type="button">提交新技能词典建议</button>
+      <button class="ghost-btn" id="review-skill-invalid" type="button">标记无效</button>
+    </div>`;
+  const submit = async (decision) => {
+    await api(`/api/review/${item.item_id}/review-skill`, {
+      method: "POST",
+      body: JSON.stringify({
+        decision,
+        normalized_skill: $("#review-skill-name").value,
+        kg_display_skill: $("#review-skill-family").value,
+      }),
+    });
+    await refreshReview();
+    $("#review-dialog").close();
+  };
+  $("#review-skill-confirm").addEventListener("click", () => submit("confirmed"));
+  $("#review-skill-map").addEventListener("click", () => submit("mapped"));
+  $("#review-skill-new").addEventListener("click", () => submit("new_skill"));
+  $("#review-skill-invalid").addEventListener("click", () => submit("invalid"));
   $("#review-dialog").showModal();
 }
 
@@ -587,9 +710,11 @@ function renderOptimizationProfile(payload) {
   state.optimization.loaded = true;
 
   $("#optimization-job").value = state.optimization.currentJob;
-  $("#optimization-job-options").innerHTML = state.optimization.jobs
-    .map((job) => `<option value="${escapeHtml(job)}"></option>`)
+  $("#optimization-job").innerHTML = [`<option value="">请选择标准岗位</option>`, ...state.optimization.jobs
+    .map((job) => `<option value="${escapeHtml(job)}">${escapeHtml(job)}</option>`)
+  ]
     .join("");
+  $("#optimization-job").value = state.optimization.currentJob;
   renderOptimizationSkills();
   renderOptimizationChanges();
   resetOptimizationEdit();
@@ -796,9 +921,9 @@ function buildOptimizationDraft() {
   return {
     standard_job: state.optimization.currentJob,
     preview_type: "人工优化变更预览",
-    base_profile_file: "dataset/job_update/data/base/job_current_profile_system.csv",
-    target_manual_file: "dataset/job_update/data/base/job_profile_manual_overrides.csv",
-    effective_profile_file: "dataset/job_update/data/base/job_current_profile_effective.csv",
+  base_profile_file: "dataset/job_update/company_job_update/data/base/job_current_profile_system.csv",
+  target_manual_file: "dataset/job_update/company_job_update/data/base/job_profile_manual_overrides.csv",
+  effective_profile_file: "dataset/job_update/company_job_update/data/base/job_current_profile_effective.csv",
     write_policy: "当前仅预览本次页面调整，不直接写入系统画像文件。",
     changes: state.optimization.changes,
     effective_preview: state.optimization.skills.filter((row) => row.manual_status !== "人工删除"),
@@ -931,6 +1056,10 @@ function renderMergedJobResult(originalItem, mergedItem) {
 }
 
 function renderJobResult(item) {
+  if (item?.status === "auto_merged") {
+    renderMergedJobResult(item, item);
+    return;
+  }
   state.currentReviewItem = item;
   const route = item?.result?.route || {};
   const skills = item?.result?.skills || [];
@@ -951,6 +1080,11 @@ function renderJobResult(item) {
     </div>
 
     ${processStepsHtml(item)}
+
+    <div class="result-section">
+      <h4>候选岗位与二次裁决</h4>
+      ${topCandidatesHtml(route)}
+    </div>
 
     <div class="result-section">
       <h4>岗位识别结果</h4>
@@ -974,12 +1108,12 @@ function renderJobResult(item) {
             <tr><th>归一化技能</th><th>KG 展示技能</th><th>技能类型</th><th>置信度</th></tr>
           </thead>
           <tbody>
-            ${skills.map((skill) => `
+            ${skills.map((skill, index) => `
               <tr>
-                <td>${escapeHtml(skill.normalized_skill)}</td>
-                <td>${escapeHtml(skill.kg_display_skill)}</td>
+                <td><input data-skill-normalized="${index}" value="${escapeHtml(skill.normalized_skill)}" /></td>
+                <td><input data-skill-family="${index}" value="${escapeHtml(skill.kg_display_skill)}" /></td>
                 <td><span class="tag">${escapeHtml(skill.skill_type || "未标注")}</span></td>
-                <td>${skill.confidence == null ? "无" : Number(skill.confidence).toFixed(2)}</td>
+                <td>${skill.confidence == null ? "无" : Number(skill.confidence).toFixed(2)}${skill.is_new_skill_candidate ? " · 新技能候选" : ""}${skill.is_low_confidence ? " · 低置信度" : ""}<label><input data-skill-invalid="${index}" type="checkbox" /> 无效</label></td>
               </tr>
             `).join("") || `<tr><td colspan="4">暂无技能抽取结果。</td></tr>`}
           </tbody>
@@ -997,7 +1131,16 @@ function renderJobResult(item) {
       </div>
     </div>
 
-    ${isExisting ? "" : `
+    ${isExisting ? `
+      <div class="result-section">
+        <h4>确认既有标准岗位</h4>
+        <label>从标准岗位 Top-K 中选择
+          <select id="detail-standard-job">
+            ${(route.top_jobs || route.selected_jobs || []).map((candidate) => `<option value="${escapeHtml(candidate.name)}" ${candidate.name === bestJob ? "selected" : ""}>${escapeHtml(candidate.name)} (${Number(candidate.score || 0).toFixed(3)})</option>`).join("")}
+          </select>
+        </label>
+      </div>
+    ` : `
       <div class="result-section">
         <h4>新岗位人工补充</h4>
         <div class="new-job-grid">
@@ -1008,20 +1151,62 @@ function renderJobResult(item) {
       </div>
     `}
 
+    <div class="result-section">
+      <div class="panel-title-row">
+        <h4>手动补充技能</h4>
+        <button class="ghost-btn" id="add-manual-review-skill" type="button">新增技能</button>
+      </div>
+      <p class="muted">仅填写你决定随本条 JD 入库的规范技能；删除系统技能可勾选“无效”。</p>
+      <div id="manual-review-skills"></div>
+    </div>
+
+    <div class="result-section">
+      <h4>从标准岗位 Top-K 中人工选择</h4>
+      <label>最终标准岗位<select id="detail-manual-standard-job"></select></label>
+    </div>
+
     <div class="dialog-actions result-actions">
       <button class="ghost-btn" id="detail-reject" type="button">不更新</button>
       <button class="secondary-btn" id="detail-open-review" type="button">打开审核弹窗</button>
+      <button class="secondary-btn" id="detail-merge-as-existing" type="button">按所选 Top-K 作为既有岗位入库</button>
       <button class="primary-btn" id="detail-merge" type="button">${isExisting ? "确认并入基础数据库" : "确认新岗位并入库"}</button>
       <button class="ghost-btn" id="detail-open-analytics" type="button">查看该岗位趋势</button>
     </div>
   `;
 
   $("#detail-open-review").addEventListener("click", () => openReviewDialog(item.item_id));
+  const manualJobSelect = $("#detail-manual-standard-job");
+  if (manualJobSelect) {
+    manualJobSelect.innerHTML = (route.top_jobs || route.selected_jobs || [])
+      .map((candidate) => `<option value="${escapeHtml(candidate.name)}" ${candidate.name === bestJob ? "selected" : ""}>${escapeHtml(candidate.name)} (${Number(candidate.score || 0).toFixed(3)})</option>`)
+      .join("");
+  }
+  $("#add-manual-review-skill").addEventListener("click", appendManualReviewSkillRow);
   $("#detail-open-analytics").addEventListener("click", () => openAnalyticsForJob(selectedJob, selectedMonth));
   $("#detail-reject").addEventListener("click", async () => {
     await api(`/api/review/${item.item_id}/reject-update`, { method: "POST" });
     await refreshReview();
     $("#job-result-panel").innerHTML = `<div class="empty-result"><h3>已标记为不更新</h3><p>该记录已从待审核队列移除。</p></div>`;
+  });
+  $("#detail-merge-as-existing").addEventListener("click", async () => {
+    const button = $("#detail-merge-as-existing");
+    button.disabled = true;
+    try {
+      const mergedItem = await api(`/api/review/${item.item_id}/confirm-existing`, {
+        method: "POST",
+        body: JSON.stringify({
+          merge_database: true,
+          standard_job_title: $("#detail-manual-standard-job")?.value || bestJob,
+          skills: reviewedSkillsPayload(skills),
+        }),
+      });
+      await Promise.all([refreshReview(), refreshBackups(), refreshAnalyticsOptions()]);
+      state.analytics.loaded = false;
+      renderMergedJobResult(item, mergedItem);
+    } catch (error) {
+      button.disabled = false;
+      $("#job-result-panel").insertAdjacentHTML("afterbegin", `<div class="error-strip">${escapeHtml(error.message)}</div>`);
+    }
   });
   $("#detail-merge").addEventListener("click", async () => {
     const mergeButton = $("#detail-merge");
@@ -1033,7 +1218,11 @@ function renderJobResult(item) {
       if (isExisting) {
         mergedItem = await api(`/api/review/${item.item_id}/confirm-existing`, {
           method: "POST",
-          body: JSON.stringify({ merge_database: true }),
+          body: JSON.stringify({
+            merge_database: true,
+            standard_job_title: $("#detail-manual-standard-job")?.value || $("#detail-standard-job")?.value || bestJob,
+            skills: reviewedSkillsPayload(skills),
+          }),
         });
       } else {
         mergedItem = await api(`/api/review/${item.item_id}/confirm-new-job`, {
@@ -1043,12 +1232,17 @@ function renderJobResult(item) {
             standard_job_title: $("#detail-new-title").value,
             match_keywords: $("#detail-new-keywords").value,
             merge_database: true,
+            skills: reviewedSkillsPayload(skills),
           }),
         });
       }
       await Promise.all([refreshReview(), refreshBackups(), refreshAnalyticsOptions()]);
       state.analytics.loaded = false;
-      renderMergedJobResult(item, mergedItem);
+      if (isExisting) {
+        renderMergedJobResult(item, mergedItem);
+      } else {
+        $("#job-result-panel").innerHTML = `<div class="success-strip">已提交词典维护待审核。该新岗位尚未写入正式词典和基础数据，审核通过后再入库。</div>`;
+      }
     } catch (error) {
       mergeButton.disabled = false;
       mergeButton.textContent = originalText;
@@ -1180,6 +1374,18 @@ function pipelinePayload() {
 }
 
 function bindEvents() {
+  $("#domain-select").addEventListener("change", async (event) => {
+    state.domain = event.target.value;
+    state.analytics.loaded = false;
+    state.analytics.migrationSkills = [];
+    state.optimization.loaded = false;
+    state.optimization.currentJob = "";
+    $("#optimization-job").innerHTML = `<option value="">请选择标准岗位</option>`;
+    await Promise.all([refreshOverview(), refreshReview(), refreshAnalyticsOptions()]);
+    if ($("#view-optimization").classList.contains("active")) {
+      await refreshOptimizationProfile();
+    }
+  });
   $$(".nav-item").forEach((button) => {
     button.addEventListener("click", () => {
       switchView(button.dataset.view);
@@ -1208,12 +1414,24 @@ function bindEvents() {
   $("#optimization-new-skill").addEventListener("keydown", (event) => {
     if (event.key === "Enter") normalizeOptimizationSkill();
   });
-  $("#optimization-save-draft").addEventListener("click", () => {
+  $("#optimization-save-draft").addEventListener("click", async () => {
     if (!state.optimization.changes.length) {
       $("#optimization-draft").textContent = "暂无可预览的变更。请先新增、删除或修改一个技能。";
       return;
     }
-    $("#optimization-draft").textContent = JSON.stringify(buildOptimizationDraft(), null, 2);
+    try {
+      const saved = await api("/api/optimization/overrides", {
+        method: "POST",
+        body: JSON.stringify({
+          standard_job: state.optimization.currentJob,
+          changes: state.optimization.changes,
+        }),
+      });
+      $("#optimization-draft").textContent = `已写入 ${saved.domain} 数据库：${saved.saved_changes} 条人工覆盖记录。`;
+      await refreshOptimizationProfile();
+    } catch (error) {
+      $("#optimization-draft").textContent = error.message;
+    }
   });
 
   $("#refresh-runs").addEventListener("click", refreshRuns);
