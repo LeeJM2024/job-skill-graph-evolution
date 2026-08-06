@@ -187,7 +187,7 @@ def main() -> None:
         skill_dir / "展示级词典.csv", index=False, encoding="utf-8-sig"
     )
     pd.DataFrame(extraction_rows).drop_duplicates().to_csv(
-        skill_dir / "泛抽取级词典.csv", index=False, encoding="utf-8-sig"
+        skill_dir / "government_skill_dictionary.csv", index=False, encoding="utf-8-sig"
     )
     pd.DataFrame(skill_audit_rows).to_csv(
         output_dir / "skill_dictionary_seed_audit.csv", index=False, encoding="utf-8-sig"

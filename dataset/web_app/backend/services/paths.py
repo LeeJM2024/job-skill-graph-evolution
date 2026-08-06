@@ -23,12 +23,12 @@ BASE_SKILL_MONTHLY_SPREAD = BASE_DATA_DIR / "skill_job_monthly_spread.csv"
 BASE_JOB_PROFILE_DIFF = BASE_DATA_DIR / "job_profile_diff.csv"
 BASE_JOB_PROFILE_SNAPSHOTS = BASE_DATA_DIR / "job_profile_snapshots.csv"
 BASE_CURRENT_PROFILE = BASE_DATA_DIR / "job_current_profile_system.csv"
-SKILL_ALIAS_DICTIONARY = SKILL_EXTRACT_ROOT / "泛抽取级词典.csv"
+SKILL_ALIAS_DICTIONARY = SKILL_EXTRACT_ROOT / "company_skill_dictionary.csv"
 # The broad extraction dictionary is the sole maintained skill ontology.
 SKILL_NORMALIZED_DICTIONARY = SKILL_ALIAS_DICTIONARY
 SKILL_DISPLAY_DICTIONARY = SKILL_ALIAS_DICTIONARY
 DATA_STREAM_TITLE_DICTIONARY = DATA_STREAM_ROOT / "data" / "input" / "standard_job_title_dictionary.csv"
-DATA_STREAM_SKILL_DICTIONARY = DATA_STREAM_ROOT / "data" / "input" / "泛抽取级词典_传统新兴分类.csv"
+DATA_STREAM_SKILL_DICTIONARY = DATA_STREAM_ROOT / "data" / "input" / "company_skill_dictionary_with_type.csv"
 
 GOVERNMENT_JOB_UPDATE_ROOT = DATASET_ROOT / "job_update" / "government_job_update"
 GOVERNMENT_BASE_DATA_DIR = GOVERNMENT_JOB_UPDATE_ROOT / "data" / "base"

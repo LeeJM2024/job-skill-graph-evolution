@@ -19,7 +19,7 @@ DEFAULT_TITLE_CLEANED_POSTINGS = BASE_DATA_DIR / "government_job_postings_title_
 DEFAULT_TITLE_CLEANING_AUDIT = BASE_DATA_DIR / "government_title_cleaning_audit.csv"
 DEFAULT_TITLE_CLEANING_CACHE = BASE_DATA_DIR / "cache" / "government_title_cleaning_cache.jsonl"
 DEFAULT_SKILL_EXTRACT_DIR = PACKAGE_ROOT / "skill_extract"
-DEFAULT_SKILL_EXTRACTION_DICTIONARY = DEFAULT_SKILL_EXTRACT_DIR / "泛抽取级词典.csv"
+DEFAULT_SKILL_EXTRACTION_DICTIONARY = DEFAULT_SKILL_EXTRACT_DIR / "government_skill_dictionary.csv"
 DEFAULT_SKILL_EXTRACTION_CACHE = BASE_DATA_DIR / "cache" / "government_skill_extraction_cache.jsonl"
 DEFAULT_SKILL_NORMALIZATION_CACHE = BASE_DATA_DIR / "cache" / "government_skill_normalization_cache.jsonl"
 

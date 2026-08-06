@@ -21,7 +21,7 @@ from . import extract_job_skills_api as extract_api
 
 
 DATASET_DICT_DIR = extract_api.SKILL_EXTRACT_DIR
-DEFAULT_EXTRACTION_DICTIONARY = DATASET_DICT_DIR / "\u6cdb\u62bd\u53d6\u7ea7\u8bcd\u5178.csv"
+DEFAULT_EXTRACTION_DICTIONARY = DATASET_DICT_DIR / "company_skill_dictionary.csv"
 DEFAULT_CACHE = extract_api.SKILL_EXTRACT_DIR / "cache" / "skill_normalization_api_cache.jsonl"
 
 NEW_SKILL_ALLOWED_ANCHORS = (

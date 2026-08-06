@@ -1,13 +1,14 @@
-# 岗位技能更新系统 Web 控制台
+# 岗位技能演化 Web 控制台
 
-本地 Web 应用，用于演示和审核 `dataset/job_update/company_job_update` 的既有岗位更新流程。
+Web 控制台是公司岗位和政府技术岗位的统一操作入口。页面顶部可切换数据源；切换后读取和写入各自独立的 CSV、SQLite、词典和审核队列。
 
 ## 启动
 
-在 `dataset` 目录运行：
+在 Windows PowerShell 中：
 
 ```powershell
-python -m uvicorn backend.app:app --host 127.0.0.1 --port 8787 --app-dir web_app
+cd "B:\揭榜挂帅\dataset"
+python -m uvicorn backend.app:app --host 127.0.0.1 --port 8787 --app-dir ".\web_app"
 ```
 
 或：
@@ -16,143 +17,56 @@ python -m uvicorn backend.app:app --host 127.0.0.1 --port 8787 --app-dir web_app
 npm run web:job-update
 ```
 
-然后打开：
+打开：`http://127.0.0.1:8787`
 
-```text
-http://127.0.0.1:8787
-```
+请在 `dataset/.env` 中配置 LLM API Key。首次处理 JD 时，`text2vec` 模型可能需要下载。
 
-## 当前能力
+## 页面能力
 
-- 首页概览：汇总最新月份、标准岗位数、技能数、待审核数量、新增/下降技能数量和备份记录。
-- 数据流测试：调用数据流生成系统或已有 run，再调用 `core.cli run-data-stream`。
-- 结果展示：读取 comparison / analysis 输出，展示通过状态、岗位需求正确率、技能频率正确率、差异预览和图表。
-- 时序分析：读取 base 分析结果，展示岗位技能趋势、岗位画像对比、生命周期、迁移路径、月度新增和衰退技能榜单。
-- 人工优化：读取当前系统岗位画像，支持页面内新增、删除、修改岗位技能，并预览本次人工调整。
-- 单条 JD 更新：岗位名称、月份、岗位职责、岗位要求分框输入，并在页面右侧展示处理结果详情。
-- 批量 CSV：逐条进入同一套岗位判断和审核流程。
-- 人工审核：既有岗位可确认入库；疑似新岗位可人工补充标准岗位名、大族和匹配关键词后入库。
-- 安全更新：入库前自动备份 `job_update.db` 和 4 个 base CSV。
+| 页面 | 功能 |
+| --- | --- |
+| 首页概览 | 当前月份、岗位数、技能数、待审核数和时序概览 |
+| 单条 JD 更新 | 输入岗位名、职责和要求，选择自动或人工确认模式 |
+| 待审核队列 | 查看岗位候选、技能候选并决定是否入库 |
+| 时序分析 | 查看技能频率、生命周期、迁移路径和岗位画像版本对比 |
+| 人工优化 | 对当前岗位画像新增、修改、删除技能，并持久化人工覆盖 |
+| 数据流测试 | 调用公司基线数据流的分析和比对功能 |
 
-## 页面结构
+## 单条 JD 的两种模式
 
-当前控制台按演示闭环组织为：
+### 自动模式
 
-```text
-首页概览
--> 单条 JD 更新
--> 时序分析
--> 人工优化
--> 数据流测试
--> 备份记录
-```
+系统执行标题清洗、text2vec Top-K、必要时 LLM 二次裁决和技能抽取。确认属于既有标准岗位时，直接写入当前数据源的事件流、频率表、技能池、时序产物和 SQLite。
 
-### 首页概览
+### 人工确认模式
 
-首页用于快速说明系统当前状态和动态更新链路：
+系统先完成完整推理，但不写入正式基础数据。页面展示：
 
-- 展示最新月份、标准岗位数、技能数、待审核数量、迁移技能数、本月新增技能数、本月下降技能数。
-- 展示“输入 JD -> 岗位匹配 -> 技能抽取 -> 确认入库 -> 时序刷新”的流程。
-- 展示待审核队列的前几条记录，并可直接打开审核弹窗。
+- 原始标题和清洗后的标题。
+- 岗位大族与标准岗位 Top-K、相似度和二次裁决建议。
+- 抽取出的 `normalized_skill`、`kg_display_skill`、置信度和新技能提示。
+- 用户可选择一个 Top-K 标准岗位，删除或改写技能，或手动补充规范技能。
 
-### 单条 JD 更新
+确认“按所选岗位入库”后，才更新该数据源的正式 CSV 与 SQLite。确认新岗位只创建词典维护建议，不直接写入正式词典。
 
-单条 JD 页面采用左右结构：
+## 人工优化的落盘规则
 
-```text
-左侧：JD 输入表单
-右侧：处理结果详情
-```
+“人工优化”保存到当前数据源 SQLite 的 `job_profile_manual_overrides` 表。它覆盖当前画像展示，但不篡改历史 JD、事件流、频率表或画像快照；因此人工判断和原始事实可分别追溯。
 
-提交 JD 后，右侧会展示：
+## 通过 Web 修改数据的规则
 
-- 原始岗位名、清洗后岗位名、匹配到的标准岗位和岗位大族。
-- 岗位匹配状态与判断原因。
-- 抽取出的归一化技能、KG 展示技能、技能类型和置信度。
-- 更新影响预览，包括月度频率行、频率表总行、技能池行数和是否可入库。
-- 对疑似新岗位，提供岗位族、标准岗位名和匹配关键词的人工补充输入。
-- 支持“不更新”“打开审核弹窗”“确认入库”“查看该岗位趋势”。
+- 单条 JD 自动入库或人工确认入库后，系统自动更新对应数据域的事件流、频率、技能池、生命周期、迁移、画像和 SQLite。
+- “人工优化”保存的是 SQLite 人工覆盖记录，不会直接编辑画像 CSV，也不会改写历史数据。
+- 新岗位、新技能的确认会形成待维护建议；正式岗位词典和技能词典仍应由维护人员在 CSV 中审核修改后，再重新处理相关 JD。
+- 不要用 Excel 直接改 Web 展示的频率、技能池或画像 CSV；这会绕过数据库和时序重算流程。
 
-确认入库后，页面会刷新待审核队列、备份记录和时序分析选项；点击“查看该岗位趋势”会自动切换到时序分析页，并选中对应标准岗位和月份。
-确认入库成功后，右侧处理结果会切换为“已入库”状态，展示标准岗位、岗位族、写入技能数、基础表行数和备份编号，避免继续停留在审核页面。
+## 数据源对应关系
 
-## 时序分析页面
+| Web 数据源 | 基础目录 | 数据库 |
+| --- | --- | --- |
+| 公司岗位 | `job_update/company_job_update/data/base/` | `job_update.db` |
+| 政府技术岗位 | `job_update/government_job_update/data/base/` | `government_job_update.db` |
 
-页面入口：
+## 停止服务
 
-```text
-时序分析
-```
-
-展示目标：
-
-- 选择一个标准岗位后，查看该岗位 Top 技能的月度频率变化。
-- 查看该岗位下技能生命周期状态分布和判断依据。
-- 搜索或选择技能，查看技能从首现岗位到后续扩散岗位的迁移路径。
-- 查看指定月份的新增/上升技能榜单和衰退/消失技能榜单。
-- 对比起始月份和结束月份的岗位画像，明确展示新增、删除、频率上升、频率下降和稳定核心能力项。
-
-数据来源：
-
-```text
-dataset/job_update/company_job_update/data/base/job_skill_monthly_frequency.csv
-dataset/job_update/company_job_update/data/base/skill_lifecycle.csv
-dataset/job_update/company_job_update/data/base/skill_migration.csv
-dataset/job_update/company_job_update/data/base/skill_job_monthly_spread.csv
-dataset/job_update/company_job_update/data/base/job_profile_diff.csv
-dataset/job_update/company_job_update/data/base/job_profile_snapshots.csv
-```
-
-相关接口：
-
-```text
-GET /api/analytics/jobs
-GET /api/analytics/months
-GET /api/analytics/overview
-GET /api/analytics/job-trend
-GET /api/analytics/lifecycle
-GET /api/analytics/skill-migration
-GET /api/analytics/monthly-rank
-GET /api/analytics/profile-compare
-```
-
-当前第一版使用原生 SVG 和 HTML 表格/榜单展示，不依赖额外前端构建流程。岗位画像对比模块会读取 `job_profile_snapshots.csv` 展示旧/新画像 Top 能力，并读取 `job_profile_diff.csv` 明确标注新增、删除、修改和稳定核心能力项。
-
-## 人工优化页面
-
-页面入口：
-
-```text
-人工优化
-```
-
-当前雏形能力：
-
-- 从 `job_current_profile_system.csv` 读取当前系统岗位画像。
-- 输入标准岗位后展示该岗位全部当前技能、类别、状态、核心标记和来源。
-- 新增技能时先调用归一化预览，确认标准技能名和展示类别后再加入页面画像。
-- 支持删除某岗位下的技能，删除只记录为人工变更，不修改历史快照。
-- 支持修改技能类别、状态、是否核心和备注。
-- 预览包含 `add/delete/update` 操作的结构化变更内容，后续可接入 `job_profile_manual_overrides.csv` 和最终生效画像生成流程。
-
-相关接口：
-
-```text
-GET /api/optimization/profile
-GET /api/optimization/normalize-skill
-```
-
-## 单条 JD 处理逻辑
-
-Web 单条 JD 判断已经对齐正式 `core` 主流程：
-
-```text
-岗位标题清洗
--> shibing624/text2vec 语义路由
--> 中间分数区间调用 LLM 二次裁决
--> 既有岗位调用 skill_extract 抽取归一化技能
--> dry-run 预览频率表和技能池变化
--> 人工确认后写入 base CSV 和 SQLite 数据库
-```
-
-人工确认新岗位时，系统会先把新标准岗位写入标准岗位词典和 SQLite，再调用正式 `skill_extract` 抽取技能，最后更新事件流、频率表、技能池和数据库。
+在运行 Web 服务的 PowerShell 窗口按 `Ctrl+C`。服务不会自动在后台启动。

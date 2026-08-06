@@ -6,7 +6,7 @@
   "target_total_jd_max": 3000,
   "standard_job_file": "data/input/standard_job_title_dictionary.csv",
   "source_job_file": "data/input/job_bigcompany_final.csv",
-  "skill_dictionary_file": "data/input/泛抽取级词典_传统新兴分类.csv",
+  "skill_dictionary_file": "data/input/company_skill_dictionary_with_type.csv",
   "skill_industry_migration_prior_file": "data/input/skill_industry_migration_prior.csv",
   "output_event_stream_file": "outputs/job_update_event_stream_generated.csv",
   "output_job_trend_file": "outputs/job_demand_trend_design.csv",

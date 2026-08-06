@@ -1,123 +1,78 @@
 # 岗位数据流生成系统
 
-本项目用于根据真实招聘数据半合成生成月度岗位招聘事件流，并同步输出可用于系统比对的标准答案表。
+本工具为公司岗位系统生成可复现的初始招聘事件流。它以真实企业 JD、标准岗位词典和技能分类词典为输入，构造用于初始化和验证的月度公司岗位基线。
 
-## 数据口径
+它不是在线用户提交 JD 的处理入口。基线生成完成后，日常单条 JD 应直接进入 `company_job_update` 或 Web 控制台，动态更新既有基础数据。
 
-- 时间范围：2024-12 至 2026-07。
-- 标准岗位：使用 `data/input/standard_job_title_dictionary.csv` 中的全部 71 个标准岗位。
-- 岗位与技能来源：以 `data/input/job_bigcompany_final.csv` 为准。
-- 技能阶段辅助：`data/input/泛抽取级词典_传统新兴分类.csv` 可用于辅助识别新兴技能。
-- 最终事件流不输出 `traditional_skills` 与 `new_skills` 字段。
-
-## 目录结构
+## 输入
 
 ```text
-config/
-  generation_config.json        生成参数与随机种子配置
-data/
-  input/                        输入数据
-  intermediate/                 中间文件
-docs/
-  岗位数据流生成系统设计.md
-  完整使用说明.md
-outputs/                        运行结果根目录
-  runs/<run_id>/                每次执行生成的独立结果文件夹
-src/
-  generate_event_stream.py      后续生成脚本入口
+data/input/job_bigcompany_final.csv
+data/input/standard_job_title_dictionary.csv
+data/input/company_skill_dictionary_with_type.csv
+config/generation_config.json
 ```
 
-完整运行方式、输入输出说明和校验口径见：
+- 企业 JD 提供岗位标题、职责和要求的真实文本。
+- 标准岗位词典决定公司岗位体系。
+- 技能词典提供规范技能、KG 展示分类及传统/新兴技能标记。
+- 配置文件定义时间范围、随机种子和生成参数。
+
+## 人工维护与自动产物
+
+以下文件由维护人员人工更新：
 
 ```text
-docs/完整使用说明.md
+data/input/job_bigcompany_final.csv
+data/input/standard_job_title_dictionary.csv
+data/input/company_skill_dictionary_with_type.csv
+config/generation_config.json
 ```
 
-## 预期输出
+`outputs/runs/<run_id>/` 下的所有文件都是命令自动生成的结果，不应人工修改。需要调整生成结果时，应修改输入数据、词典或配置后重新运行完整生成流程。
 
-- `outputs/runs/<run_id>/job_update_event_stream_generated.csv`
-- `outputs/runs/<run_id>/job_demand_trend_design.csv`
-- `outputs/runs/<run_id>/skill_trend_design.csv`
-- `outputs/runs/<run_id>/job_skill_monthly_frequency_answer.csv`
+## 完整生成
 
-## 当前进度
+从本目录执行以下五步：
 
-### 第 1 步：输入解析与数据画像
-
-运行命令：
-
-```bash
-python src/profile_inputs.py
+```powershell
+cd "B:\揭榜挂帅\dataset\岗位数据流生成系统"
+python src\profile_inputs.py
+python src\generate_job_demand_plan.py
+python src\generate_skill_trend_plan.py
+python src\generate_event_stream.py
+python src\build_answer_tables.py
 ```
 
-输出文件：
+第一步会创建 `outputs/runs/<run_id>/` 并记录当前 `run_id`；后续步骤自动写入同一个 run。运行产物不提交 Git。
 
-- `outputs/runs/<run_id>/input_profile.csv`：每个标准岗位的真实 JD 样本数、岗位名称数、技能池规模和质量备注。
-- `outputs/runs/<run_id>/skill_pool_by_job.csv`：每个标准岗位对应的技能池，以及技能属于传统、新兴、两者重复或未归类。
-- `outputs/runs/<run_id>/input_quality_report.json`：输入数据总体质量摘要。
+也可从 `dataset` 一键完成“生成 + 公司系统验证”：
 
-### 第 2 步：岗位需求趋势生成
-
-运行命令：
-
-```bash
-python src/generate_job_demand_plan.py
+```powershell
+cd "B:\揭榜挂帅\dataset"
+python run_full_pipeline.py
 ```
 
-输出文件：
+## 产物
 
-- `outputs/runs/<run_id>/job_demand_monthly_plan.csv`：每个标准岗位在每个月的计划 JD 数。
-- `outputs/runs/<run_id>/job_demand_trend_design.csv`：每个标准岗位被分配到的岗位需求趋势及活跃月份摘要。
-- `outputs/runs/<run_id>/job_demand_quality_report.json`：岗位需求计划的总量、趋势分布和零值月份质量摘要。
+| 文件 | 用途 |
+| --- | --- |
+| `job_update_event_stream_generated.csv` | 生成后的公司初始 JD 事件流 |
+| `job_demand_trend_design.csv` | 岗位需求趋势设计 |
+| `skill_trend_design.csv` | 技能趋势设计，仅用于生成与验证 |
+| `job_demand_monthly_answer.csv` | 岗位月度需求答案表 |
+| `job_skill_monthly_frequency_answer.csv` | 技能月度频率答案表 |
+| `final_quality_report.json` | 生成质量报告 |
 
-注意：如果标准岗位没有真实 JD 样本和技能池，则保留在标准岗位集合与趋势设计表中，但全周期计划 JD 数为 0。
+注意：`skill_trend_design.csv` 不是 `company_job_update` 日常处理单条 JD 所需的输入。日常系统使用自己的 `data/base/` 数据、词典和 SQLite。
 
-### 第 3 步：技能趋势与技能概率计划生成
+## 与公司系统的关系
 
-运行命令：
+公司岗位的现有 `data/base/` 基线由本系统的生成结果初始化。对于一个新的 run，可以使用公司系统的验证命令检查事件流与答案表是否一致：
 
-```bash
-python src/generate_skill_trend_plan.py
+```powershell
+cd "B:\揭榜挂帅\dataset\job_update\company_job_update"
+python -m core.cli run-data-stream --run-dir "B:\揭榜挂帅\dataset\岗位数据流生成系统\outputs\runs\<run_id>"
 ```
 
-输出文件：
-
-- `outputs/runs/<run_id>/skill_trend_design.csv`：每个岗位下被选入生成计划的技能及其技能趋势。
-- `outputs/runs/<run_id>/skill_monthly_probability_plan.csv`：每个岗位、技能、月份的出现概率计划。
-- `outputs/runs/<run_id>/skill_trend_quality_report.json`：技能计划规模、趋势分布和岗位覆盖情况摘要。
-
-注意：第三步只生成技能概率计划，不生成具体 JD。最终事件流仍不会输出 `traditional_skills` 和 `new_skills` 字段。
-
-### 第 4 步：JD 事件流生成
-
-运行命令：
-
-```bash
-python src/generate_event_stream.py
-```
-
-输出文件：
-
-- `outputs/runs/<run_id>/job_update_event_stream_generated.csv`：最终生成的岗位招聘事件流。
-- `outputs/runs/<run_id>/event_stream_quality_report.json`：事件流行数、技能数量分布、字段排除情况和质量检查摘要。
-
-注意：事件流字段严格使用配置中的 `event_stream_fields`，不会输出 `traditional_skills` 与 `new_skills`。
-
-### 第 5 步：答案表生成与最终校验
-
-运行命令：
-
-```bash
-python src/build_answer_tables.py
-```
-
-输出文件：
-
-- `outputs/runs/<run_id>/job_demand_monthly_answer.csv`：岗位需求月度答案表。
-- `outputs/runs/<run_id>/job_skill_monthly_frequency_answer.csv`：技能频率月度答案表。
-- `outputs/runs/<run_id>/final_quality_report.json`：最终质量报告。
-- `outputs/runs/<run_id>/run_summary.txt`：简要运行摘要。
-
-答案表从最终事件流重新计算得到，用于和业务系统输出结果进行比对。
-
-第 1 步会创建新的 `outputs/runs/<run_id>/` 文件夹，并写入 `outputs/current_run_id.txt`。第 2-5 步会自动读取这个 run id，将同一次执行的所有输出放入同一个文件夹。
+该命令只生成分析和比对报告，不覆盖公司正式 CSV 或 SQLite。若确实需要整体替换公司基线，应先审查 run 的事件流和答案表，再由维护人员执行受控的数据初始化与 Git 提交。普通用户单条 JD 不执行上述命令。
