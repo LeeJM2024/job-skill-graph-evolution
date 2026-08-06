@@ -32,7 +32,7 @@ def main() -> int:
         data_stream_root = resolve_data_stream_root(script_root, args.data_stream_root)
         job_update_root = resolve_job_update_root(script_root, args.job_update_root)
         validate_root(data_stream_root, "data stream system")
-        validate_root(job_update_root, "job_update system")
+        validate_root(job_update_root, "company job update system")
 
         print("Starting full pipeline")
         print(f"DataStreamRoot: {data_stream_root}")
@@ -78,12 +78,12 @@ def main() -> int:
             raise RuntimeError(f"Generated run folder does not exist: {run_dir}")
 
         run_step(
-            "Step 6/6 analyze and compare with job_update",
+            "Step 6/6 analyze and compare with company job update",
             job_update_root,
             [
                 args.python_exe,
                 "-m",
-                "job_update.cli",
+                "core.cli",
                 "run-data-stream",
                 "--run-dir",
                 str(run_dir),
@@ -166,10 +166,10 @@ def resolve_job_update_root(script_root: Path, explicit_root: Path | None) -> Pa
     if explicit_root is not None:
         return explicit_root.resolve()
 
-    candidate = script_root / "job_update"
-    if not (candidate / "job_update" / "cli.py").exists():
+    candidate = script_root / "job_update" / "company_job_update"
+    if not (candidate / "core" / "cli.py").exists():
         raise RuntimeError(
-            "Could not auto-detect job_update folder. "
+            "Could not auto-detect company_job_update folder. "
             "Pass --job-update-root explicitly."
         )
     return candidate.resolve()

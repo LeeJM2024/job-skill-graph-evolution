@@ -15,6 +15,11 @@ dataset/job_update/outputs/*
 !dataset/job_update/outputs/.gitkeep
 dataset/job_update/threshold_tuning/outputs/*
 !dataset/job_update/threshold_tuning/outputs/.gitkeep
+dataset/job_update/company_job_update/outputs/*
+!dataset/job_update/company_job_update/outputs/.gitkeep
+dataset/job_update/company_job_update/skill_extract/cache/
+dataset/job_update/government_job_update/data/base/cache/
+dataset/government_job_update/data/base/审计/
 dataset/岗位数据流生成系统/outputs/runs/*
 !dataset/岗位数据流生成系统/outputs/runs/.gitkeep
 
@@ -33,6 +38,9 @@ temp/
 *.tmp
 *.temp
 dataset/web_app/backups/
+dataset/web_app/output/
+dataset/.playwright-cli/
+backend-src/
 
 # Step 1 generated data
 data/raw/*.jsonl

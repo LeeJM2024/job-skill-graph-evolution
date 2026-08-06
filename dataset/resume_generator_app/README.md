@@ -18,8 +18,8 @@ http://127.0.0.1:5188/
 
 ## 页面能力
 
-- 从 `dataset/job_update/data/base/standard_job_title_dictionary.csv` 生成标准岗位列表。
-- 从 `dataset/job_update/data/base/job_skill_monthly_frequency.csv` 和 `skill_pool.csv` 聚合岗位技能画像。
+- 从 `dataset/job_update/company_job_update/data/base/standard_job_title_dictionary.csv` 生成标准岗位列表。
+- 从 `dataset/job_update/company_job_update/data/base/job_skill_monthly_frequency.csv` 和 `skill_pool.csv` 聚合岗位技能画像。
 - 支持选择标准岗位、岗位大族、经验年限、学历、学校类型、专业和额外技能。
 - 支持导出单条简历的 JSON、CSV、Markdown。
 - CSV 字段对齐 `dataset/resume/synthetic_detailed_resumes_experience_30k.csv` 的主字段。

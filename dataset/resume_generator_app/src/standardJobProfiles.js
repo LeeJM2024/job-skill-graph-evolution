@@ -1,4 +1,4 @@
-// Generated from dataset/job_update/data/base CSV files.
+// Generated from dataset/job_update/company_job_update/data/base CSV files.
 // Regenerate when the standard job dictionary or base skill frequencies change.
 
 export const STANDARD_JOB_PROFILES = [
