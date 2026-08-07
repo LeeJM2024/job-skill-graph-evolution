@@ -1,0 +1,38 @@
+{
+  "dataset_type": "large_test_event_stream",
+  "notice": "测试专用大样本 JD 数据流，不覆盖 data/base 正式基础库。",
+  "run_id": "large_test_20260807_19_23_per_job_month",
+  "frontend_entry": "数据流测试 -> 已有 run -> large_test_20260807_19_23_per_job_month",
+  "month_start": "2024-12",
+  "month_end": "2026-07",
+  "month_count": 20,
+  "standard_job_count": 73,
+  "event_stream_rows": 30720,
+  "job_month_pairs": 1460,
+  "per_job_month_jd_min": 19,
+  "per_job_month_jd_max": 23,
+  "event_stream_file": "job_update_event_stream_large_test_19_23_per_job_month.csv",
+  "job_demand_answer_file": "job_demand_monthly_answer.csv",
+  "skill_frequency_answer_file": "job_skill_monthly_frequency_answer.csv",
+  "derived_tables_dir": "derived",
+  "derived_tables": [
+    "skill_lifecycle.csv",
+    "skill_migration.csv",
+    "skill_job_monthly_spread.csv",
+    "job_profile_snapshots.csv",
+    "job_profile_diff.csv",
+    "job_current_profile_system.csv"
+  ],
+  "generator_run_dir": "../../../../岗位数据流生成系统/outputs/runs/large_test_20260807_19_23_per_job_month",
+  "analysis_output_dir": "../../../outputs/analysis_runs/large_test_20260807_19_23_per_job_month",
+  "comparison_output_dir": "../../../outputs/comparison_runs/large_test_20260807_19_23_per_job_month",
+  "validation": {
+    "analysis_passed": true,
+    "comparison_passed": true,
+    "job_demand_match_rate": 1.0,
+    "skill_frequency_match_rate": 1.0,
+    "missing_source_jobs": 0,
+    "missing_skill_plan_job_months": 0,
+    "invalid_skill_pairs": 0
+  }
+}

@@ -25,6 +25,7 @@ from .paths import (
     SKILL_EXTRACT_ROOT,
 )
 from .paths import domain_file, resolve_domain
+from . import data_source_service
 from .profile_override_service import apply_profile_overrides
 
 
@@ -71,26 +72,31 @@ DIFF_NUMBER_COLUMNS = [
 ]
 
 
-def list_jobs(domain: str = "company") -> list[str]:
-    frame = _read_csv(domain_file(domain, "frequency"))
+def data_sources(domain: str = "company") -> list[dict[str, Any]]:
+    return data_source_service.list_sources(domain)
+
+
+def list_jobs(domain: str = "company", source_key: str | None = None) -> list[str]:
+    frame = _tables(domain, source_key).frequency
     if frame.empty or "standard_job" not in frame.columns:
         return []
     return sorted(frame["standard_job"].dropna().astype(str).unique().tolist())
 
 
-def list_months(domain: str = "company") -> list[str]:
-    frame = _read_csv(domain_file(domain, "frequency"))
+def list_months(domain: str = "company", source_key: str | None = None) -> list[str]:
+    frame = _tables(domain, source_key).frequency
     if frame.empty or "month" not in frame.columns:
         return []
     return sorted(frame["month"].dropna().astype(str).unique().tolist())
 
 
-def overview(domain: str = "company") -> dict[str, Any]:
+def overview(domain: str = "company", source_key: str | None = None) -> dict[str, Any]:
     domain = resolve_domain(domain)
-    frequency = _read_csv(domain_file(domain, "frequency"))
-    lifecycle = _read_csv(domain_file(domain, "lifecycle"))
-    migration = _read_csv(domain_file(domain, "migration"))
-    diff = _read_csv(domain_file(domain, "diff"))
+    tables = _tables(domain, source_key)
+    frequency = tables.frequency
+    lifecycle = tables.lifecycle
+    migration = tables.migration
+    diff = tables.diff
     latest_month = _latest_month(frequency, "month")
     return {
         "latest_month": latest_month,
@@ -111,8 +117,9 @@ def job_trend(
     month_start: str | None = None,
     month_end: str | None = None,
     domain: str = "company",
+    source_key: str | None = None,
 ) -> dict[str, Any]:
-    frame = _read_csv(domain_file(domain, "frequency"))
+    frame = _tables(domain, source_key).frequency
     if frame.empty:
         return {"standard_job": standard_job or "", "months": [], "series": []}
 
@@ -153,8 +160,14 @@ def job_trend(
     return {"standard_job": job, "months": months, "series": series}
 
 
-def lifecycle(standard_job: str | None = None, status: str | None = None, limit: int = 120, domain: str = "company") -> dict[str, Any]:
-    frame = _read_csv(domain_file(domain, "lifecycle"))
+def lifecycle(
+    standard_job: str | None = None,
+    status: str | None = None,
+    limit: int = 120,
+    domain: str = "company",
+    source_key: str | None = None,
+) -> dict[str, Any]:
+    frame = _tables(domain, source_key).lifecycle
     if frame.empty:
         return {"standard_job": standard_job or "", "summary": [], "rows": []}
 
@@ -180,9 +193,10 @@ def lifecycle(standard_job: str | None = None, status: str | None = None, limit:
     return {"standard_job": job, "summary": summary, "rows": [_clean_record(row) for row in rows]}
 
 
-def migration(skill: str | None = None, limit: int = 20, domain: str = "company") -> dict[str, Any]:
-    migration_frame = _read_csv(domain_file(domain, "migration"))
-    spread_frame = _read_csv(domain_file(domain, "spread"))
+def migration(skill: str | None = None, limit: int = 20, domain: str = "company", source_key: str | None = None) -> dict[str, Any]:
+    tables = _tables(domain, source_key)
+    migration_frame = tables.migration
+    spread_frame = tables.spread
     if migration_frame.empty:
         return {"skills": [], "selected": None, "spread": []}
 
@@ -217,8 +231,9 @@ def monthly_rank(
     standard_job: str | None = None,
     limit: int = 20,
     domain: str = "company",
+    source_key: str | None = None,
 ) -> dict[str, Any]:
-    frame = _read_csv(domain_file(domain, "diff"))
+    frame = _tables(domain, source_key).diff
     if frame.empty:
         return {"month": month or "", "type": rank_type, "rows": []}
 
@@ -251,9 +266,11 @@ def profile_compare(
     to_month: str | None = None,
     limit: int = 80,
     domain: str = "company",
+    source_key: str | None = None,
 ) -> dict[str, Any]:
-    snapshots = _read_csv(domain_file(domain, "snapshot"))
-    diff = _read_csv(domain_file(domain, "diff"))
+    tables = _tables(domain, source_key)
+    snapshots = tables.snapshots
+    diff = tables.diff
     if snapshots.empty:
         return _empty_profile_compare(standard_job or "", from_month or "", to_month or "")
 
@@ -305,10 +322,19 @@ def profile_compare(
     }
 
 
-def optimization_profile(standard_job: str | None = None, limit: int = 500, domain: str = "company") -> dict[str, Any]:
+def optimization_profile(
+    standard_job: str | None = None,
+    limit: int = 500,
+    domain: str = "company",
+    source_key: str | None = None,
+) -> dict[str, Any]:
     domain = resolve_domain(domain)
-    frame = _read_csv(domain_file(domain, "current"))
-    frame, override_count = apply_profile_overrides(frame, domain=domain)
+    tables = _tables(domain, source_key)
+    frame = tables.current_profile
+    if data_source_service.is_base_source(domain, source_key):
+        frame, override_count = apply_profile_overrides(frame, domain=domain)
+    else:
+        override_count = 0
     if frame.empty:
         return {
             "standard_job": standard_job or "",
@@ -554,6 +580,10 @@ def _read_csv(path) -> pd.DataFrame:
     if not path.exists():
         return pd.DataFrame()
     return pd.read_csv(path, dtype=str, encoding="utf-8-sig").fillna("")
+
+
+def _tables(domain: str = "company", source_key: str | None = None) -> data_source_service.SourceTables:
+    return data_source_service.get_source_tables(domain, source_key)
 
 
 def _source_preview(config: dict[str, Any], *, keyword: str | None, limit: int) -> dict[str, Any]:

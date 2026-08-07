@@ -8,10 +8,13 @@
 job_update/
   company_job_update/       公司岗位：月度企业招聘数据
   government_job_update/    政府技术岗位：真实发布时间、年度招聘周期
+  data/test_streams/        前端展示和压力测试用 JD 数据流，不是正式基础库
   shared/                   公共算法工具，不保存任何业务数据
 ```
 
 公司岗位与政府岗位完全独立：各自拥有标准岗位词典、技能词典、事件流、技能频率表、技能池、生命周期、迁移、岗位画像、待审核队列和 SQLite 数据库。不要把一个数据域的 CSV 传给另一个数据域。
+
+`data/test_streams/` 下的文件只用于前端选择和测试展示。它可以被 Web 控制台读取，用来观察大样本条件下的趋势图、生命周期和岗位画像对比，但不作为公司或政府岗位的正式基础库。
 
 ## 共同处理逻辑
 
@@ -29,7 +32,7 @@ job_update/
 | --- | --- |
 | [公司岗位系统](company_job_update/README.md) | 企业 JD 的初始基线与后续月度更新 |
 | [政府岗位系统](government_job_update/README.md) | 政府技术岗位的真实年度事件流与更新 |
-| [Web 控制台](../web_app/README.md) | 两个数据域共用的可视化、人工确认和画像编辑入口 |
+| [Web 控制台](../web_app/README.md) | 两个数据域共用的可视化、人工确认、画像编辑和 CSV 数据源选择入口 |
 
 ## 验证
 
@@ -49,6 +52,8 @@ government_job_update/data/base/government_job_update.db
 ```
 
 Web 中的“岗位画像人工优化”写入相应数据库的人工覆盖层。它会立即影响当前画像展示，但不会回写或篡改历史 JD、事件流和月度快照。
+
+Web 首页选择测试数据源时，时序分析和人工优化读取的是测试流派生表；这类数据只用于查看，不应替代正式 SQLite 或正式 `data/base` CSV。
 
 ## 数据维护规则
 

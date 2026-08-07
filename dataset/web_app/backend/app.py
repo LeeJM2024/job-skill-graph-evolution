@@ -95,6 +95,11 @@ def api_pipeline_result(run_id: str) -> dict[str, object]:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
+@app.get("/api/data-sources")
+def api_data_sources(domain: str = "company") -> list[dict[str, Any]]:
+    return analytics_service.data_sources(domain)
+
+
 @app.post("/api/jobs/submit-one-dry-run")
 def api_submit_one(payload: JobInput, domain: str = "company") -> dict[str, Any]:
     try:
@@ -192,18 +197,18 @@ def api_backups() -> list[dict[str, object]]:
 
 
 @app.get("/api/analytics/jobs")
-def api_analytics_jobs(domain: str = "company") -> list[str]:
-    return analytics_service.list_jobs(domain)
+def api_analytics_jobs(domain: str = "company", source_key: str | None = None) -> list[str]:
+    return analytics_service.list_jobs(domain, source_key=source_key)
 
 
 @app.get("/api/analytics/months")
-def api_analytics_months(domain: str = "company") -> list[str]:
-    return analytics_service.list_months(domain)
+def api_analytics_months(domain: str = "company", source_key: str | None = None) -> list[str]:
+    return analytics_service.list_months(domain, source_key=source_key)
 
 
 @app.get("/api/analytics/overview")
-def api_analytics_overview(domain: str = "company") -> dict[str, Any]:
-    return analytics_service.overview(domain)
+def api_analytics_overview(domain: str = "company", source_key: str | None = None) -> dict[str, Any]:
+    return analytics_service.overview(domain, source_key=source_key)
 
 
 @app.get("/api/analytics/job-trend")
@@ -213,6 +218,7 @@ def api_analytics_job_trend(
     month_start: str | None = None,
     month_end: str | None = None,
     domain: str = "company",
+    source_key: str | None = None,
 ) -> dict[str, Any]:
     return analytics_service.job_trend(
         standard_job,
@@ -220,6 +226,7 @@ def api_analytics_job_trend(
         month_start=month_start,
         month_end=month_end,
         domain=domain,
+        source_key=source_key,
     )
 
 
@@ -229,13 +236,19 @@ def api_analytics_lifecycle(
     status: str | None = None,
     limit: int = 120,
     domain: str = "company",
+    source_key: str | None = None,
 ) -> dict[str, Any]:
-    return analytics_service.lifecycle(standard_job, status=status, limit=limit, domain=domain)
+    return analytics_service.lifecycle(standard_job, status=status, limit=limit, domain=domain, source_key=source_key)
 
 
 @app.get("/api/analytics/skill-migration")
-def api_analytics_skill_migration(skill: str | None = None, limit: int = 20, domain: str = "company") -> dict[str, Any]:
-    return analytics_service.migration(skill, limit=limit, domain=domain)
+def api_analytics_skill_migration(
+    skill: str | None = None,
+    limit: int = 20,
+    domain: str = "company",
+    source_key: str | None = None,
+) -> dict[str, Any]:
+    return analytics_service.migration(skill, limit=limit, domain=domain, source_key=source_key)
 
 
 @app.get("/api/analytics/monthly-rank")
@@ -245,8 +258,16 @@ def api_analytics_monthly_rank(
     standard_job: str | None = None,
     limit: int = 20,
     domain: str = "company",
+    source_key: str | None = None,
 ) -> dict[str, Any]:
-    return analytics_service.monthly_rank(month, rank_type=type, standard_job=standard_job, limit=limit, domain=domain)
+    return analytics_service.monthly_rank(
+        month,
+        rank_type=type,
+        standard_job=standard_job,
+        limit=limit,
+        domain=domain,
+        source_key=source_key,
+    )
 
 
 @app.get("/api/analytics/profile-compare")
@@ -256,6 +277,7 @@ def api_analytics_profile_compare(
     to_month: str | None = None,
     limit: int = 80,
     domain: str = "company",
+    source_key: str | None = None,
 ) -> dict[str, Any]:
     return analytics_service.profile_compare(
         standard_job,
@@ -263,6 +285,7 @@ def api_analytics_profile_compare(
         to_month=to_month,
         limit=limit,
         domain=domain,
+        source_key=source_key,
     )
 
 
@@ -271,8 +294,9 @@ def api_optimization_profile(
     standard_job: str | None = None,
     limit: int = 500,
     domain: str = "company",
+    source_key: str | None = None,
 ) -> dict[str, Any]:
-    return analytics_service.optimization_profile(standard_job=standard_job, limit=limit, domain=domain)
+    return analytics_service.optimization_profile(standard_job=standard_job, limit=limit, domain=domain, source_key=source_key)
 
 
 @app.get("/api/optimization/normalize-skill")

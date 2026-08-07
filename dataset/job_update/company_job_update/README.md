@@ -91,3 +91,21 @@ python -m core.cli rebuild-current-profile
 ## 初始基线
 
 公司初始事件流来自 [岗位数据流生成系统](../../岗位数据流生成系统/README.md)。它仅用于重新构建基线或验证，不应在每次用户提交 JD 时运行。
+
+## Web 前端可选测试数据源
+
+Web 控制台首页可以选择当前查看的 CSV 数据源。公司岗位正式基础库仍然是：
+
+```text
+dataset/job_update/company_job_update/data/base/job_update_event_stream.csv
+```
+
+此外，项目中保留了测试专用的大样本 JD 数据流：
+
+```text
+dataset/job_update/data/test_streams/large_test_20260807_19_23_per_job_month/
+```
+
+它包含事件流、频率答案表，以及已经派生好的生命周期、迁移和岗位画像表。选择该数据源后，首页概览、时序分析和人工优化会基于测试数据展示，用于验证图表在大样本下是否自然、稳定。
+
+注意：测试数据源不覆盖 `company_job_update/data/base/`，也不代表正式岗位画像。正式入库、词典维护和人工覆盖仍以 `company_job_update/data/base/` 为准。

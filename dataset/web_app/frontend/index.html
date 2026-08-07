@@ -49,6 +49,17 @@
 
           <div id="overview-metrics" class="metric-grid"></div>
 
+          <div class="panel source-panel">
+            <div>
+              <h3>当前查看 CSV</h3>
+              <p id="global-source-path" class="muted">正在加载可选数据源。</p>
+            </div>
+            <label class="wide">
+              选择数据源
+              <select id="global-source-select"></select>
+            </label>
+          </div>
+
           <div class="overview-grid">
             <div class="panel">
               <h3>动态更新流程</h3>
@@ -142,6 +153,7 @@
             </div>
             <button id="refresh-analytics" class="primary-btn">刷新分析</button>
           </div>
+          <div class="source-banner" data-source-indicator></div>
 
           <div class="control-row">
             <label class="wide">
@@ -277,6 +289,7 @@
               <button id="optimization-save-draft" class="primary-btn">保存本次变更</button>
             </div>
           </div>
+          <div class="source-banner" data-source-indicator></div>
 
           <div class="control-row">
             <label class="wide">
@@ -383,6 +396,7 @@
               <p>提交 JD 后展示岗位识别、技能抽取、更新预览，并可继续人工确认入库。</p>
             </div>
           </div>
+          <div class="source-banner" data-source-indicator></div>
 
           <div class="jd-workspace">
             <form id="job-form" class="panel form-panel">

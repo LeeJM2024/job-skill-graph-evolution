@@ -1,0 +1,17 @@
+{
+  "test_dataset_notice": "LARGE_TEST_ONLY: generated for front-end trend visualization and large-sample JD stream testing; do not treat as production base data.",
+  "generated_at": "2026-08-07T07:55:50+00:00",
+  "seed": 20260807,
+  "month_start": "2024-12",
+  "month_end": "2026-07",
+  "month_count": 20,
+  "standard_job_count": 73,
+  "per_job_month_jd_min": 19,
+  "per_job_month_jd_max": 23,
+  "actual_total_planned_jd_count": 30720,
+  "patched_jobs": [
+    "大数据开发工程师",
+    "FPGA工程师"
+  ],
+  "patched_skill_rows_added": 26
+}

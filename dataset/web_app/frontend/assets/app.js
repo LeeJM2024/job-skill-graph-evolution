@@ -5,6 +5,8 @@ const state = {
   reviewItems: [],
   backups: [],
   overview: null,
+  dataSources: [],
+  currentSourceKey: "base",
   analytics: {
     jobs: [],
     months: [],
@@ -40,6 +42,39 @@ async function api(path, options = {}) {
     throw new Error(error.detail || response.statusText);
   }
   return response.json();
+}
+
+function selectedSource() {
+  return state.dataSources.find((source) => source.key === state.currentSourceKey) || state.dataSources[0] || null;
+}
+
+function sourceQueryParams(extra = {}) {
+  const params = new URLSearchParams(extra);
+  if (state.currentSourceKey) params.set("source_key", state.currentSourceKey);
+  return params;
+}
+
+function sourceText(source = selectedSource()) {
+  if (!source) return "当前未选择数据源";
+  const rows = source.row_count ? ` · ${source.row_count} 条 JD` : "";
+  return `${source.label}${rows}`;
+}
+
+function renderSourceIndicators() {
+  const source = selectedSource();
+  const text = sourceText(source);
+  const path = source?.event_stream_path || "";
+  const note = source?.note || "";
+  $("#global-source-path").textContent = path ? `${text} ｜ ${path}` : text;
+  $$("[data-source-indicator]").forEach((node) => {
+    node.innerHTML = `
+      <div>
+        <strong>当前查看文件</strong>
+        <span>${escapeHtml(path ? `${text} ｜ ${path}` : text)}</span>
+      </div>
+      ${note ? `<span>${escapeHtml(note)}</span>` : ""}
+    `;
+  });
 }
 
 function setLoading(isLoading) {
@@ -918,12 +953,16 @@ function deleteOptimizationSkill(skill) {
 }
 
 function buildOptimizationDraft() {
+  const source = selectedSource();
   return {
     standard_job: state.optimization.currentJob,
     preview_type: "人工优化变更预览",
-  base_profile_file: "dataset/job_update/company_job_update/data/base/job_current_profile_system.csv",
-  target_manual_file: "dataset/job_update/company_job_update/data/base/job_profile_manual_overrides.csv",
-  effective_profile_file: "dataset/job_update/company_job_update/data/base/job_current_profile_effective.csv",
+    selected_source_key: state.currentSourceKey,
+    selected_source_label: source?.label || "",
+    selected_event_stream_file: source?.event_stream_path || "",
+    base_profile_file: "dataset/job_update/company_job_update/data/base/job_current_profile_system.csv",
+    target_manual_file: "dataset/job_update/company_job_update/data/base/job_profile_manual_overrides.csv",
+    effective_profile_file: "dataset/job_update/company_job_update/data/base/job_current_profile_effective.csv",
     write_policy: "当前仅预览本次页面调整，不直接写入系统画像文件。",
     changes: state.optimization.changes,
     effective_preview: state.optimization.skills.filter((row) => row.manual_status !== "人工删除"),
@@ -935,6 +974,7 @@ async function refreshOptimizationProfile() {
   const job = $("#optimization-job").value.trim();
   if (job) params.set("standard_job", job);
   params.set("limit", "500");
+  if (state.currentSourceKey) params.set("source_key", state.currentSourceKey);
   renderOptimizationProfile(await api(`/api/optimization/profile?${params}`));
 }
 
@@ -1268,10 +1308,11 @@ function renderRank(selector, payload) {
 }
 
 async function refreshAnalyticsOptions() {
+  const sourceParams = sourceQueryParams();
   const [jobs, months, overview] = await Promise.all([
-    api("/api/analytics/jobs"),
-    api("/api/analytics/months"),
-    api("/api/analytics/overview"),
+    api(`/api/analytics/jobs?${sourceParams}`),
+    api(`/api/analytics/months?${sourceParams}`),
+    api(`/api/analytics/overview?${sourceParams}`),
   ]);
   state.analytics.jobs = jobs;
   state.analytics.months = months;
@@ -1284,6 +1325,7 @@ async function refreshAnalyticsOptions() {
     $("#analytics-month-end").value = months[months.length - 1];
   }
   renderAnalyticsMetrics(overview);
+  renderSourceIndicators();
   renderOverview();
 }
 
@@ -1301,20 +1343,24 @@ async function refreshAnalytics() {
     month_end: monthEnd,
     top_n: String(topN),
   });
+  if (state.currentSourceKey) params.set("source_key", state.currentSourceKey);
   const rankParams = new URLSearchParams({ month: monthEnd, standard_job: job, limit: "12" });
+  if (state.currentSourceKey) rankParams.set("source_key", state.currentSourceKey);
   const compareParams = new URLSearchParams({
     standard_job: job,
     from_month: monthStart,
     to_month: monthEnd,
     limit: "80",
   });
+  if (state.currentSourceKey) compareParams.set("source_key", state.currentSourceKey);
+  const sourceParams = sourceQueryParams();
   const [trend, lifecycleData, migrationData, emerging, declining, overviewData, profileCompare] = await Promise.all([
     api(`/api/analytics/job-trend?${params}`),
-    api(`/api/analytics/lifecycle?standard_job=${encodeURIComponent(job)}&limit=80`),
-    api(`/api/analytics/skill-migration?limit=25`),
+    api(`/api/analytics/lifecycle?${sourceQueryParams({ standard_job: job, limit: "80" })}`),
+    api(`/api/analytics/skill-migration?${sourceQueryParams({ limit: "25" })}`),
     api(`/api/analytics/monthly-rank?${rankParams}&type=emerging`),
     api(`/api/analytics/monthly-rank?${rankParams}&type=declining`),
-    api("/api/analytics/overview"),
+    api(`/api/analytics/overview?${sourceParams}`),
     api(`/api/analytics/profile-compare?${compareParams}`),
   ]);
   renderAnalyticsMetrics(overviewData);
@@ -1346,8 +1392,21 @@ async function refreshBackups() {
 }
 
 async function refreshOverview() {
-  state.overview = await api("/api/analytics/overview");
+  state.overview = await api(`/api/analytics/overview?${sourceQueryParams()}`);
   renderOverview();
+}
+
+async function refreshDataSources() {
+  const sources = await api("/api/data-sources");
+  state.dataSources = sources || [];
+  if (!state.dataSources.some((source) => source.key === state.currentSourceKey)) {
+    state.currentSourceKey = state.dataSources[0]?.key || "base";
+  }
+  $("#global-source-select").innerHTML = state.dataSources
+    .map((source) => `<option value="${escapeHtml(source.key)}">${escapeHtml(sourceText(source))}</option>`)
+    .join("");
+  $("#global-source-select").value = state.currentSourceKey;
+  renderSourceIndicators();
 }
 
 async function openAnalyticsForJob(job, month) {
@@ -1376,11 +1435,15 @@ function pipelinePayload() {
 function bindEvents() {
   $("#domain-select").addEventListener("change", async (event) => {
     state.domain = event.target.value;
+    state.currentSourceKey = "base";
     state.analytics.loaded = false;
+    state.analytics.jobs = [];
+    state.analytics.months = [];
     state.analytics.migrationSkills = [];
     state.optimization.loaded = false;
     state.optimization.currentJob = "";
     $("#optimization-job").innerHTML = `<option value="">请选择标准岗位</option>`;
+    await refreshDataSources();
     await Promise.all([refreshOverview(), refreshReview(), refreshAnalyticsOptions()]);
     if ($("#view-optimization").classList.contains("active")) {
       await refreshOptimizationProfile();
@@ -1394,8 +1457,26 @@ function bindEvents() {
 
   $("#overview-open-manual").addEventListener("click", () => switchView("manual"));
   $("#overview-open-analytics").addEventListener("click", () => switchView("analytics"));
+  $("#global-source-select").addEventListener("change", async () => {
+    state.currentSourceKey = $("#global-source-select").value || "base";
+    state.analytics.loaded = false;
+    state.analytics.jobs = [];
+    state.analytics.months = [];
+    state.analytics.migrationSkills = [];
+    state.optimization.loaded = false;
+    state.optimization.currentJob = "";
+    $("#optimization-job").innerHTML = `<option value="">请选择标准岗位</option>`;
+    renderSourceIndicators();
+    await Promise.all([refreshOverview(), refreshAnalyticsOptions()]);
+    if ($("#view-optimization").classList.contains("active")) {
+      await refreshOptimizationProfile();
+    }
+    if ($("#view-analytics").classList.contains("active")) {
+      await refreshAnalytics();
+    }
+  });
   $("#overview-refresh").addEventListener("click", async () => {
-    await Promise.all([refreshOverview(), refreshReview(), refreshBackups()]);
+    await Promise.all([refreshDataSources(), refreshOverview(), refreshReview(), refreshBackups()]);
   });
 
   $$(".profile-tab").forEach((button) => {
@@ -1497,7 +1578,7 @@ function bindEvents() {
   });
   $("#migration-skill").addEventListener("change", async () => {
     const skill = $("#migration-skill").value;
-    renderMigration(await api(`/api/analytics/skill-migration?skill=${encodeURIComponent(skill)}&limit=25`));
+    renderMigration(await api(`/api/analytics/skill-migration?${sourceQueryParams({ skill, limit: "25" })}`));
   });
 }
 
@@ -1509,6 +1590,7 @@ async function boot() {
   } catch {
     $("#health").textContent = "服务异常";
   }
+  await refreshDataSources();
   await Promise.all([refreshRuns(), refreshReview(), refreshBackups(), refreshAnalyticsOptions()]);
 }
 

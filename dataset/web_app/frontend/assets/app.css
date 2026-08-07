@@ -287,6 +287,37 @@ textarea {
   margin: 14px 0;
 }
 
+.source-panel {
+  align-items: center;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+}
+
+.source-banner {
+  align-items: flex-start;
+  background: #eef5f3;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: #31504c;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin: 14px 0;
+  padding: 12px 14px;
+}
+
+.source-banner strong {
+  color: var(--ink);
+  display: block;
+  font-size: 13px;
+  margin-bottom: 3px;
+}
+
+.source-banner span {
+  overflow-wrap: anywhere;
+}
+
 .wide-panel {
   grid-column: 1 / -1;
 }
@@ -1264,7 +1295,8 @@ dialog::backdrop {
     .optimization-grid,
     .optimization-workspace,
     .draft-grid,
-    .edit-grid {
+    .edit-grid,
+    .source-panel {
     grid-template-columns: 1fr;
   }
 
