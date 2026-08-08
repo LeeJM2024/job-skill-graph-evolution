@@ -16,9 +16,10 @@
 
 默认阈值：岗位大族 `0.58`，标准岗位 `0.82`。分数未达到自动条件、多个候选接近，或使用 `--mode manual` 时，记录进入待审核队列而不写入正式事件流。
 
-## 基础数据
+## 公司版本数据
 
-`data/base/` 是公司的正式基线：
+公司正式运行数据位于 `data/versions/<selected_version>/`。当前默认版本由
+`COMPANY_DATA_VERSION` 决定，系统运行时只读取选定版本：
 
 | 文件 | 用途 |
 | --- | --- |
@@ -38,7 +39,7 @@
 
 只人工维护以下两类文件：
 
-- `data/base/standard_job_title_dictionary.csv`：新增、合并或调整公司标准岗位、岗位大族和匹配关键词。
+- `data/versions/<selected_version>/standard_job_title_dictionary.csv`：新增、合并或调整公司标准岗位、岗位大族和匹配关键词。
 - `skill_extract/company_skill_dictionary.csv`：新增技能、修改别名归一化结果或修改 `kg_display_skill` 分类。
 
 不要手工编辑 `job_update_event_stream.csv`、`job_skill_monthly_frequency.csv`、`skill_pool.csv`、生命周期/迁移/画像 CSV 或 `job_update.db`。它们是派生状态：正常单条 JD 提交、人工确认或以下重建命令会自动更新它们。修改正式词典后，应重处理受影响 JD 或在受控场景下重建基线，而不是直接改统计结果。
@@ -79,7 +80,7 @@ python -m core.cli --help
 ```powershell
 python -m core.cli init-db
 python -m core.cli export-csv
-python -m core.cli rebuild-frequency --event-stream data/base/job_update_event_stream.csv --output data/base/job_skill_monthly_frequency.csv
+python -m core.cli rebuild-frequency --event-stream data/versions/<selected_version>/job_update_event_stream.csv --output data/versions/<selected_version>/job_skill_monthly_frequency.csv
 python -m core.cli rebuild-lifecycle
 python -m core.cli rebuild-migration
 python -m core.cli rebuild-profile
@@ -90,25 +91,24 @@ python -m core.cli rebuild-current-profile
 
 ## 初始基线
 
-公司初始事件流来自 [岗位数据流生成系统](../../岗位数据流生成系统/README.md)。它仅用于重新构建基线或验证，不应在每次用户提交 JD 时运行。
+公司初始事件流来自 [岗位数据流生成与评测系统](../../岗位数据流生成与评测系统/README.md)。它仅用于重新构建基线或验证，不应在每次用户提交 JD 时运行。
 
-## Web 前端可选测试数据源
+## 大流源数据
 
-Web 控制台首页可以选择当前查看的 CSV 数据源。公司岗位正式基础库仍然是：
-
-```text
-dataset/job_update/company_job_update/data/base/job_update_event_stream.csv
-```
-
-此外，项目中保留了测试专用的大样本 JD 数据流：
+公司大流的源数据由岗位数据流生成与评测系统维护，位置为：
 
 ```text
-dataset/job_update/data/test_streams/large_test_20260807_19_23_per_job_month/
+dataset/岗位数据流生成与评测系统/outputs/company_large_v2/
 ```
 
-它包含事件流、频率答案表，以及已经派生好的生命周期、迁移和岗位画像表。选择该数据源后，首页概览、时序分析和人工优化会基于测试数据展示，用于验证图表在大样本下是否自然、稳定。
+它包含大流原始事件、答案表和用于审计的派生结果。重建公司大流版本时，
+由 `promote_large_v2.py` 读取其中的原始事件流，重新生成：
 
-注意：测试数据源不覆盖 `company_job_update/data/base/`，也不代表正式岗位画像。正式入库、词典维护和人工覆盖仍以 `company_job_update/data/base/` 为准。
+```text
+dataset/job_update/company_job_update/data/versions/company_large_v2/
+```
+
+正式系统和 Web 只读取 `data/versions/` 下选定的公司版本，不直接读取上游生成目录。
 # Company data versions
 
 The company update system keeps independent, complete data versions. The

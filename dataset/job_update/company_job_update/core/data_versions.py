@@ -7,7 +7,8 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 VERSION_ROOT = PROJECT_ROOT / "data" / "versions"
-LEGACY_BASE_DIR = PROJECT_ROOT / "data" / "base"
+DATASET_ROOT = PROJECT_ROOT.parents[1]
+LEGACY_BASE_DIR = DATASET_ROOT / "岗位数据流生成与评测系统" / "data" / "reference" / "company_base_v1"
 COMPANY_DATA_VERSION_ENV = "COMPANY_DATA_VERSION"
 DEFAULT_COMPANY_DATA_VERSION = "company_large_v2"
 

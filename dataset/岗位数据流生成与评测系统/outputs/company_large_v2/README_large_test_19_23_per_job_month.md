@@ -2,12 +2,12 @@
 
 本目录是测试专用 run：`large_test_20260807_19_23_per_job_month`。
 
-这份数据只用于验证前端“岗位技能趋势图”等时序视图在大样本条件下的展示效果，不应直接覆盖 `dataset/job_update/company_job_update/data/base` 下的正式基础库。
+这份数据属于上游大流生成结果，用于审计和重建公司大流版本，不应直接覆盖 `dataset/job_update/company_job_update/data/versions` 下的正式运行版本。
 
 ## 生成目标
 
 - 时间范围：2024-12 至 2026-07，共 20 个月。
-- 标准岗位：73 个，来自最新 `dataset/job_update/company_job_update/data/base/standard_job_title_dictionary.csv`。
+- 标准岗位：73 个，来自生成系统输入词典和公司版本词典。
 - 每个岗位每个月 JD 数：19 至 23 条。
 - 最终事件流：30720 条 JD。
 
@@ -21,17 +21,17 @@
 
 ## 基础库检查
 
-生成前已检查：生成器使用的标准岗位词典与最新 base 词典一致。
+生成前已检查：生成器使用的标准岗位词典与公司正式版本词典一致。
 
-- 生成器输入：`dataset/岗位数据流生成系统/data/input/standard_job_title_dictionary.csv`
-- 最新 base：`dataset/job_update/company_job_update/data/base/standard_job_title_dictionary.csv`
+- 生成器输入：`dataset/岗位数据流生成与评测系统/data/input/standard_job_title_dictionary.csv`
+- 公司版本词典：`dataset/job_update/company_job_update/data/versions/company_large_v2/standard_job_title_dictionary.csv`
 - 二者 SHA256 前 16 位均为：`1E1633C05591A6F7`
 
 ## 测试补齐说明
 
 原始生成输入中，`大数据开发工程师` 和 `FPGA工程师` 对生成器支撑不足，无法直接满足“每个岗位每个月都有 19 至 23 条 JD”的要求。因此本 run 在测试 source 文件中补充了少量兜底模板，并在技能池中补齐了对应岗位技能。
 
-这部分补齐只存在于本测试 run，不影响正式 base 文件。
+这部分补齐只存在于本测试 run，不影响正式公司版本文件。
 
 ## 校验结果
 

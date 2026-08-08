@@ -10,16 +10,18 @@ import pandas as pd
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+DATA_FLOW_ROOT = PROJECT_ROOT
+DATASET_ROOT = PROJECT_ROOT.parent
+if str(DATASET_ROOT / "job_update") not in sys.path:
+    sys.path.insert(0, str(DATASET_ROOT / "job_update"))
 
 from company_job_update.core.frequency_store import rebuild_frequency_table
 from company_job_update.core.skill_pool_store import SKILL_POOL_COLUMNS
 from company_job_update.core.text import clean_text, split_semicolon
 
 
-BASE_DIR = PROJECT_ROOT / "data" / "base"
-OUTPUT_DIR = PROJECT_ROOT / "data" / "splits" / "v1_job_holdout"
+BASE_DIR = DATA_FLOW_ROOT / "data" / "reference" / "company_base_v1"
+OUTPUT_DIR = DATA_FLOW_ROOT / "data" / "evaluation" / "v1_job_holdout"
 
 EVENT_COLUMNS = [
     "job_id",
@@ -611,7 +613,7 @@ def write_readme(
 ) -> None:
     text = f"""# v1_job_holdout 数据集切分说明
 
-本目录由 `scripts/rebuild_v1_job_holdout_split.py` 从当前 `data/base/` 重新生成。
+本目录由 `scripts/rebuild_v1_job_holdout_split.py` 从公司基线参考数据重新生成。
 
 切分目标：
 
@@ -649,7 +651,7 @@ def write_readme(
 ## 重新生成命令
 
 ```powershell
-cd B:\\揭榜挂帅\\dataset\\company_job_update
+cd B:\\揭榜挂帅\\dataset\\岗位数据流生成与评测系统
 python scripts\\rebuild_v1_job_holdout_split.py
 ```
 """

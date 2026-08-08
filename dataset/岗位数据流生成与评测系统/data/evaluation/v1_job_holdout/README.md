@@ -1,6 +1,6 @@
 # v1_job_holdout 数据集切分说明
 
-本目录由 `scripts/rebuild_v1_job_holdout_split.py` 从当前 `data/base/` 重新生成。
+本目录由岗位数据流生成与评测系统中的 `scripts/rebuild_v1_job_holdout_split.py` 从公司基线参考数据重新生成。
 
 切分目标：
 
@@ -55,6 +55,6 @@
 ## 重新生成命令
 
 ```powershell
-cd B:\揭榜挂帅\dataset\job_update\company_job_update
+cd B:\揭榜挂帅\dataset\岗位数据流生成与评测系统
 python scripts\rebuild_v1_job_holdout_split.py
 ```

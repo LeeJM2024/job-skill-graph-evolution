@@ -1,4 +1,4 @@
-# 岗位数据流生成系统
+# 岗位数据流生成与评测系统
 
 本工具为公司岗位系统生成可复现的初始招聘事件流。它以真实企业 JD、标准岗位词典和技能分类词典为输入，构造用于初始化和验证的月度公司岗位基线。
 
@@ -36,7 +36,7 @@ config/generation_config.json
 从本目录执行以下五步：
 
 ```powershell
-cd "B:\揭榜挂帅\dataset\岗位数据流生成系统"
+cd "B:\揭榜挂帅\dataset\岗位数据流生成与评测系统"
 python src\profile_inputs.py
 python src\generate_job_demand_plan.py
 python src\generate_skill_trend_plan.py
@@ -64,15 +64,15 @@ python run_full_pipeline.py
 | `job_skill_monthly_frequency_answer.csv` | 技能月度频率答案表 |
 | `final_quality_report.json` | 生成质量报告 |
 
-注意：`skill_trend_design.csv` 不是 `company_job_update` 日常处理单条 JD 所需的输入。日常系统使用自己的 `data/base/` 数据、词典和 SQLite。
+注意：`skill_trend_design.csv` 不是 `company_job_update` 日常处理单条 JD 所需的输入。日常系统使用 `company_job_update/data/versions/` 下选定的版本、词典和 SQLite。
 
 ## 与公司系统的关系
 
-公司岗位的现有 `data/base/` 基线由本系统的生成结果初始化。对于一个新的 run，可以使用公司系统的验证命令检查事件流与答案表是否一致：
+公司岗位版本由本系统的生成结果初始化。对于一个新的 run，可以使用公司系统的验证命令检查事件流与答案表是否一致：
 
 ```powershell
 cd "B:\揭榜挂帅\dataset\job_update\company_job_update"
-python -m core.cli run-data-stream --run-dir "B:\揭榜挂帅\dataset\岗位数据流生成系统\outputs\runs\<run_id>"
+python -m core.cli run-data-stream --run-dir "B:\揭榜挂帅\dataset\岗位数据流生成与评测系统\outputs\runs\<run_id>"
 ```
 
 该命令只生成分析和比对报告，不覆盖公司正式 CSV 或 SQLite。若确实需要整体替换公司基线，应先审查 run 的事件流和答案表，再由维护人员执行受控的数据初始化与 Git 提交。普通用户单条 JD 不执行上述命令。

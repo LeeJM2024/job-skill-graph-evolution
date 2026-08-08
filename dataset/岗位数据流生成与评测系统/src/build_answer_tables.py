@@ -261,7 +261,7 @@ def build_answers(run_dir: Path) -> tuple[list[dict], list[dict], dict, str]:
 
 def build_summary(report: dict) -> str:
     lines = [
-        "岗位数据流生成系统运行摘要",
+        "岗位数据流生成与评测系统运行摘要",
         "",
         f"Seed: {report['config_seed']}",
         f"时间范围: {report['month_start']} 至 {report['month_end']}",

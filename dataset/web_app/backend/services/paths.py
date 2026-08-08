@@ -15,7 +15,7 @@ if str(JOB_UPDATE_GROUP_ROOT) not in sys.path:
 from company_job_update.core.data_versions import resolve_company_data_paths
 
 COMPANY_DATA_PATHS = resolve_company_data_paths()
-DATA_STREAM_ROOT = DATASET_ROOT / "岗位数据流生成系统"
+DATA_STREAM_ROOT = DATASET_ROOT / "岗位数据流生成与评测系统"
 SKILL_EXTRACT_ROOT = JOB_UPDATE_ROOT / "skill_extract"
 
 BASE_DATA_DIR = COMPANY_DATA_PATHS.data_dir

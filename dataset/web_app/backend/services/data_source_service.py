@@ -188,7 +188,7 @@ def _run_sources(skip_run_ids: set[str]) -> list[DataSource]:
                 run_dir=run_dir,
                 skill_universe_path=run_dir / "skill_trend_design.csv",
                 frequency_path=_analysis_file(run_dir.name, "job_skill_monthly_frequency_analysis.csv"),
-                note="来自岗位数据流生成系统 outputs/runs。",
+                note="来自岗位数据流生成与评测系统 outputs/runs。",
             )
         )
     return sources

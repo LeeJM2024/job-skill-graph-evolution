@@ -55,7 +55,7 @@ npm run web:job-update
 
 - `base`：当前岗位数据域的正式基础库。
 - `test_stream:*`：测试专用 JD 数据流，当前包含 `large_test_20260807_19_23_per_job_month`。
-- `run:*`：岗位数据流生成系统历史 run 中可被识别的事件流。
+- `run:*`：岗位数据流生成与评测系统历史 run 中可被识别的事件流。
 
 切换后，以下页面会跟随刷新并显示当前选择文件：
 
@@ -83,16 +83,16 @@ npm run web:job-update
 
 | Web 数据源 | 基础目录 | 数据库 |
 | --- | --- | --- |
-| 公司岗位 | `job_update/company_job_update/data/base/` | `job_update.db` |
+| 公司岗位 | `job_update/company_job_update/data/versions/<selected_version>/` | `job_update.db` |
 | 政府技术岗位 | `job_update/government_job_update/data/base/` | `government_job_update.db` |
 
-测试数据源目录：
+公司大流生成与评测数据目录：
 
 ```text
-job_update/data/test_streams/large_test_20260807_19_23_per_job_month/
+岗位数据流生成与评测系统/outputs/company_large_v2/
 ```
 
-该目录是大样本展示测试数据，不覆盖正式基础库。
+该目录是上游生成和评测数据，不是 Web 的正式运行数据源。
 
 ## 停止服务
 

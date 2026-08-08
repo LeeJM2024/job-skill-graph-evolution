@@ -12,7 +12,9 @@ import pandas as pd
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DATASET_ROOT = PROJECT_ROOT.parents[1]
+DATA_FLOW_ROOT = PROJECT_ROOT
+DATASET_ROOT = PROJECT_ROOT.parent
+JOB_UPDATE_ROOT = DATASET_ROOT / "job_update" / "company_job_update"
 if str(DATASET_ROOT / "job_update") not in sys.path:
     sys.path.insert(0, str(DATASET_ROOT / "job_update"))
 
@@ -27,14 +29,12 @@ from company_job_update.core.skill_pool_store import rebuild_skill_pool_table
 
 
 SOURCE_STREAM = (
-    DATASET_ROOT
-    / "job_update"
-    / "data"
-    / "test_streams"
-    / "large_test_20260807_19_23_per_job_month"
+    DATA_FLOW_ROOT
+    / "outputs"
+    / "company_large_v2"
     / "job_update_event_stream_large_test_19_23_per_job_month.csv"
 )
-COMPANY_SKILL_DICTIONARY = PROJECT_ROOT / "skill_extract" / "company_skill_dictionary.csv"
+COMPANY_SKILL_DICTIONARY = JOB_UPDATE_ROOT / "skill_extract" / "company_skill_dictionary.csv"
 LEGACY_VERSION = "company_base_v1"
 LARGE_VERSION = "company_large_v2"
 
@@ -164,7 +164,7 @@ def _seed_legacy_version() -> None:
             {
                 "version": LEGACY_VERSION,
                 "kind": "company_legacy_baseline",
-                "source": "copied unchanged from data/base before versioned baselines were introduced",
+                "source": "copied unchanged from the company_base_v1 reference data before versioned baselines were introduced",
             },
             ensure_ascii=False,
             indent=2,

@@ -30,7 +30,7 @@ Use `--dry-run` to inspect the result without writing files.
 Maintenance commands:
 
 ```powershell
-python -m core.cli rebuild-skill-pool --skill-universe "B:\揭榜挂帅\dataset\岗位数据流生成系统\outputs\skill_trend_design.csv"
+python -m core.cli rebuild-skill-pool --skill-universe "B:\揭榜挂帅\dataset\岗位数据流生成与评测系统\outputs\skill_trend_design.csv"
 python -m core.cli rebuild-frequency --event-stream data\base\job_update_event_stream.csv --output data\base\job_skill_monthly_frequency.csv
 python -m core.cli rebuild-lifecycle
 python -m core.cli rebuild-migration

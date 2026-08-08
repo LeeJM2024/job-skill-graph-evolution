@@ -1,8 +1,8 @@
 {
   "dataset_type": "large_test_event_stream",
-  "notice": "测试专用大样本 JD 数据流，不覆盖 data/base 正式基础库。",
+  "notice": "上游生成的大样本 JD 数据流，用于审计和重建 company_large_v2，不直接作为 Web 运行数据源。",
   "run_id": "large_test_20260807_19_23_per_job_month",
-  "frontend_entry": "数据流测试 -> 已有 run -> large_test_20260807_19_23_per_job_month",
+  "frontend_entry": "上游生成结果 -> company_job_update 版本重建",
   "month_start": "2024-12",
   "month_end": "2026-07",
   "month_count": 20,
@@ -23,7 +23,7 @@
     "job_profile_diff.csv",
     "job_current_profile_system.csv"
   ],
-  "generator_run_dir": "../../../../岗位数据流生成系统/outputs/runs/large_test_20260807_19_23_per_job_month",
+  "generator_run_dir": "../../../../岗位数据流生成与评测系统/outputs/runs/large_test_20260807_19_23_per_job_month",
   "analysis_output_dir": "../../../outputs/analysis_runs/large_test_20260807_19_23_per_job_month",
   "comparison_output_dir": "../../../outputs/comparison_runs/large_test_20260807_19_23_per_job_month",
   "validation": {

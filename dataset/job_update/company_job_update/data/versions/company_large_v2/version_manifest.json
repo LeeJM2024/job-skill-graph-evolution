@@ -2,7 +2,7 @@
   "version": "company_large_v2",
   "created_at": "2026-08-08T05:18:41Z",
   "kind": "company_generated_market_based_baseline",
-  "source_event_stream": "job_update/data/test_streams/large_test_20260807_19_23_per_job_month/job_update_event_stream_large_test_19_23_per_job_month.csv",
+  "source_event_stream": "岗位数据流生成与评测系统/outputs/company_large_v2/job_update_event_stream_large_test_19_23_per_job_month.csv",
   "source_event_rows": 30717,
   "event_rows": 30717,
   "skill_count": 228,

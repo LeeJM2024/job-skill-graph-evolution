@@ -34,7 +34,7 @@ dataset/
     company_job_update/       公司岗位更新系统与基础数据
     government_job_update/    政府技术岗位更新系统与基础数据
     shared/                   两个数据域共用的 LLM、相似度、文本工具
-  岗位数据流生成系统/          公司岗位初始基线事件流生成工具
+  岗位数据流生成与评测系统/          公司岗位初始基线事件流生成工具
   web_app/                    双数据源 Web 控制台
 ```
 
@@ -43,7 +43,7 @@ dataset/
 - [岗位更新总览](dataset/job_update/README.md)
 - [公司岗位系统](dataset/job_update/company_job_update/README.md)
 - [政府岗位系统](dataset/job_update/government_job_update/README.md)
-- [岗位数据流生成系统](dataset/岗位数据流生成系统/README.md)
+- [岗位数据流生成与评测系统](dataset/岗位数据流生成与评测系统/README.md)
 - [Web 控制台](dataset/web_app/README.md)
 
 ## 环境准备
@@ -85,4 +85,4 @@ npm run test:job-update
 - 人工维护的源数据和词典：公司 `standard_job_title_dictionary.csv`、`company_skill_dictionary.csv`、政府源数据 `government_jobs_2024_2026_tech_final.csv`、政府标准岗位词典、`government_skill_dictionary.csv`，以及政府初始岗位映射审核结果。
 - 命令或 Web 自动维护的数据：两个数据域的正式事件流、技能频率、技能池、生命周期、迁移、岗位画像、待审核记录和 `*.db`。不要直接编辑这些派生 CSV 或 SQLite；应通过单条 JD 入库、人工确认、重建命令或正式初始化流程更新。
 - `outputs/`、LLM 缓存、浏览器运行产物属于本地过程文件，已由 `.gitignore` 排除。
-- 公司岗位的初始事件流由“岗位数据流生成系统”构造；政府岗位使用原始数据自带的真实时间流。
+- 公司岗位的初始事件流由“岗位数据流生成与评测系统”构造；政府岗位使用原始数据自带的真实时间流。
