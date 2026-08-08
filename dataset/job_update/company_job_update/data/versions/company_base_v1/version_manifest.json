@@ -1,0 +1,35 @@
+{
+  "version": "company_base_v1",
+  "created_at": "2026-08-08T05:29:19+00:00",
+  "kind": "company_legacy_baseline_normalized",
+  "event_rows": 2338,
+  "standard_job_count": 73,
+  "month_count": 20,
+  "skill_count": 229,
+  "normalization_rules": {
+    "多源信息融合SLAM": "SLAM",
+    "大模型ASR": "模型ASR",
+    "大模型偏好数据": "模型偏好数据",
+    "大模型后训练": "模型后训练",
+    "大模型安全": "大模型安全",
+    "模型安全": "大模型安全",
+    "大模型强化": "模型强化",
+    "大模型微调": "模型微调",
+    "大模型训练": "模型训练",
+    "大模型评测": "模型评测",
+    "大模型调优": "模型调优",
+    "大模型预训练": "模型预训练",
+    "agent": "Agent"
+  },
+  "database_counts": {
+    "standard_jobs": 73,
+    "job_postings": 2338,
+    "job_skill_monthly_frequency": 23245,
+    "skill_pool": 229,
+    "skill_lifecycle": 1715,
+    "skill_migration": 229,
+    "skill_job_monthly_spread": 23245,
+    "job_profile_snapshots": 23245,
+    "job_profile_diff": 141972
+  }
+}

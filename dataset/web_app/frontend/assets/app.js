@@ -1402,10 +1402,8 @@ async function refreshDataSources() {
   if (!state.dataSources.some((source) => source.key === state.currentSourceKey)) {
     state.currentSourceKey = state.dataSources[0]?.key || "base";
   }
-  $("#global-source-select").innerHTML = state.dataSources
-    .map((source) => `<option value="${escapeHtml(source.key)}">${escapeHtml(sourceText(source))}</option>`)
-    .join("");
-  $("#global-source-select").value = state.currentSourceKey;
+  const versionNode = $("#global-source-version");
+  if (versionNode) versionNode.textContent = sourceText(selectedSource());
   renderSourceIndicators();
 }
 
@@ -1457,8 +1455,7 @@ function bindEvents() {
 
   $("#overview-open-manual").addEventListener("click", () => switchView("manual"));
   $("#overview-open-analytics").addEventListener("click", () => switchView("analytics"));
-  $("#global-source-select").addEventListener("change", async () => {
-    state.currentSourceKey = $("#global-source-select").value || "base";
+  /*
     state.analytics.loaded = false;
     state.analytics.jobs = [];
     state.analytics.months = [];
@@ -1474,7 +1471,7 @@ function bindEvents() {
     if ($("#view-analytics").classList.contains("active")) {
       await refreshAnalytics();
     }
-  });
+  */
   $("#overview-refresh").addEventListener("click", async () => {
     await Promise.all([refreshDataSources(), refreshOverview(), refreshReview(), refreshBackups()]);
   });

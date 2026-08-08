@@ -82,11 +82,9 @@ class SourceTables:
 
 def list_sources(domain: str = "company") -> list[dict[str, Any]]:
     domain = resolve_domain(domain)
-    sources = [_base_source(domain)]
-    if domain == "company":
-        sources.extend(_test_stream_sources())
-        sources.extend(_run_sources({source.run_id for source in sources if source.run_id}))
-    return [_source_to_dict(source) for source in sources]
+    # The active version is selected by COMPANY_DATA_VERSION at process
+    # startup. It is a deployment setting, not a user-facing source switch.
+    return [_source_to_dict(_base_source(domain))]
 
 
 def get_source_info(domain: str = "company", source_key: str | None = None) -> dict[str, Any]:
@@ -198,14 +196,6 @@ def _run_sources(skip_run_ids: set[str]) -> list[DataSource]:
 
 def _resolve_source(domain: str, source_key: str | None) -> DataSource:
     domain = resolve_domain(domain)
-    key = source_key or BASE_SOURCE_KEY
-    sources = [_base_source(domain)]
-    if domain == "company":
-        sources.extend(_test_stream_sources())
-        sources.extend(_run_sources({source.run_id for source in sources if source.run_id}))
-    for source in sources:
-        if source.key == key:
-            return source
     return _base_source(domain)
 
 

@@ -1,0 +1,37 @@
+{
+  "version": "company_large_v2",
+  "created_at": "2026-08-08T05:18:41Z",
+  "kind": "company_generated_market_based_baseline",
+  "source_event_stream": "job_update/data/test_streams/large_test_20260807_19_23_per_job_month/job_update_event_stream_large_test_19_23_per_job_month.csv",
+  "source_event_rows": 30717,
+  "event_rows": 30717,
+  "skill_count": 228,
+  "standard_job_count": 73,
+  "month_count": 20,
+  "normalization_rules": {
+    "大模型安全": "大模型安全",
+    "模型安全": "大模型安全",
+    "大模型ASR": "模型ASR",
+    "大模型偏好数据": "模型偏好数据",
+    "大模型后训练": "模型后训练",
+    "大模型强化": "模型强化",
+    "大模型微调": "模型微调",
+    "大模型训练": "模型训练",
+    "大模型评测": "模型评测",
+    "大模型调优": "模型调优",
+    "大模型预训练": "模型预训练",
+    "agent": "Agent"
+  },
+  "database_counts": {
+    "standard_jobs": 73,
+    "job_postings": 30717,
+    "job_skill_monthly_frequency": 48188,
+    "skill_pool": 228,
+    "skill_lifecycle": 2711,
+    "skill_migration": 228,
+    "skill_job_monthly_spread": 48188,
+    "job_profile_snapshots": 48188,
+    "job_profile_diff": 244721
+  },
+  "selection": "Set COMPANY_DATA_VERSION=company_large_v2 before starting the company CLI or Web backend."
+}

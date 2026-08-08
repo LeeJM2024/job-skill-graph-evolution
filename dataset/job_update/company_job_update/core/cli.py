@@ -21,6 +21,7 @@ from .analysis import (
 )
 from .comparison import compare_answer_tables, write_comparison_outputs
 from .current_profile_store import CurrentProfileStore
+from .data_versions import resolve_company_data_paths
 from .database import SQLiteJobUpdateStore
 from .frequency_store import FrequencyStore, rebuild_frequency_table
 from .job_profile_store import JobProfileStore
@@ -45,18 +46,19 @@ from .work_modes import (
 )
 
 
-BASE_DATA_DIR = PROJECT_ROOT / "data" / "base"
-BASE_TITLE_DICTIONARY = BASE_DATA_DIR / "standard_job_title_dictionary.csv"
-BASE_EVENT_STREAM = BASE_DATA_DIR / "job_update_event_stream.csv"
-BASE_FREQUENCY_OUTPUT = BASE_DATA_DIR / "job_skill_monthly_frequency.csv"
-BASE_SKILL_POOL = BASE_DATA_DIR / "skill_pool.csv"
-BASE_SKILL_LIFECYCLE = BASE_DATA_DIR / "skill_lifecycle.csv"
-BASE_SKILL_MIGRATION = BASE_DATA_DIR / "skill_migration.csv"
-BASE_SKILL_JOB_MONTHLY_SPREAD = BASE_DATA_DIR / "skill_job_monthly_spread.csv"
-BASE_JOB_PROFILE_SNAPSHOTS = BASE_DATA_DIR / "job_profile_snapshots.csv"
-BASE_JOB_PROFILE_DIFF = BASE_DATA_DIR / "job_profile_diff.csv"
-BASE_CURRENT_PROFILE = BASE_DATA_DIR / "job_current_profile_system.csv"
-BASE_DATABASE = BASE_DATA_DIR / "job_update.db"
+ACTIVE_DATA_PATHS = resolve_company_data_paths()
+BASE_DATA_DIR = ACTIVE_DATA_PATHS.data_dir
+BASE_TITLE_DICTIONARY = ACTIVE_DATA_PATHS.title_dictionary
+BASE_EVENT_STREAM = ACTIVE_DATA_PATHS.event_stream
+BASE_FREQUENCY_OUTPUT = ACTIVE_DATA_PATHS.frequency
+BASE_SKILL_POOL = ACTIVE_DATA_PATHS.skill_pool
+BASE_SKILL_LIFECYCLE = ACTIVE_DATA_PATHS.lifecycle
+BASE_SKILL_MIGRATION = ACTIVE_DATA_PATHS.migration
+BASE_SKILL_JOB_MONTHLY_SPREAD = ACTIVE_DATA_PATHS.spread
+BASE_JOB_PROFILE_SNAPSHOTS = ACTIVE_DATA_PATHS.profile_snapshots
+BASE_JOB_PROFILE_DIFF = ACTIVE_DATA_PATHS.profile_diff
+BASE_CURRENT_PROFILE = ACTIVE_DATA_PATHS.current_profile
+BASE_DATABASE = ACTIVE_DATA_PATHS.database
 
 
 def main() -> None:

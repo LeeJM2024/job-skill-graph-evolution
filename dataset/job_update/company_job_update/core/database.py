@@ -691,10 +691,12 @@ class SQLiteJobUpdateStore:
             return
         placeholders = ", ".join("?" for _ in columns)
         column_sql = ", ".join(columns)
-        rows = [tuple(row[column] for column in columns) for _, row in normalized.iterrows()]
         conn.executemany(
             f"INSERT INTO {table_name} ({column_sql}) VALUES ({placeholders})",
-            rows,
+            # itertuples avoids materializing a Python Series for every cell.
+            # This matters when a version baseline contains hundreds of
+            # thousands of job-profile diff rows.
+            normalized.itertuples(index=False, name=None),
         )
 
     def _upsert_processed_posting(self, conn: sqlite3.Connection, result: ProcessResult) -> None:

@@ -109,3 +109,24 @@ dataset/job_update/data/test_streams/large_test_20260807_19_23_per_job_month/
 它包含事件流、频率答案表，以及已经派生好的生命周期、迁移和岗位画像表。选择该数据源后，首页概览、时序分析和人工优化会基于测试数据展示，用于验证图表在大样本下是否自然、稳定。
 
 注意：测试数据源不覆盖 `company_job_update/data/base/`，也不代表正式岗位画像。正式入库、词典维护和人工覆盖仍以 `company_job_update/data/base/` 为准。
+# Company data versions
+
+The company update system keeps independent, complete data versions. The
+active version is selected by the programmer or deployment configuration, not
+by the Web user:
+
+```powershell
+$env:COMPANY_DATA_VERSION = "company_large_v2"
+python -m company_job_update.core.cli submit-one --month "2026-08" --job-title "..."
+```
+
+Available versions are under `data/versions/`:
+
+- `company_base_v1`: immutable copy of the previous company baseline.
+- `company_large_v2`: the larger market-based generated baseline, with its own
+  event stream, frequency tables, skill pool, lifecycle, migration, profiles,
+  and `job_update.db`.
+
+Every company CLI process and Web backend process reads only the selected
+version. A single JD submission updates that version's CSV files and SQLite
+database only. The Web UI does not expose a company-version selector.

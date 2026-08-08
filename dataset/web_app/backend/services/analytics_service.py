@@ -242,6 +242,14 @@ def monthly_rank(
     if standard_job:
         filtered = filtered[filtered["standard_job"].astype(str) == standard_job]
 
+    # A skill must receive one current direction. Deduplicate across all
+    # change types before splitting into emerging or declining rankings;
+    # filtering first would let one skill appear in both panels.
+    filtered = (
+        filtered.sort_values(["skill", "from_month"], ascending=[True, False])
+        .drop_duplicates(subset=["skill"], keep="first")
+    )
+
     if rank_type == "declining":
         filtered = filtered[filtered["change_type"].astype(str).isin(DECLINING_TYPES)]
         ascending = True

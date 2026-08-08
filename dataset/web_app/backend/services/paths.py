@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
 
 
 DATASET_ROOT = Path(__file__).resolve().parents[3]
@@ -8,21 +9,27 @@ WEB_APP_ROOT = DATASET_ROOT / "web_app"
 FRONTEND_ROOT = WEB_APP_ROOT / "frontend"
 JOB_UPDATE_ROOT = DATASET_ROOT / "job_update" / "company_job_update"
 JOB_UPDATE_PACKAGE_ROOT = JOB_UPDATE_ROOT / "core"
+JOB_UPDATE_GROUP_ROOT = DATASET_ROOT / "job_update"
+if str(JOB_UPDATE_GROUP_ROOT) not in sys.path:
+    sys.path.insert(0, str(JOB_UPDATE_GROUP_ROOT))
+from company_job_update.core.data_versions import resolve_company_data_paths
+
+COMPANY_DATA_PATHS = resolve_company_data_paths()
 DATA_STREAM_ROOT = DATASET_ROOT / "岗位数据流生成系统"
 SKILL_EXTRACT_ROOT = JOB_UPDATE_ROOT / "skill_extract"
 
-BASE_DATA_DIR = JOB_UPDATE_ROOT / "data" / "base"
-BASE_DATABASE = BASE_DATA_DIR / "job_update.db"
-BASE_TITLE_DICTIONARY = BASE_DATA_DIR / "standard_job_title_dictionary.csv"
-BASE_EVENT_STREAM = BASE_DATA_DIR / "job_update_event_stream.csv"
-BASE_FREQUENCY_OUTPUT = BASE_DATA_DIR / "job_skill_monthly_frequency.csv"
-BASE_SKILL_POOL = BASE_DATA_DIR / "skill_pool.csv"
-BASE_SKILL_LIFECYCLE = BASE_DATA_DIR / "skill_lifecycle.csv"
-BASE_SKILL_MIGRATION = BASE_DATA_DIR / "skill_migration.csv"
-BASE_SKILL_MONTHLY_SPREAD = BASE_DATA_DIR / "skill_job_monthly_spread.csv"
-BASE_JOB_PROFILE_DIFF = BASE_DATA_DIR / "job_profile_diff.csv"
-BASE_JOB_PROFILE_SNAPSHOTS = BASE_DATA_DIR / "job_profile_snapshots.csv"
-BASE_CURRENT_PROFILE = BASE_DATA_DIR / "job_current_profile_system.csv"
+BASE_DATA_DIR = COMPANY_DATA_PATHS.data_dir
+BASE_DATABASE = COMPANY_DATA_PATHS.database
+BASE_TITLE_DICTIONARY = COMPANY_DATA_PATHS.title_dictionary
+BASE_EVENT_STREAM = COMPANY_DATA_PATHS.event_stream
+BASE_FREQUENCY_OUTPUT = COMPANY_DATA_PATHS.frequency
+BASE_SKILL_POOL = COMPANY_DATA_PATHS.skill_pool
+BASE_SKILL_LIFECYCLE = COMPANY_DATA_PATHS.lifecycle
+BASE_SKILL_MIGRATION = COMPANY_DATA_PATHS.migration
+BASE_SKILL_MONTHLY_SPREAD = COMPANY_DATA_PATHS.spread
+BASE_JOB_PROFILE_DIFF = COMPANY_DATA_PATHS.profile_diff
+BASE_JOB_PROFILE_SNAPSHOTS = COMPANY_DATA_PATHS.profile_snapshots
+BASE_CURRENT_PROFILE = COMPANY_DATA_PATHS.current_profile
 SKILL_ALIAS_DICTIONARY = SKILL_EXTRACT_ROOT / "company_skill_dictionary.csv"
 # The broad extraction dictionary is the sole maintained skill ontology.
 SKILL_NORMALIZED_DICTIONARY = SKILL_ALIAS_DICTIONARY
