@@ -26,7 +26,9 @@ from typing import Any, Iterable
 DATASET_DIR = Path(__file__).resolve().parents[1]
 SKILL_EXTRACT_DIR = Path(__file__).resolve().parent
 DEFAULT_INPUT = DATASET_DIR / "cleaned" / "all_jobs_23714_normalized.jsonl"
-DEFAULT_EXTRACTION_DICTIONARY = SKILL_EXTRACT_DIR / "\u6cdb\u62bd\u53d6\u7ea7\u8bcd\u5178.csv"
+# The company skill dictionary is the single formal ontology for extraction,
+# normalization, and kg_display_skill output.
+DEFAULT_EXTRACTION_DICTIONARY = SKILL_EXTRACT_DIR / "company_skill_dictionary.csv"
 DEFAULT_GOLD = DEFAULT_EXTRACTION_DICTIONARY
 DEFAULT_OUTPUT_DIR = SKILL_EXTRACT_DIR / "output"
 DEFAULT_CACHE = SKILL_EXTRACT_DIR / "cache" / "job_skill_extract_api_cache.jsonl"
