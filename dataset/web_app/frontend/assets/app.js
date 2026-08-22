@@ -26,7 +26,10 @@ const state = {
     summary: {},
     loaded: false,
   },
+  liveEvolution: null,
 };
+
+let evolutionReplayTimer = null;
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -670,6 +673,258 @@ function renderProfileCompare(payload) {
   renderProfileChangeTable(state.analytics.profileChangeTab);
 }
 
+function skillLabelLayout(skill) {
+  const characters = Array.from(String(skill || "").trim());
+  const maxLineLength = 8;
+  const firstLine = characters.slice(0, maxLineLength).join("");
+  const secondLine = characters.slice(maxLineLength, maxLineLength * 2).join("");
+  // Latin names occupy less horizontal space per character than Chinese text,
+  // but longer technical identifiers still need a larger circular label area.
+  const visualLength = characters.reduce((total, character) => total + (/^[\x00-\x7F]$/.test(character) ? 0.62 : 1), 0);
+  return {
+    firstLine,
+    secondLine,
+    size: Math.min(112, 60 + Math.max(0, visualLength - 3) * 5),
+    fontSize: visualLength > 12 ? 10 : visualLength > 8 ? 11 : 12,
+  };
+}
+
+function renderEvolutionMap(payload, selector, { animate = false } = {}) {
+  const map = $(selector);
+  if (!map) return;
+  const changes = payload.changes || {};
+  const beforeProfile = payload.before_profile || payload.from_profile || [];
+  const afterProfile = payload.after_profile || payload.to_profile || [];
+  const changeBySkill = new Map();
+  ["added", "increased", "decreased", "removed", "stable_core"].forEach((kind) => {
+    (changes[kind] || []).forEach((row) => {
+      const skill = String(row.skill || "").trim();
+      if (skill && !changeBySkill.has(skill)) changeBySkill.set(skill, { ...row, kind });
+    });
+  });
+
+  const previous = new Map(beforeProfile.map((row) => [String(row.skill || "").trim(), row]));
+  const current = new Map(afterProfile.map((row) => [String(row.skill || "").trim(), row]));
+  const changedSkills = ["added", "increased", "decreased", "removed"]
+    .flatMap((kind) => (changes[kind] || []).map((row) => ({
+      skill: String(row.skill || "").trim(),
+      delta: Math.abs(Number(row.frequency_delta) || 0),
+      frequency: Number(row.to_monthly_skill_frequency) || 0,
+    })))
+    .filter((row) => row.skill)
+    .sort((left, right) => right.delta - left.delta || right.frequency - left.frequency || left.skill.localeCompare(right.skill));
+  const profileSkills = afterProfile
+    .slice()
+    .sort((left, right) => Number(left.rank_in_month || 9999) - Number(right.rank_in_month || 9999))
+    .map((row) => String(row.skill || "").trim());
+  // Full nodes carry the overview. Every remaining skill stays on the map as
+  // an expandable dot, so dense updates never hide part of the real profile.
+  const changedLimit = 4;
+  const visibleChanged = changedSkills.slice(0, changedLimit).map((row) => row.skill);
+  const visibleExisting = profileSkills.filter((skill) => previous.has(skill)).slice(0, 8);
+  const allSkills = Array.from(new Set([...visibleChanged, ...visibleExisting, ...profileSkills]));
+  const nodes = allSkills.map((skill) => {
+    const old = previous.get(skill);
+    const row = current.get(skill) || old || {};
+    const comparison = changeBySkill.get(skill);
+    let kind = comparison?.kind || (String(row.is_core_skill) === "1" ? "stable_core" : "steady");
+    if (!old && kind === "steady") kind = "added";
+    const beforeFrequency = Number(old?.monthly_skill_frequency) || 0;
+    const afterFrequency = Number(current.get(skill)?.monthly_skill_frequency) || 0;
+    return {
+      skill,
+      family: row.kg_display_skill || "通用技术",
+      kind,
+      beforeFrequency,
+      afterFrequency,
+      frequency: Math.max(afterFrequency, Number(row.cumulative_skill_frequency) || 0),
+      delta: Number(comparison?.frequency_delta) || afterFrequency - beforeFrequency,
+      isNew: !old,
+      isRemoved: !current.has(skill),
+      band: ["added", "increased", "decreased", "removed"].includes(kind) ? "change" : "core",
+      label: skillLabelLayout(skill),
+    };
+  }).filter((node) => node.skill);
+
+  const statusText = {
+    added: "新能力点亮",
+    increased: "需求增强",
+    decreased: "需求回落",
+    removed: "需求消失",
+    stable_core: "稳定核心",
+    steady: "持续活跃",
+  };
+  const counts = {
+    added: (changes.added || []).length,
+    increased: (changes.increased || []).length,
+    decreased: (changes.decreased || []).length,
+    removed: (changes.removed || []).length,
+  };
+  const signalCount = counts.added + counts.increased;
+  const maxFrequency = Math.max(...nodes.map((node) => Math.max(node.beforeFrequency, node.afterFrequency)), 0.01);
+  const featuredSkills = new Set([...visibleChanged, ...visibleExisting]);
+  const featuredNodes = nodes.filter((node) => featuredSkills.has(node.skill));
+  const compactNodes = nodes.filter((node) => !featuredSkills.has(node.skill));
+  const nodesByBand = {
+    change: featuredNodes.filter((node) => visibleChanged.includes(node.skill)),
+    core: featuredNodes.filter((node) => visibleExisting.includes(node.skill) && !visibleChanged.includes(node.skill)),
+  };
+  const positionBySkill = new Map();
+  [
+    { band: "change", xRadius: 40, yRadius: 33, angleOffset: -Math.PI / 2 },
+    { band: "core", xRadius: 27, yRadius: 22, angleOffset: -Math.PI / 2 + Math.PI / 4 },
+  ].forEach(({ band, xRadius, yRadius, angleOffset }) => {
+    const group = nodesByBand[band];
+    group.forEach((node, index) => {
+      const angle = angleOffset + (index / Math.max(group.length, 1)) * Math.PI * 2;
+      positionBySkill.set(node.skill, {
+        x: 50 + Math.cos(angle) * xRadius,
+        y: 50 + Math.sin(angle) * yRadius,
+      });
+    });
+  });
+  const compactPositionBySkill = new Map();
+  compactNodes.forEach((node, index) => {
+    const angle = -Math.PI / 2 + (index / Math.max(compactNodes.length, 1)) * Math.PI * 2;
+    compactPositionBySkill.set(node.skill, {
+      x: 50 + Math.cos(angle) * 46,
+      y: 50 + Math.sin(angle) * 40,
+    });
+  });
+  map.innerHTML = `
+    <div class="evolution-orbit orbit-one"></div>
+    <div class="evolution-orbit orbit-two"></div>
+    <div class="evolution-core">
+      <span>岗位核心</span>
+      <strong>${escapeHtml(payload.standard_job || "岗位画像")}</strong>
+      <em>${escapeHtml(payload.to_month || payload.month || "当前")}</em>
+    </div>
+    ${animate ? `<div class="evolution-signal" aria-hidden="true"><span></span><i></i><b></b></div>` : ""}
+    ${compactNodes.length ? `<div class="evolution-overflow-note">${compactNodes.length} 个收纳技能：点击小圆点查看详情</div>` : ""}
+    <aside class="evolution-focus-card" id="evolution-focus-card"><strong>完整技能画像</strong><span>点击外围小圆点查看被收纳技能的前后变化</span></aside>
+    ${featuredNodes.map((node, index) => {
+      const position = positionBySkill.get(node.skill) || { x: 50, y: 50 };
+      const x = position.x;
+      const y = position.y;
+      const frequencySize = 54 + Math.min(16, (Math.max(node.afterFrequency, node.beforeFrequency) / maxFrequency) * 16);
+      const afterSize = Math.max(node.label.size, frequencySize);
+      const beforeSize = Math.max(node.label.size - 4, 52 + Math.min(14, (node.beforeFrequency / maxFrequency) * 14));
+      return `
+        <article class="skill-orb ${node.kind} ${node.isNew ? "is-new" : ""} ${node.isRemoved ? "is-removed" : ""} ${animate && (payload.signal_skills || []).includes(node.skill) ? "signal-target" : ""}" style="--x:${x.toFixed(2)}%;--y:${y.toFixed(2)}%;--size:${afterSize.toFixed(0)}px;--before-size:${beforeSize.toFixed(0)}px;--label-font-size:${node.label.fontSize}px;--delay:${(index * 0.11).toFixed(2)}s" title="${escapeHtml(`${node.skill} · ${node.family} · ${statusText[node.kind]} · 写入前 ${percent(node.beforeFrequency)}，写入后 ${percent(node.afterFrequency)}`)}">
+          <span class="orb-family">${escapeHtml(node.family)}</span>
+          <strong class="skill-orb-label">${escapeHtml(node.label.firstLine)}${node.label.secondLine ? `<br>${escapeHtml(node.label.secondLine)}` : ""}</strong>
+          <em class="frequency-before">写入前 ${percent(node.beforeFrequency)}</em>
+          <em class="frequency-after">${node.isNew ? `新增至 ${percent(node.afterFrequency)}` : node.isRemoved ? "写入后移出" : `写入后 ${percent(node.afterFrequency)}`}</em>
+        </article>`;
+    }).join("") || `<p class="muted evolution-empty">暂无可展示的岗位技能节点。</p>`}
+    ${compactNodes.map((node, index) => {
+      const position = compactPositionBySkill.get(node.skill) || { x: 50, y: 50 };
+      const status = node.isNew ? "新增" : node.isRemoved ? "移出" : node.delta > 0 ? "增强" : node.delta < 0 ? "回落" : "稳定";
+      return `<button class="skill-dot ${node.kind} ${node.isNew ? "is-new" : ""}" type="button" data-compact-node="${index}" style="--x:${position.x.toFixed(2)}%;--y:${position.y.toFixed(2)}%" title="${escapeHtml(`查看 ${node.skill}：${status}`)}" aria-label="查看技能 ${escapeHtml(node.skill)}"></button>`;
+    }).join("")}
+  `;
+  map.querySelectorAll("[data-compact-node]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const node = compactNodes[Number(button.dataset.compactNode)];
+      if (!node) return;
+      const status = node.isNew ? "新增" : node.isRemoved ? "移出" : node.delta > 0 ? "需求增强" : node.delta < 0 ? "需求回落" : "保持稳定";
+      const focus = map.querySelector("#evolution-focus-card");
+      if (!focus) return;
+      focus.classList.add("is-selected");
+      focus.innerHTML = `
+        <span>${escapeHtml(node.family)}</span>
+        <strong>${escapeHtml(node.skill)}</strong>
+        <em>${escapeHtml(status)}</em>
+        <p>写入前 ${percent(node.beforeFrequency)} <b>→</b> 写入后 ${percent(node.afterFrequency)}</p>
+        ${node.delta ? `<i>${signedPercent(node.delta)}</i>` : ""}
+      `;
+    });
+  });
+  if (animate) startEvolutionReplay(map);
+}
+
+function startEvolutionReplay(map) {
+  if (evolutionReplayTimer) window.clearTimeout(evolutionReplayTimer);
+
+  const play = () => {
+    map.dataset.replayPhase = "before";
+    evolutionReplayTimer = window.setTimeout(() => {
+      map.dataset.replayPhase = "after";
+      evolutionReplayTimer = window.setTimeout(play, 3200);
+    }, 2800);
+  };
+  play();
+}
+
+function showLiveEvolution(effect) {
+  if (!effect) return;
+  state.liveEvolution = effect;
+  if (effect.effect_id) {
+    const location = new URL(window.location.href);
+    location.searchParams.set("live_effect", effect.effect_id);
+    window.history.replaceState({}, "", location);
+  }
+  const summary = effect.summary || {};
+  const changes = effect.changes || {};
+  const submitted = effect.signal_skills || [];
+  $("#live-evolution-content").innerHTML = `
+    <section class="panel live-summary">
+      <div class="live-summary-head">
+        <div>
+          <span class="evolution-eyebrow">JUST UPDATED</span>
+          <h3>${escapeHtml(effect.standard_job || "岗位画像")}</h3>
+          <p>${escapeHtml(effect.month || "")} · ${escapeHtml(effect.standard_category || "未命名岗位大族")} · 本条 JD 已正式写入</p>
+        </div>
+        <span class="tag ok">实时回放</span>
+      </div>
+      <div class="metric-grid compact-metrics live-metrics">
+        ${metric("新增技能", summary.added ?? 0, "ok")}
+        ${metric("需求增强", summary.increased ?? 0, "ok")}
+        ${metric("需求回落", summary.decreased ?? 0, "danger")}
+        ${metric("稳定核心", summary.stable_core ?? 0)}
+        ${metric("本次信号", summary.signal_skills ?? submitted.length, "warn")}
+      </div>
+      <div class="live-signal-strip"><strong>本次 JD 输入的技能信号</strong><div class="tag-row">${submitted.map((skill) => `<span class="tag">${escapeHtml(skill)}</span>`).join("") || `<span class="muted">本次没有写入可展示的技能。</span>`}</div></div>
+    </section>
+    <section class="profile-evolution-stage live-stage" aria-labelledby="live-evolution-title">
+      <div class="evolution-stage-head">
+        <div>
+          <span class="evolution-eyebrow">REAL-TIME PROFILE EFFECT</span>
+          <h3 id="live-evolution-title">岗位能力生态演化台</h3>
+          <p id="live-evolution-caption" class="muted"></p>
+        </div>
+      </div>
+      <div id="live-evolution-map" class="profile-evolution-map" aria-live="polite"></div>
+    </section>
+    <section class="live-change-grid">
+      ${renderLiveChangeCard("新增 / 点亮", changes.added, "ok")}
+      ${renderLiveChangeCard("增强 / 脉冲", changes.increased, "ok")}
+      ${renderLiveChangeCard("回落 / 褪色", changes.decreased, "danger")}
+      ${renderLiveChangeCard("稳定核心", changes.stable_core, "")}
+    </section>
+  `;
+  const enhanced = (summary.added || 0) + (summary.increased || 0);
+  $("#live-evolution-caption").textContent = enhanced
+    ? `自动回放：先展示写入前岗位画像，再切换到写入后结果；本条 JD 带来 ${enhanced} 个增强信号。`
+    : "自动回放：先展示写入前岗位画像，再切换到写入后结果；本条 JD 未改变岗位核心骨架。";
+  renderEvolutionMap({ ...effect, to_month: effect.month }, "#live-evolution-map", { animate: true });
+  switchView("live-evolution");
+}
+
+function renderLiveChangeCard(title, rows = [], tone) {
+  const content = rows.slice(0, 7).map((row) => {
+    const before = row.from_monthly_skill_frequency;
+    const after = row.to_monthly_skill_frequency;
+    const transition = before === null || before === undefined
+      ? `新增至 ${percent(after)}`
+      : after === null || after === undefined
+        ? `${percent(before)} → 移出`
+        : `${percent(before)} → ${percent(after)}`;
+    return `<li><strong>${escapeHtml(row.skill || "")}</strong><span>${transition}${row.frequency_delta ? ` (${signedPercent(row.frequency_delta)})` : ""}</span></li>`;
+  }).join("") || `<li class="muted">本次无变化</li>`;
+  return `<article class="panel live-change-card ${tone}"><h4>${title}</h4><ul>${content}</ul></article>`;
+}
+
 function renderProfileList(selector, rows) {
   $(selector).innerHTML = rows.slice(0, 18)
     .map((row) => {
@@ -1091,8 +1346,15 @@ function renderMergedJobResult(originalItem, mergedItem) {
     </div>
   `;
 
-  $("#merged-open-analytics").addEventListener("click", () => openAnalyticsForJob(standardJob, month));
+  $("#merged-open-analytics").textContent = "查看本次岗位演化";
+  $("#merged-open-analytics").addEventListener("click", () => {
+    const effect = result.live_update_effect || originalItem?.result?.live_update_effect;
+    if (effect) showLiveEvolution(effect);
+    else openAnalyticsForJob(standardJob, month);
+  });
   $("#merged-next").addEventListener("click", resetJobResultPanel);
+  const effect = result.live_update_effect || originalItem?.result?.live_update_effect;
+  if (effect) showLiveEvolution(effect);
 }
 
 function renderJobResult(item) {
@@ -1454,6 +1716,12 @@ function bindEvents() {
   });
 
   $("#overview-open-manual").addEventListener("click", () => switchView("manual"));
+  $("#live-return-manual").addEventListener("click", () => switchView("manual"));
+  $("#live-open-analytics").addEventListener("click", () => {
+    const effect = state.liveEvolution;
+    if (effect) openAnalyticsForJob(effect.standard_job, effect.month);
+    else switchView("analytics");
+  });
   $("#overview-open-analytics").addEventListener("click", () => switchView("analytics"));
   /*
     state.analytics.loaded = false;
@@ -1589,6 +1857,14 @@ async function boot() {
   }
   await refreshDataSources();
   await Promise.all([refreshRuns(), refreshReview(), refreshBackups(), refreshAnalyticsOptions()]);
+  const effectId = new URLSearchParams(window.location.search).get("live_effect");
+  if (effectId) {
+    try {
+      showLiveEvolution(await api(`/api/live-evolution/${encodeURIComponent(effectId)}`));
+    } catch (error) {
+      console.warn("Unable to restore live update effect", error);
+    }
+  }
 }
 
 boot();
