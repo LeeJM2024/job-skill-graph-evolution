@@ -19,6 +19,7 @@
         <nav>
           <button class="nav-item active" data-view="overview">首页概览</button>
           <button class="nav-item" data-view="manual">单条 JD 更新</button>
+          <button class="nav-item" data-view="live-evolution">实时岗位演化</button>
           <button class="nav-item" data-view="analytics">时序分析</button>
           <button class="nav-item" data-view="optimization">人工优化</button>
           <button class="nav-item" data-view="auto">数据流测试</button>
@@ -386,6 +387,26 @@
             </div>
             <div id="optimization-change-list" class="change-list"></div>
             <pre id="optimization-draft" class="log-box">暂无变更。</pre>
+          </div>
+        </section>
+
+        <section id="view-live-evolution" class="view">
+          <div class="section-head">
+            <div>
+              <h2>实时岗位演化</h2>
+              <p>展示刚刚入库的单条 JD 对岗位技能画像造成的真实变化。</p>
+            </div>
+            <div class="actions">
+              <button id="live-return-manual" class="secondary-btn" type="button">继续提交 JD</button>
+              <button id="live-open-analytics" class="ghost-btn" type="button">查看历史趋势</button>
+            </div>
+          </div>
+          <div class="source-banner" data-source-indicator></div>
+          <div id="live-evolution-content" class="live-evolution-content">
+            <div class="panel empty-result">
+              <h3>等待一次正式入库</h3>
+              <p>自动入库或人工确认既有岗位后，这里会回放该条 JD 带来的岗位画像变化。</p>
+            </div>
           </div>
         </section>
 

@@ -21,6 +21,7 @@ for path in (DATASET_ROOT, JOB_UPDATE_GROUP_ROOT, JOB_UPDATE_ROOT, GOVERNMENT_JO
 
 from .schemas import ExistingReviewInput, JobInput, NewJobReviewInput, ProfileOverrideInput, RunExistingInput, RunFullInput, SkillReviewInput
 from .services.profile_override_service import save_profile_overrides
+from .services.live_update_effect_service import get_live_update_effect
 from .services.backup_service import create_backup, list_backups
 from .services.job_service import (
     confirm_existing,
@@ -107,6 +108,14 @@ def api_submit_one(payload: JobInput, domain: str = "company") -> dict[str, Any]
         return government_job_service.submit_one_dry_run(data) if domain == "government" else submit_one_dry_run(data)
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/api/live-evolution/{effect_id}")
+def api_live_evolution(effect_id: str, domain: str = "company") -> dict[str, Any]:
+    try:
+        return get_live_update_effect(domain, effect_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @app.post("/api/jobs/import-csv")

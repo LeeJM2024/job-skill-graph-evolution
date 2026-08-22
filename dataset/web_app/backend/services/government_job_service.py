@@ -20,6 +20,12 @@ from company_job_update.core.models import JobPosting
 from company_job_update.core.review_queue import create_pending_reviews, serialize_process_result
 from shared.text_utils import clean_text
 
+from .live_update_effect_service import (
+    build_live_update_effect,
+    capture_current_job_profile,
+    record_live_update_effect,
+)
+
 
 def submit_one_dry_run(payload: dict[str, Any]) -> dict[str, Any]:
     mode = clean_text(payload.get("processing_mode")).lower() or "auto"
@@ -45,8 +51,18 @@ def submit_one_dry_run(payload: dict[str, Any]) -> dict[str, Any]:
     preview = system.process(posting, write=False, collect_skills_for_review=True)
     input_payload = {"month": posting.month, "job_title": posting.job_title, "responsibility": posting.job_responsibility, "requirement": posting.job_requirement, "source": "government_web"}
     if mode == "auto" and preview.route.status == "existing_job" and preview.route.best_job is not None:
-        applied = system.process(posting, write=True, confirmed_standard_job=preview.route.best_job.name, confirmed_standard_category=preview.route.best_category.name if preview.route.best_category else "")
-        return {"status": "auto_merged", "result": serialize_process_result(applied, skill_pool_path=DEFAULT_SKILL_POOL)}
+        category = preview.route.best_category.name if preview.route.best_category else ""
+        before_profile = capture_current_job_profile("government", preview.route.best_job.name)
+        applied = system.process(posting, write=True, confirmed_standard_job=preview.route.best_job.name, confirmed_standard_category=category)
+        result = serialize_process_result(applied, skill_pool_path=DEFAULT_SKILL_POOL)
+        result["live_update_effect"] = _record_live_effect(
+            posting=posting,
+            standard_job=preview.route.best_job.name,
+            standard_category=category,
+            before_profile=before_profile,
+            normalized_skills=applied.normalized_skills,
+        )
+        return {"status": "auto_merged", "result": result}
     bundle = create_pending_reviews(store=store, submission_mode=mode, input_payload=input_payload, result=preview, skill_pool_path=DEFAULT_SKILL_POOL, always_queue_job=True)
     return {"status": "pending", "item": bundle["job_review"], "skill_reviews": bundle["skill_reviews"], "result": bundle["result"]}
 
@@ -70,7 +86,26 @@ def reject_update(item_id: str) -> dict[str, Any]:
 
 
 def confirm_existing(item_id: str, *, standard_job_title: str = "", skills: list[dict[str, Any]] | None = None) -> dict[str, Any]:
-    return confirm_existing_review(item_id, standard_job_title=standard_job_title, skills=skills)
+    store = GovernmentSQLiteStore(DEFAULT_DATABASE)
+    item = store.get_review_item(item_id)
+    route = item.get("result", {}).get("route") or {}
+    selected_job = clean_text(standard_job_title) or clean_text((route.get("best_job") or {}).get("name"))
+    if not selected_job:
+        raise ValueError("Select an existing government standard job before confirming")
+    before_profile = capture_current_job_profile("government", selected_job)
+    merged = confirm_existing_review(item_id, standard_job_title=selected_job, skills=skills)
+    result_payload = dict(merged.get("result") or {})
+    result_payload["live_update_effect"] = _record_live_effect(
+        posting=SimpleNamespace(
+            job_id=clean_text(item.get("job_id")),
+            month=clean_text(item.get("input", {}).get("month")),
+        ),
+        standard_job=selected_job,
+        standard_category=clean_text((route.get("best_category") or {}).get("name")),
+        before_profile=before_profile,
+        normalized_skills=[SimpleNamespace(normalized_skill=clean_text(skill.get("normalized_skill"))) for skill in (skills or result_payload.get("skills") or [])],
+    )
+    return store.update_review_item(item_id, result_payload=result_payload)
 
 
 def confirm_new_job(item_id: str, *, standard_category: str, standard_job_title: str, match_keywords: str = "") -> dict[str, Any]:
@@ -79,3 +114,16 @@ def confirm_new_job(item_id: str, *, standard_category: str, standard_job_title:
 
 def review_skill(item_id: str, *, decision: str, normalized_skill: str = "", kg_display_skill: str = "", skill_type: str = "") -> dict[str, Any]:
     return review_skill_item(item_id, decision=decision, normalized_skill=normalized_skill, kg_display_skill=kg_display_skill, skill_type=skill_type)
+
+
+def _record_live_effect(*, posting: Any, standard_job: str, standard_category: str, before_profile: list[dict[str, Any]], normalized_skills: list[Any]) -> dict[str, Any]:
+    after_profile = capture_current_job_profile("government", standard_job)
+    effect = build_live_update_effect(
+        standard_job=standard_job,
+        standard_category=standard_category,
+        month=posting.month,
+        before_profile=before_profile,
+        after_profile=after_profile,
+        submitted_skills=[clean_text(skill.normalized_skill) for skill in normalized_skills],
+    )
+    return record_live_update_effect("government", job_id=posting.job_id, effect=effect)
