@@ -20,12 +20,35 @@ def serialize_process_result(result: ProcessResult, *, skill_pool_path: Path | N
         _serialize_skill(skill, mentions.get(skill.normalized_skill.casefold()), known_skills)
         for skill in result.normalized_skills
     ]
+    admission_by_skill = {item.normalized_skill.casefold(): item for item in result.admissions}
+    for skill in skills:
+        admission = admission_by_skill.get(skill["normalized_skill"].casefold())
+        if admission is None:
+            continue
+        skill["admission_status"] = admission.status
+        skill["admission_reason"] = admission.reason
+        skill["support_job_count"] = admission.support_job_count
+        skill["support_month_count"] = admission.support_month_count
+        skill["confirmation_route"] = admission.confirmation_route
+        skill["cross_role_support_job_count"] = admission.cross_role_support_job_count
     return {
         "job_id": result.posting.job_id,
         "job_title": result.posting.job_title,
         "routing_job_title": result.posting.routing_job_title,
         "route": _serialize_route(result),
         "skills": skills,
+        "cross_validation": [
+            {
+                "skill": item.normalized_skill,
+                "status": item.status,
+                "reason": item.reason,
+                "support_job_count": item.support_job_count,
+                "support_month_count": item.support_month_count,
+                "confirmation_route": item.confirmation_route,
+                "cross_role_support_job_count": item.cross_role_support_job_count,
+            }
+            for item in result.admissions
+        ],
         "updated": result.update is not None,
         "update": _serialize_update(result),
     }

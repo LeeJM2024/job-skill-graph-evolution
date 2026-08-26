@@ -340,9 +340,10 @@ def optimization_profile(
     tables = _tables(domain, source_key)
     frame = tables.current_profile
     if data_source_service.is_base_source(domain, source_key):
-        frame, override_count = apply_profile_overrides(frame, domain=domain)
+        frame, override_count, dynamic_candidate_count = apply_profile_overrides(frame, domain=domain)
     else:
         override_count = 0
+        dynamic_candidate_count = 0
     if frame.empty:
         return {
             "standard_job": standard_job or "",
@@ -354,6 +355,7 @@ def optimization_profile(
                 "source_month": "",
                 "source_type": "",
                 "manual_override_count": 0,
+                "cross_validated_dynamic_count": 0,
             },
         }
 
@@ -393,6 +395,7 @@ def optimization_profile(
             "job_count": len(jobs),
             "skill_count": int(len(filtered)),
             "manual_override_count": override_count,
+            "cross_validated_dynamic_count": dynamic_candidate_count,
             "source_month": "、".join(source_months),
             "source_type": "、".join(source_types),
         },

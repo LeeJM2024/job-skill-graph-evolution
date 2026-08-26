@@ -19,16 +19,18 @@ for path in (DATASET_ROOT, JOB_UPDATE_GROUP_ROOT, JOB_UPDATE_ROOT, GOVERNMENT_JO
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
-from .schemas import ExistingReviewInput, JobInput, NewJobReviewInput, ProfileOverrideInput, RunExistingInput, RunFullInput, SkillReviewInput
+from .schemas import CandidateSkillReviewInput, ExistingReviewInput, JobInput, NewJobReviewInput, ProfileOverrideInput, RunExistingInput, RunFullInput, SkillReviewInput
 from .services.profile_override_service import save_profile_overrides
 from .services.live_update_effect_service import get_live_update_effect
 from .services.backup_service import create_backup, list_backups
 from .services.job_service import (
     confirm_existing,
     confirm_new_job,
+    get_candidate_skills,
     get_review_items,
     import_csv,
     reject_update,
+    review_candidate_skill,
     review_skill,
     submit_one_dry_run,
 )
@@ -133,6 +135,27 @@ async def api_import_csv(file: UploadFile = File(...), domain: str = "company") 
 @app.get("/api/review/items")
 def api_review_items(domain: str = "company") -> list[dict[str, Any]]:
     return government_job_service.get_review_items() if domain == "government" else get_review_items()
+
+
+@app.get("/api/cross-validation/candidates")
+def api_cross_validation_candidates(status: str | None = None, domain: str = "company") -> list[dict[str, Any]]:
+    if domain == "government":
+        return []
+    return get_candidate_skills(status=status)
+
+
+@app.post("/api/cross-validation/candidates/review")
+def api_review_cross_validation_candidate(payload: CandidateSkillReviewInput, domain: str = "company") -> dict[str, Any]:
+    if domain == "government":
+        raise HTTPException(status_code=400, detail="政府岗位数据域暂不启用动态候选能力池")
+    try:
+        return review_candidate_skill(
+            standard_job=payload.standard_job,
+            skill=payload.skill,
+            action=payload.action,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.post("/api/review/{item_id}/reject-update")

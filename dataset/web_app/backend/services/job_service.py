@@ -48,6 +48,7 @@ from company_job_update.core.skill_lifecycle_store import SkillLifecycleStore
 from company_job_update.core.skill_migration_store import SkillMigrationStore
 from company_job_update.core.job_profile_store import JobProfileStore
 from company_job_update.core.current_profile_store import CurrentProfileStore
+from company_job_update.core.candidate_skill_store import RoleSkillCandidateStore
 from company_job_update.core.review_queue import (
     create_pending_reviews,
     serialize_process_result as serialize_review_process_result,
@@ -158,6 +159,20 @@ def import_csv(frame: pd.DataFrame) -> dict[str, Any]:
 def get_review_items() -> list[dict[str, Any]]:
     _ensure_database_initialized()
     return SQLiteJobUpdateStore(BASE_DATABASE).list_review_items(status="pending")
+
+
+def get_candidate_skills(status: str | None = None) -> list[dict[str, Any]]:
+    _ensure_database_initialized()
+    return RoleSkillCandidateStore(BASE_DATABASE).list_candidates(status=status)
+
+
+def review_candidate_skill(*, standard_job: str, skill: str, action: str) -> dict[str, Any]:
+    _ensure_database_initialized()
+    return RoleSkillCandidateStore(BASE_DATABASE).review_candidate(
+        standard_job=standard_job,
+        skill=skill,
+        action=action,
+    )
 
 
 def reject_update(item_id: str) -> dict[str, Any]:
@@ -330,6 +345,7 @@ def _build_system(progress_messages: list[str]) -> JobUpdateSystem:
             BASE_JOB_PROFILE_DIFF,
         ),
         current_profile_store=CurrentProfileStore(BASE_CURRENT_PROFILE),
+        candidate_skill_store=RoleSkillCandidateStore(BASE_DATABASE),
         database_store=SQLiteJobUpdateStore(BASE_DATABASE),
         similarity=_similarity(),
         route_adjudicator=_route_adjudicator(),
@@ -398,6 +414,10 @@ def _merge_summary(result: ProcessResult) -> dict[str, Any]:
         "spread_rows": update.spread_rows,
         "profile_snapshot_rows": update.profile_snapshot_rows,
         "profile_diff_rows": update.profile_diff_rows,
+        "admitted_skill_count": len(update.normalized_skills),
+        "candidate_skill_count": len(
+            [item for item in result.admissions if item.status in {"candidate", "confirmed_dynamic", "confirmed_cross_role"}]
+        ),
     }
 
 

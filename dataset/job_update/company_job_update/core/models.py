@@ -5,6 +5,14 @@ from typing import Any, Literal
 
 
 RouteStatus = Literal["existing_job", "potential_new_job", "new_family"]
+SkillAdmissionStatus = Literal[
+    "verified_existing",
+    "verified_dynamic",
+    "verified_cross_role",
+    "candidate",
+    "confirmed_dynamic",
+    "confirmed_cross_role",
+]
 
 
 @dataclass(slots=True)
@@ -30,6 +38,20 @@ class NormalizedSkill:
     skill_type: str | None = None
     confidence: float | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(slots=True)
+class SkillAdmission:
+    """Evidence-backed admission decision for one job-skill relation."""
+
+    normalized_skill: str
+    kg_display_skill: str
+    status: SkillAdmissionStatus
+    reason: str
+    support_job_count: int = 0
+    support_month_count: int = 0
+    confirmation_route: str = ""
+    cross_role_support_job_count: int = 0
 
 
 @dataclass(slots=True)
@@ -98,4 +120,5 @@ class ProcessResult:
     update: ExistingJobUpdate | None = None
     # Populated for manual review even when the route is not an existing job.
     normalized_skills: list[NormalizedSkill] = field(default_factory=list)
+    admissions: list[SkillAdmission] = field(default_factory=list)
 

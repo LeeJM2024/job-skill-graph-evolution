@@ -11,14 +11,15 @@ import pandas as pd
 from .paths import GOVERNMENT_BASE_DATABASE, BASE_DATABASE, resolve_domain
 
 
-def apply_profile_overrides(frame: pd.DataFrame, *, domain: str) -> tuple[pd.DataFrame, int]:
-    """Overlay active manual edits without changing historical profile snapshots."""
+def apply_profile_overrides(frame: pd.DataFrame, *, domain: str) -> tuple[pd.DataFrame, int, int]:
+    """Overlay manual and cross-validated dynamic edits without mutating snapshots."""
     domain = resolve_domain(domain)
     if frame.empty:
-        return frame, 0
+        return frame, 0, 0
     overrides = _active_overrides(domain, standard_job="")
-    if not overrides:
-        return frame, 0
+    candidates = _confirmed_dynamic_candidates(domain)
+    if not overrides and not candidates:
+        return frame, 0, 0
 
     output = frame.copy()
     for column, default in (("manual_status", "系统识别"), ("manual_note", "")):
@@ -50,7 +51,29 @@ def apply_profile_overrides(frame: pd.DataFrame, *, domain: str) -> tuple[pd.Dat
         row["standard_job"] = job
         row["skill"] = skill
         output = pd.concat([output, pd.DataFrame([row])], ignore_index=True)
-    return output, len(overrides)
+    for item in candidates:
+        job = item["standard_job"]
+        skill = item["normalized_skill"]
+        is_cross_role = item.get("confirmation_route") == "cross_role_migration"
+        mask = (output["standard_job"].astype(str) == job) & (output["skill"].astype(str) == skill)
+        if mask.any():
+            continue
+        row = {column: "" for column in output.columns}
+        row.update(
+            {
+                "standard_job": job,
+                "skill": skill,
+                "kg_display_skill": item["kg_display_skill"],
+                "snapshot_skill_status": "已验证跨岗位技能" if is_cross_role else "已验证动态技能",
+                "is_core_skill": 0,
+                "source_month": item["last_seen_month"],
+                "source_type": "cross_validated_cross_role" if is_cross_role else "cross_validated_dynamic",
+                "manual_status": "跨岗位迁移确认" if is_cross_role else "交叉验证确认",
+                "manual_note": item["confirmation_reason"],
+            }
+        )
+        output = pd.concat([output, pd.DataFrame([row])], ignore_index=True)
+    return output, len(overrides), len(candidates)
 
 
 def save_profile_overrides(*, domain: str, standard_job: str, changes: list[dict[str, Any]]) -> dict[str, Any]:
@@ -119,6 +142,29 @@ def _active_overrides(domain: str, *, standard_job: str) -> list[dict[str, Any]]
         {**dict(row), "payload": json.loads(row["payload_json"] or "{}")}
         for row in rows
     ]
+
+
+def _confirmed_dynamic_candidates(domain: str) -> list[dict[str, str]]:
+    path = _database_path(domain)
+    if not path.exists():
+        return []
+    with closing(_connect(path)) as conn:
+        try:
+            columns = {row[1] for row in conn.execute("PRAGMA table_info(role_skill_candidates)").fetchall()}
+            confirmation_route = "confirmation_route" if "confirmation_route" in columns else "''"
+            rows = conn.execute(
+                f"""
+                SELECT standard_job, normalized_skill, kg_display_skill,
+                       last_seen_month, confirmation_reason,
+                       {confirmation_route} AS confirmation_route
+                FROM role_skill_candidates
+                WHERE status = 'confirmed'
+                ORDER BY confirmed_at, standard_job, normalized_skill
+                """
+            ).fetchall()
+        except sqlite3.OperationalError:
+            return []
+    return [dict(row) for row in rows]
 
 
 def _migrate(conn: sqlite3.Connection) -> None:

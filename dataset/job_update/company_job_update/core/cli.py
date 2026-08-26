@@ -21,6 +21,7 @@ from .analysis import (
 )
 from .comparison import compare_answer_tables, write_comparison_outputs
 from .current_profile_store import CurrentProfileStore
+from .candidate_skill_store import RoleSkillCandidateStore
 from .data_versions import resolve_company_data_paths
 from .database import SQLiteJobUpdateStore
 from .frequency_store import FrequencyStore, rebuild_frequency_table
@@ -768,6 +769,7 @@ def main() -> None:
                 args.job_profile_diff,
             ),
             current_profile_store=CurrentProfileStore(args.current_profile),
+            candidate_skill_store=RoleSkillCandidateStore(args.database),
             database_store=SQLiteJobUpdateStore(args.database),
             similarity=similarity,
             route_adjudicator=route_adjudicator,
@@ -1087,6 +1089,18 @@ def serialize_process_result(result) -> dict[str, Any]:
             for skill in result.normalized_skills
         ],
         "updated": result.update is not None,
+        "cross_validation": [
+            {
+                "skill": item.normalized_skill,
+                "status": item.status,
+                "reason": item.reason,
+                "support_job_count": item.support_job_count,
+                "support_month_count": item.support_month_count,
+                "confirmation_route": item.confirmation_route,
+                "cross_role_support_job_count": item.cross_role_support_job_count,
+            }
+            for item in result.admissions
+        ],
     }
     if result.update is not None:
         payload["update"] = {

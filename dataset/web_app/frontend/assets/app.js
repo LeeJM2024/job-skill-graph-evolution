@@ -1019,6 +1019,7 @@ function renderOptimizationSkills() {
     metric("标准岗位", escapeHtml(state.optimization.currentJob || "未选择")),
     metric("当前技能数", skills.length),
     metric("来源月份", summary.source_month || "无"),
+    metric("交叉验证确认", summary.cross_validated_dynamic_count ?? 0),
     metric("人工变更", state.optimization.changes.length),
   ].join("");
   $("#optimization-count").textContent = `${skills.length} 个技能`;
@@ -1243,10 +1244,13 @@ function processStepsHtml(item) {
   const route = item?.result?.route || {};
   const skills = item?.result?.skills || [];
   const update = item?.result?.update || {};
+  const crossValidation = item?.result?.cross_validation || [];
+  const candidateCount = crossValidation.filter((item) => ["candidate", "confirmed_dynamic", "confirmed_cross_role"].includes(item.status)).length;
   const steps = [
     ["岗位标题清洗", item?.result?.routing_job_title || item?.input?.job_title],
     ["标准岗位匹配", route.best_job?.name || "未命中"],
     ["技能抽取", `${skills.length} 个技能`],
+    ["交叉验证", candidateCount ? `${candidateCount} 个候选能力暂不写入基线` : "均已通过岗位能力验证"],
     ["频率更新预览", update.monthly_rows ? `${update.monthly_rows} 行月度频率` : "等待已有岗位确认"],
     ["人工确认", item?.status === "pending" ? "待审核" : item?.status || "待审核"],
   ];
@@ -1302,13 +1306,14 @@ function renderMergedJobResult(originalItem, mergedItem) {
   state.currentReviewItem = mergedItem || originalItem;
   const { result, mergeResult, standardJob, standardCategory, month } = mergeTargetInfo(originalItem, mergedItem);
   const skills = result.skills || originalItem?.result?.skills || [];
+  const crossValidation = result.cross_validation || [];
   const backup = result.backup || {};
   const backupText = backup.backup_id
     ? `备份编号：${backup.backup_id}`
     : "本次确认已完成；如启用备份，备份记录会显示在备份列表中。";
 
   $("#job-result-panel").innerHTML = `
-    <div class="success-strip">已确认入库，基础 CSV 与 SQLite 数据已更新。</div>
+    <div class="success-strip">已完成可信更新：已验证技能进入基线，候选新增能力进入独立缓冲池。</div>
     <div class="result-header">
       <div>
         <h3>${escapeHtml(originalItem?.input?.job_title || standardJob)}</h3>
@@ -1322,7 +1327,8 @@ function renderMergedJobResult(originalItem, mergedItem) {
       <div class="metric-grid compact-metrics">
         ${metric("标准岗位", escapeHtml(standardJob || "未命中"))}
         ${metric("岗位族", escapeHtml(standardCategory || "未命中"))}
-        ${metric("写入技能", mergeResult.skill_count ?? skills.length)}
+        ${metric("写入基线技能", mergeResult.admitted_skill_count ?? mergeResult.skill_count ?? skills.length)}
+        ${metric("候选新增能力", mergeResult.candidate_skill_count ?? 0)}
         ${metric("事件流行数", mergeResult.event_rows ?? "已更新")}
         ${metric("频率表行数", mergeResult.frequency_rows ?? "已更新")}
         ${metric("技能池行数", mergeResult.skill_pool_rows ?? "已更新")}
@@ -1332,11 +1338,19 @@ function renderMergedJobResult(originalItem, mergedItem) {
 
     <div class="result-section">
       <div class="panel-title-row">
-        <h4>已入库技能</h4>
+        <h4>技能准入结果</h4>
         <span class="muted">${skills.length} 个归一化技能</span>
       </div>
       <div class="tag-row">
-        ${skills.map((skill) => `<span class="tag">${escapeHtml(skill.normalized_skill || skill.kg_display_skill || "")}</span>`).join("") || `<span class="muted">暂无技能结果。</span>`}
+        ${skills.map((skill) => {
+          const name = skill.normalized_skill || skill.kg_display_skill || "";
+          const pending = ["candidate", "confirmed_dynamic", "confirmed_cross_role"].includes(skill.admission_status);
+          const suffix = skill.admission_status === "confirmed_cross_role"
+            ? "（跨岗位确认）"
+            : pending ? "（候选）" : "";
+          return `<span class="tag ${pending ? "warn" : "ok"}" title="${escapeHtml(skill.admission_reason || "")}">${escapeHtml(name + suffix)}</span>`;
+        }).join("") || `<span class="muted">暂无技能结果。</span>`}
+        ${crossValidation.length ? `<p class="muted">候选能力可通过同岗位双 JD、跨自然月复现，或通过当前 JD 原文证据与相似岗位近期迁移证据共同确认后叠加到当前岗位画像。</p>` : ""}
       </div>
     </div>
 

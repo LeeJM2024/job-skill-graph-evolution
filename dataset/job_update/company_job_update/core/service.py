@@ -7,9 +7,11 @@ from typing import Callable
 
 from .database import SQLiteJobUpdateStore
 from .current_profile_store import CurrentProfileStore
+from .candidate_skill_store import RoleSkillCandidateStore
+from .cross_role_evidence import CrossRoleEvidenceResolver
 from .frequency_store import FrequencyStore
 from .job_profile_store import JobProfileStore
-from .models import ExistingJobUpdate, JobPosting, JobRoute, NormalizedSkill, ProcessResult, ScoredCandidate
+from .models import ExistingJobUpdate, JobPosting, JobRoute, NormalizedSkill, ProcessResult, ScoredCandidate, SkillAdmission
 from .route_adjudication import RouteAdjudicator
 from .similarity import SimilarityBackend, Text2VecSimilarity
 from .skill_extraction import SkillExtractor
@@ -31,6 +33,7 @@ class JobUpdateSystem:
     skill_migration_store: SkillMigrationStore | None = None
     job_profile_store: JobProfileStore | None = None
     current_profile_store: CurrentProfileStore | None = None
+    candidate_skill_store: RoleSkillCandidateStore | None = None
     database_store: SQLiteJobUpdateStore | None = None
     similarity: SimilarityBackend | None = None
     route_adjudicator: RouteAdjudicator | None = None
@@ -169,12 +172,75 @@ class JobUpdateSystem:
                 self.database_store.sync_after_process(result=result)
             return result
 
+        admissions: list[SkillAdmission] = []
+        admitted_skills = normalized_skills
+        if self.candidate_skill_store is not None:
+            current_profile = self.current_profile_store.load() if self.current_profile_store is not None else None
+            trusted_skills = set()
+            if current_profile is not None and not current_profile.empty:
+                target_rows = current_profile[
+                    current_profile["standard_job"].astype(str).str.strip() == route.best_job.name
+                ]
+                trusted_skills = {
+                    str(value).strip().casefold()
+                    for value in target_rows.get("skill", [])
+                    if str(value).strip()
+                }
+            evidence_by_skill = {
+                skill.normalized_skill.casefold(): {
+                    "field": skill.evidence_field or "",
+                    "sentence": skill.evidence_sentence or "",
+                    "confidence": skill.confidence,
+                }
+                for skill in posting.skills
+                if skill.normalized_skill
+            }
+            cross_role_evidence_by_skill: dict[str, dict[str, object]] = {}
+            if self.skill_migration_store is not None:
+                cross_role_resolver = CrossRoleEvidenceResolver(
+                    taxonomy=self.taxonomy,
+                    similarity=self.similarity or Text2VecSimilarity(),
+                    migration=self.skill_migration_store.load_migration(),
+                    spread=self.skill_migration_store.load_spread(),
+                )
+                cross_role_evidence_by_skill = {
+                    skill.normalized_skill.casefold(): cross_role_resolver.resolve(
+                        standard_job=route.best_job.name,
+                        skill=skill.normalized_skill,
+                        observed_month=posting.month,
+                    )
+                    for skill in normalized_skills
+                    if skill.normalized_skill
+                }
+            admissions = self.candidate_skill_store.evaluate(
+                posting=posting,
+                standard_job=route.best_job.name,
+                skills=normalized_skills,
+                trusted_skills=trusted_skills,
+                evidence_by_skill=evidence_by_skill,
+                cross_role_evidence_by_skill=cross_role_evidence_by_skill,
+                persist=write,
+            )
+            admitted_keys = {
+                item.normalized_skill.casefold()
+                for item in admissions
+                if item.status in {"verified_existing", "verified_dynamic"}
+            }
+            admitted_skills = [
+                skill for skill in normalized_skills if skill.normalized_skill.casefold() in admitted_keys
+            ]
+            candidate_count = len(normalized_skills) - len(admitted_skills)
+            self._progress(
+                "cross_validation: "
+                f"admitted={len(admitted_skills)}, candidate_or_confirmed={candidate_count}"
+            )
+
         mode = "dry-run rebuild" if not write else "calculate update"
         self._progress(f"frequency: loading event stream and rebuilding monthly/cumulative table ({mode})")
         events, frequency = self.frequency_store.append_existing_job(
             posting=posting,
             standard_job=route.best_job.name,
-            normalized_skills=normalized_skills,
+            normalized_skills=admitted_skills,
             write=False,
         )
         self._progress(f"frequency: event_rows={len(events)}, frequency_rows={len(frequency)}")
@@ -189,7 +255,7 @@ class JobUpdateSystem:
                 posting=posting,
                 standard_category=standard_category,
                 standard_job=route.best_job.name,
-                normalized_skills=normalized_skills,
+                normalized_skills=admitted_skills,
                 write=False,
             )
             skill_pool_rows = len(skill_pool)
@@ -295,7 +361,7 @@ class JobUpdateSystem:
         update = ExistingJobUpdate(
             standard_job=route.best_job.name,
             month=posting.month,
-            normalized_skills=normalized_skills,
+            normalized_skills=admitted_skills,
             monthly_rows=monthly_rows,
             frequency_rows=len(frequency),
             skill_pool_rows=skill_pool_rows,
@@ -336,6 +402,7 @@ class JobUpdateSystem:
             posting=posting,
             update=update,
             normalized_skills=normalized_skills,
+            admissions=admissions,
         )
         if write and self.database_store is not None:
             self._progress(
