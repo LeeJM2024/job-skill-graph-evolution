@@ -1,0 +1,23 @@
+{
+  "metric_definition": "技能金标准覆盖率（仅漏抽扣分；系统多抽不扣分）",
+  "evaluated_cases": 100,
+  "required_gold_skills_after_normalization": 554,
+  "covered_gold_skills": 527,
+  "semantic_covered_gold_skills": 20,
+  "deleted_gold_skills_not_scored": 2,
+  "system_extra_skills_not_scored": 996,
+  "role_exact_accuracy": 0.9,
+  "role_accuracy_wilson_95ci": [
+    0.8256,
+    0.9448
+  ],
+  "gold_skill_coverage": 0.9513,
+  "jd_parse_composite_score": 0.9308,
+  "role_weight": 0.4,
+  "skill_coverage_weight": 0.6,
+  "acceptance": {
+    "role_exact_accuracy_ge_0_90": true,
+    "gold_skill_coverage_ge_0_90": true,
+    "jd_parse_composite_score_ge_0_90": true
+  }
+}

@@ -1,0 +1,101 @@
+﻿case_id,source_job_title,pred_standard_job,pred_skills
+JD001,软件开发,软件开发工程师,C/C++; Java; Python; 协同系统; 性能优化; 数据工程; 机器人与自动驾驶; 游戏与图形开发; 系统开发; 编程语言; 计算机体系结构; 软件工程; 软件开发
+JD002,测试开发专家（公会和运营平台）-TikTok直播（北京/上海）,测试开发工程师,Go; Hadoop; Java; LLM; Python; Spark; 交互技术; 协同系统; 数据工程; 游戏与图形开发; 系统开发; 编程语言; 软件测试
+JD003,高级后端开发工程师（互动业务）-TikTok社交,后端开发工程师,AI; C/C++; Go; IT基础设施; Java; Python; 协同系统; 可靠性设计; 多租户架构; 微服务安全; 性能优化; 持续学习; 数据工程; 游戏与图形开发; 系统开发; 计算机体系结构; 软件开发
+JD004,短视频推荐算法工程师-推送方向,推荐算法工程师,AIGC; AI算法; CTR/CVR; Deep Learning; DeepFM; DIN; Machine Learning; Reinforcement Learning; Uplift Modeling; 交互技术; 协同系统; 引擎开发; 归因分析; 时间序列算法; 机器人与自动驾驶; 模型工程; 游戏与图形开发; 特征工程; 算法工程; 编程语言
+JD005,语音算法实习生-飞书AI,语音算法工程师,AI; AI基础设施; AI算法; ASR; CUDA; LLM; Machine Learning; Multimodal AI; Python; PyTorch; TensorFlow; 信号处理; 协同系统; 模型推理; 模型服务化; 模型评测; 游戏与图形开发; 特征工程; 知识图谱; 编程语言; 软件测试; 音视频技术
+JD006,阿里国际-高级AI 应用开发工程师（CIO）-杭州,AI应用工程师,Agent; AI; AI基础设施; AI工作流设计; AI应用开发; AI算法; Chain of Thought; Java; LangChain; RAG; React; Spring; 数据工程; 模型评测; 流程自动化; 游戏与图形开发; 系统开发
+JD007,搜索算法工程师-抖音（上海/杭州）,搜索算法工程师,AI算法; Big Data; C/C++; Computer Vision; CTR/CVR; Deep Learning; Linux; Machine Learning; Multimodal AI; NLP; Python; 交互技术; 在线服务; 引擎开发; 性能优化; 模型压缩; 知识图谱; 端到端系统; 算法工程; 系统开发; 网络技术
+JD008,大模型算法（GPU模型底层优化方向）实习生-TikTok隐私安全,大模型算法工程师,AI算法; Attention机制; C/C++; CUDA; CUTLASS; Diffusion模型; LLM; MoE模型; PyTorch; Triton; XLA; 参数调优; 多方安全计算; 性能优化; 模型推理; 模型训练; 游戏与图形开发; 计算机体系结构; 软件工程; 软件开发; 软件测试; 高性能计算
+JD009,AI产品经理,AI产品经理,Agent; AI; AI算法; LLM; Machine Learning; 交互技术; 协同系统; 归因分析; 数据工程; 模型评测; 游戏与图形开发; 知识图谱
+JD010,【北斗】AI决策算法研究员（外卖/即时零售方向）,AI Agent算法工程师,AI; AI应用开发; AI算法; LLM; Machine Learning; 因果推断; 大模型安全; 工业自动化; 数据工程; 时空基础模型; 时间序列算法; 机器人与自动驾驶; 模型工程; 游戏与图形开发; 端到端系统; 系统开发
+JD011,前端开发工程师-飞书项目,前端开发工程师,CI/CD; 性能优化; 游戏与图形开发; 硬件开发; 系统开发; 编程语言; 计算机体系结构; 软件工程; 软件开发
+JD012,数据分析师-TikTok,数据分析师,Data Warehouse; Machine Learning; SQL; 交互技术; 动画技术; 协同系统; 因果推断; 在线实验; 归因分析; 数据工程; 模型评测; 游戏与图形开发; 算法工程; 系统开发; 编程语言
+JD013,AI解决方案专家,AI应用工程师,Agent; AI; AI工作流设计; AI应用开发; AI算法; LLM; SRE; 协同系统; 异常检测; 时间序列算法; 机器人与自动驾驶; 模型评测; 游戏与图形开发; 系统开发; 软件工程; 软件测试
+JD014,客户端开发实习生-移动OS,客户端开发工程师,AI; AI应用开发; Android; C/C++; Java; Kotlin; Swift; 协同系统; 感知算法; 游戏与图形开发; 系统开发; 编程语言; 软件工程; 软件开发
+JD015,AIGC算法实习生-GenAI,AIGC算法工程师,Agent; AI; AIGC; AI工作流设计; AI算法; Computer Vision; LLM; Machine Learning; Multimodal AI; Python; PyTorch; VFX; 协同系统; 归因分析; 机器人与自动驾驶; 模型工程; 游戏与图形开发; 系统开发; 编程语言
+JD016,大模型应用实习生（服务智能）,大模型应用工程师,Agent; AI应用开发; AI算法; C/C++; Claude Code; Go; GRM; Instruction Tuning; Java; LLM; Machine Learning; OpenClaw; prompt工程; Python; Reinforcement Learning; 协同系统; 多智能体协作框架; 数据工程; 模型后训练; 模型推理; 模型训练; 模型评测; 游戏与图形开发; 系统开发; 编程语言
+JD017,机器学习算法工程师-时效表达方向,机器学习算法工程师,AI算法; Machine Learning; Python; PyTorch; TensorFlow; 交互技术; 协同系统; 因果推断; 异常检测; 时间序列算法; 模型评测; 游戏与图形开发; 算法工程; 网络技术
+JD018,风控算法工程师-生活服务,风控算法工程师,Agent; AI; AI工作流设计; AI应用开发; AI算法; LLM; Machine Learning; Multimodal AI; PyTorch; RLHF; TensorFlow; VLM; 上下文工程; 协同系统; 可解释AI; 性能优化; 数据工程; 游戏与图形开发; 算法工程; 系统开发
+JD019,机器人算法评测实习生-Seed,机器人算法工程师,AI; AI算法; C/C++; Go; Java; LLM; Multimodal AI; Python; VLA模型; VLM; 云计算; 协同系统; 机器人与自动驾驶; 模型训练; 模型评测; 游戏与图形开发; 硬件开发; 算法工程; 编程语言
+JD020,AI Agent应用工程师（企业知识库方向）,AI Agent应用工程师,Agent; AI工作流设计; AI算法; FastAPI; LangChain; LangGraph; LLM; MCP协议; Python; RAG; SRE; 上下文工程; 异常检测; 机器人与自动驾驶; 模型评测; 知识图谱; 软件工程
+JD021,信息安全运营专家-安全与风控,信息安全工程师,AI算法; 信息安全; 协同系统; 机器人与自动驾驶; 查询优化; 软件工程
+JD022,机器人软件工程师（自主导航方向）,机器人软件工程师,C/C++; Docker; Linux; Python; ROS2; SLAM; 性能优化; 惯性导航; 机器人与自动驾驶; 硬件开发; 自动化技术; 计算机视觉; 调试工具; 软件工程; 软件开发; 雷达算法
+JD023,Android开发实习生-TikTok泛架构,Android开发工程师,AI; Android; C/C++; Java; JavaScript; Kotlin; Swift; 交互技术; 协同系统; 性能优化; 游戏与图形开发; 编程语言; 网络技术; 软件工程; 软件开发
+JD024,计算机视觉算法工程师,计算机视觉算法工程师,AI; AI Coding; AI应用开发; AI算法; Deep Learning; Diffusion模型; LLM; Machine Learning; Multimodal AI; VLA模型; 世界模型; 大模型安全; 感知算法; 数据工程; 模型评测; 模型预训练; 模式识别; 游戏与图形开发; 算法工程; 系统开发; 计算机视觉; 软件测试
+JD025,iOS开发实习生-今日头条,iOS开发工程师,Android; 协同系统; 性能优化; 系统开发; 调试工具; 软件工程; 软件开发
+JD026,广告算法工程师-国际化品牌广告,广告算法工程师,AI算法; Big Data; Hadoop; LLM; Machine Learning; Multimodal AI; PyTorch; Spark; TensorFlow; 协同系统; 数据工程; 算法工程; 系统开发; 编程语言
+JD027,蓝牙嵌入式软件工程师-移动OS,嵌入式软件工程师,C/C++; IT基础设施; RTOS; 交互技术; 信号处理; 协同系统; 性能优化; 硬件开发; 系统开发; 计算机体系结构; 调试工具; 软件工程; 软件开发; 软件测试; 通信技术; 音视频技术
+JD028,云计算客户支持工程师-火山引擎,云计算工程师,Docker; IT基础设施; 云计算; 协同系统; 数据工程; 知识图谱; 网络技术; 身份认证; 软件开发
+JD029,前端开发实习生（AI安全方向）-安全与风控,前端开发工程师,AI安全; AI算法; CSS; HTML; HTTP; JavaScript; React; TypeScript; 协同系统; 系统开发; 软件工程; 软件开发
+JD030,NLP算法工程师-抖音智能客服,NLP算法工程师,Agent; AI工作流设计; AI算法; LLM; Machine Learning; Multimodal AI; NLP; RAG; Reinforcement Learning; 机器人与自动驾驶; 模型训练; 模型评测; 游戏与图形开发; 算法工程; 编程语言; 计算机体系结构
+JD031,商品库存后端开发工程师,数据仓库工程师,Docker; Java; Spring; 交互技术; 协同系统; 归因分析; 系统开发; 编程语言; 计算机体系结构; 软件工程; 软件开发
+JD032,后端开发工程师（治理平台）-TikTok生活服务,后端开发工程师,C/C++; Go; Java; Kafka; Linux; MySQL; Python; Redis; REST API; 协同系统; 系统开发; 编程语言; 软件工程; 软件开发
+JD033,搜索-国际化短视频推荐算法工程师,计算机视觉算法工程师,AI算法; Big Data; Computer Vision; Machine Learning; Multimodal AI; NLP; 协同系统; 在线服务; 多目标优化; 归因分析; 性能优化; 模型预训练; 游戏与图形开发; 算法工程; 系统开发
+JD034,后端开发工程师-商业化交易中台,后端开发工程师,Agent; AI; AI Coding; AIGC; AI应用开发; AI算法; C/C++; Go; Java; LLM; Microservices; Prompt Engineering; Python; RAG; 归因分析; 感知算法; 数据工程; 机器人与自动驾驶; 模型工程; 游戏与图形开发; 研发效能; 系统开发; 编程语言; 软件工程; 软件开发; 软件测试
+JD035,后端开发实习生-TikTok用户增长,后端开发工程师,AI; AIGC; Flink; Go; IT基础设施; Java; MySQL; Python; Redis; 协同系统; 引擎开发; 归因分析; 模型评测; 系统开发; 编程语言; 计算机体系结构; 软件工程; 软件开发
+JD036,测试开发工程师（钱包与资金平台）-TikTok直播,测试开发工程师,C/C++; Go; Java; LLM; PHP; Python; Redis; 交互技术; 协同系统; 数据工程; 游戏与图形开发; 算法工程; 系统开发; 编程语言; 计算机体系结构; 软件测试
+JD037,【LongCat大模型人才校招】语音大模型算法研究员,语音算法工程师,AI算法; ASR; Audio Tokenization; Distributed Training; LLM; Machine Learning; Multimodal AI; PyTorch; Speech Language Model; TTS; VLA模型; 世界模型; 信号处理; 声纹基座模型; 感知算法; 机器人与自动驾驶; 模型工程; 模型推理; 模型训练; 游戏与图形开发; 语音数据管线构建; 语音表征; 软件开发; 音视频技术
+JD038,大模型算法实习生-TikTok业务风控,大模型算法工程师,Agent; AI; AI算法; LangChain; LLM; NLP; Prompt Engineering; RAG; Vector Index; 上下文工程; 协同系统; 模型微调; 模型训练; 模型评测; 游戏与图形开发; 特征工程; 系统开发; 编程语言; 计算机体系结构
+JD039,搜索算法工程师-抖音,搜索算法工程师,AI算法; Big Data; C/C++; Computer Vision; CTR/CVR; Linux; Machine Learning; Multimodal AI; NLP; Python; 交互技术; 在线服务; 引擎开发; 性能优化; 查询优化; 模型压缩; 模式识别; 知识图谱; 算法工程; 系统开发; 网络技术; 计算机视觉
+JD040,多模态大模型算法工程师-商业信任与安全,多模态算法工程师,Agent; AI算法; C/C++; Computer Vision; LLM; Machine Learning; Multimodal AI; NLP; Python; 偏好学习; 协同系统; 图像图形技术; 模型工程; 模型微调; 模型推理; 模型训练; 游戏与图形开发; 算法工程; 系统开发; 编程语言; 音视频技术
+JD041,推荐算法工程师-分发与互动,推荐算法工程师,AI; Computer Vision; IT基础设施; LLM; Machine Learning; Multimodal AI; NLP; 交互技术; 协同系统; 多任务学习; 引擎开发; 归因分析; 持续学习; 推荐大模型; 推荐架构; 数字人技术; 模型压缩; 游戏与图形开发; 知识图谱; 算法工程; 系统开发; 编程语言
+JD042,推荐大模型算法实习生-抖音直播,大模型算法工程师,AI算法; LLM; Machine Learning; Multimodal AI; 上下文工程; 偏好学习; 协同系统; 归因分析; 模型后训练; 模型推理; 模型训练; 游戏与图形开发; 特征工程; 编程语言; 软件开发; 软件测试
+JD043,推荐算法工程师-抖音,推荐算法工程师,AI; Computer Vision; IT基础设施; LLM; Machine Learning; Multimodal AI; NLP; 交互技术; 协同系统; 多任务学习; 引擎开发; 持续学习; 推荐大模型; 数字人技术; 数据工程; 模型压缩; 游戏与图形开发; 知识图谱; 算法工程; 系统开发; 编程语言
+JD044,软件开发,软件开发工程师,Go; IT基础设施; Java; Python; SRE; 信息安全; 归因分析; 性能优化; 数据工程; 机器人与自动驾驶; 游戏与图形开发; 研发效能; 系统开发; 编程语言; 计算机体系结构; 软件工程; 软件开发
+JD045,数据分析师-TikTok用户增长,数据分析师,AI算法; Multimodal AI; 协同系统; 归因分析; 数据工程; 机器人与自动驾驶; 算法工程; 软件测试
+JD046,AIGC算法实习生-Seed,AIGC算法工程师,AI; AIGC; C/C++; GenMedia; LLM; Multimodal AI; Python; PyTorch; TensorFlow; VLM; 云计算; 协同系统; 机器人与自动驾驶; 模型训练; 游戏与图形开发; 硬件开发; 编程语言; 软件工程
+JD047,AIGC算法实习生-Seed,AIGC算法工程师,AI; AIGC; C/C++; LLM; Multimodal AI; Python; PyTorch; TensorFlow; 云计算; 协同系统; 图像图形技术; 机器人与自动驾驶; 模型训练; 游戏与图形开发; 硬件开发; 编程语言; 软件工程
+JD048,推荐算法工程师-抖音,推荐算法工程师,C/C++; Computer Vision; Deep Learning; GBDT; Learning to Rank; Linux; Machine Learning; Multimodal AI; NLP; Python; 交互技术; 协同系统; 多任务学习; 模型压缩; 游戏与图形开发; 知识图谱; 算法工程; 编程语言; 计算机视觉
+JD049,高级前端开发工程师（大模型方向）-Data AML,前端开发工程师,AI; AI基础设施; CSS; HTML; JavaScript; Linux; LLM; Machine Learning; React; Web; WebIDE; 数据工程; 软件开发
+JD050,前端开发工程师（机器审核）-国际化内容安全平台,前端开发工程师,AI算法; Go; IT基础设施; Java; JavaScript; Machine Learning; NLP; React; SRE; Vue.js; Web; 信息安全; 协同系统; 大模型安全; 系统开发; 软件开发
+JD051,本地生活搜索算法专家-【搜索】,搜索算法工程师,C/C++; Linux; LLM; Machine Learning; Multimodal AI; NLP; Python; 序列建模; 算法工程; 系统开发; 编程语言
+JD052,大数据测试开发工程师-Data,大数据开发工程师,Go; Java; MySQL; Python; 协同系统; 数据工程; 软件开发; 软件测试
+JD053,电商搜索算法工程师,搜索算法工程师,C/C++; Linux; LLM; Machine Learning; Multimodal AI; NLP; Python; 序列建模; 游戏与图形开发; 算法工程; 系统开发; 编程语言
+JD054,测试开发工程师（J84347）,测试开发工程师,Automated Testing; Go; Linux; Prometheus; Python; 协同系统; 性能优化; 数据工程; 机器人与自动驾驶; 模型评测; 混沌工程; 系统开发; 编程语言; 自动化运维; 软件工程; 软件开发; 软件测试
+JD055,AI应用开发工程师-账会清算,AI应用工程师,AI; AIGC; AIops; AI应用开发; Go; Java; Python; 协同系统; 机器人与自动驾驶; 游戏与图形开发; 系统开发; 编程语言; 自动化运维; 计算机体系结构; 软件工程; 软件开发
+JD056,资深测试开发工程师-CRM与交易平台,测试开发工程师,Java; Python; Shell脚本; 机器人与自动驾驶; 模型评测; 研发效能; 系统开发; 编程语言; 软件测试
+JD057,AI产品经理,AI产品经理,AI; AIGC; AI应用开发; AI算法; LLM; NLP; 交互技术; 动画技术; 协同系统; 数字人技术; 数据工程; 机器人与自动驾驶; 游戏与图形开发; 编程语言; 音视频技术
+JD058,前端开发实习生-安全与风控,前端开发工程师,AI算法; CSS; HTML; HTTP; JavaScript; React; TypeScript; 云计算; 信息安全; 协同系统; 机器人与自动驾驶; 游戏与图形开发; 软件工程; 软件开发
+JD059,LongCat - 通用 agent 算法研究员,AI Agent算法工程师,Agent; AI工作流设计; AI算法; Machine Learning; Multimodal AI; 上下文工程; 仿真技术; 模型推理; 模型训练; 系统开发
+JD060,Keeta技术-机器学习算法工程师/专家,机器学习算法工程师,AI; AI算法; CTR/CVR; ETA算法; Java; LLM; Machine Learning; Python; Spark; 协同系统; 因果推断; 多目标优化; 工业自动化; 机器人与自动驾驶; 游戏与图形开发; 算法工程; 系统开发; 编程语言
+JD061,软件开发岗,软件开发工程师,Agent; AI; AI应用开发; LLM; 归因分析; 模型评测; 系统开发; 软件开发
+JD062,前端开发实习生-字节云,前端开发工程师,CI/CD; CSS; HTML; JavaScript; LLM; Microservices; Node.js; Prometheus; SRE; 云计算; 交互技术; 协同系统; 数据工程; 游戏与图形开发; 系统开发; 软件开发
+JD063,Android客户端开发实习生,Android开发工程师,Android; Git; Java; Kotlin; 交互技术; 协同系统; 在线实验; 游戏与图形开发; 算法工程; 软件工程
+JD064,AI软件解决方案专家(FDE)（深圳/北京/上海）,AI应用工程师,Agent; AI; AI Coding; Docker; IT基础设施; LLM; 云计算; 协同系统; 游戏与图形开发; 系统开发; 软件开发
+JD065,AIGC算法实习生-Commercial AI,AIGC算法工程师,AI; AIGC; AI算法; C/C++; Diffusion模型; LLM; Machine Learning; Multimodal AI; NLP; Python; PyTorch; TensorFlow; TensorRT-LLM; vLLM; 协同系统; 模型推理; 模型训练; 模型评测; 游戏与图形开发; 研发效能; 系统开发; 编程语言; 计算机视觉
+JD066,AI应用开发实习生-Cross Platform,AI应用工程师,Agent; AI; AI可观测性; AI应用开发; AI算法; Android; LLM; MCP协议; Multimodal AI; RAG; SRE; Web; 上下文工程; 交互技术; 参数调优; 小程序框架; 模型服务化; 流程自动化; 编程语言; 计算机体系结构; 跨平台开发; 软件工程; 软件开发
+JD067,AI大模型应用专家,AI应用工程师,Agent; AI; AI应用开发; AI算法; Java; LLM; Machine Learning; prompt工程; Python; RAG; 协同系统; 数据工程; 游戏与图形开发; 特征工程; 编程语言; 计算机体系结构
+JD068,AI应用开发实习生-财经业务,AI应用工程师,Agent; AI; AI应用开发; AI算法; C/C++; Go; LangChain; LLM; Prompt; Prompt Engineering; Python; RAG; 游戏与图形开发; 编程语言
+JD069,游戏资深客户端开发工程师（科幻射击项目）-江南工作室,客户端开发工程师,UE; 光学技术; 动画技术; 引擎开发; 游戏与图形开发; 系统开发; 编程语言; 网络技术; 软件开发
+JD070,客户端开发实习生-TikTok泛架构,客户端开发工程师,AI; Android; C/C++; Java; JavaScript; Kotlin; Swift; 交互技术; 协同系统; 性能优化; 游戏与图形开发; 系统开发; 编程语言; 网络技术; 调试工具; 软件工程; 软件开发
+JD071,软件开发工程师,软件开发工程师,AI算法; Java; Machine Learning; 协同系统; 数据工程; 系统开发; 编程语言; 计算机体系结构; 软件工程; 软件开发
+JD072,Android开发实习生-今日头条,Android开发工程师,Android; 协同系统; 系统开发; 调试工具; 软件工程; 软件开发
+JD073,千问事业部-技术解决方案专家-杭州,解决方案工程师,AI; AI算法; LLM; 协同系统; 模型评测; 游戏与图形开发; 系统开发; 软件测试
+JD074,解决方案实习生-国际商业化客户解决方案,解决方案工程师,Go; Java; JavaScript; Machine Learning; Python; 协同系统; 系统开发; 编程语言
+JD075,广告算法架构工程师-Ads Infra,广告算法工程师,AI算法; C/C++; Java; Machine Learning; 引擎开发; 归因分析; 数据工程; 模型推理; 系统开发; 编程语言; 自动化技术; 计算机体系结构; 软件工程
+JD076,广告算法工程师-Ads Core技术,广告算法工程师,AI算法; C/C++; LLM; Machine Learning; Python; Reinforcement Learning; 感知算法; 模型工程; 游戏与图形开发; 算法工程; 系统开发
+JD077,客户端开发实习生-APM,客户端开发工程师,AI; AI应用开发; Android; C/C++; Git; Java; Kotlin; Machine Learning; SRE; Swift; 协同系统; 游戏与图形开发; 编程语言; 调试工具; 软件工程; 软件开发
+JD078,机器学习算法工程师-【信息安全】,机器学习算法工程师,Agent; AI安全; AI算法; Big Data; Flink; LLM; Machine Learning; NLP; Python; PyTorch; Spark; SRE; TensorFlow; 信息安全; 多方安全计算; 异常检测; 数据工程; 时间序列算法; 模型训练; 模型评测; 游戏与图形开发; 特征工程; 知识图谱; 算法工程; 编程语言; 网络技术; 计算机体系结构
+JD079,LongCat - 具身智能算法研究员,机器人算法工程师,AI工作流设计; AI算法; C/C++; Computer Vision; Deep Learning; LLM; Machine Learning; Python; PyTorch; VLA模型; 仿真技术; 感知算法; 机器人与自动驾驶; 模型工程; 模型训练; 模型评测; 端到端系统; 算法工程; 编程语言; 自动化技术; 计算机体系结构; 软件测试
+JD080,国际产研 软件开发工程师,软件开发工程师,IT基础设施; Machine Learning; 协同系统; 性能优化; 游戏与图形开发; 研发效能; 系统开发; 编程语言; 计算机体系结构; 软件工程; 软件开发
+JD081,AI应用研发工程师（电商治理）-服务体验与治理,AI应用工程师,Agent; AI; AI工作流设计; AI应用开发; AI算法; Few-shot Learning; LangChain; LLM; MCP协议; Multimodal AI; NLP; Python; RAG; Zero-shot Learning; 协同系统; 大模型融合架构; 感知算法; 游戏与图形开发; 算法工程; 系统开发; 计算机体系结构; 软件工程; 高效训练框架
+JD082,计算机视觉算法工程师/专家,计算机视觉算法工程师,AI算法; C/C++; CLIP; Computer Vision; Deep Learning; Machine Learning; Multimodal AI; Python; PyTorch; TensorFlow; ViT; VLM; 协同系统; 模型压缩; 模型工程; 模型推理; 模型评测; 游戏与图形开发; 算法工程; 编程语言; 网络技术; 计算机体系结构; 计算机视觉; 软件开发
+JD083,数据仓库工程师-抖音生活服务,数据仓库工程师,AI算法; ETL; Hadoop; OLAP; Spark; SQL; 引擎开发; 数据工程; 游戏与图形开发; 系统开发; 软件工程
+JD084,AIGC算法实习生-智能创作,AIGC算法工程师,AI; AIGC; Machine Learning; Multimodal AI; NLP; 云计算; 协同系统; 图像图形技术; 机器人与自动驾驶; 系统开发; 计算机视觉; 软件工程; 软件开发
+JD085,电商风控算法工程师,风控算法工程师,AI算法; C/C++; Embedding; Java; Machine Learning; Python; 协同系统; 多任务学习; 算法工程; 系统开发; 编程语言; 软件测试
+JD086,大模型应用开发工程师-抖音研发,大模型应用工程师,Agent; AI; harness工程; LLM; Microservices; NLP; Vector Index; Web; 协同系统; 引擎开发; 感知算法; 模型评测; 游戏与图形开发; 系统开发; 编程语言; 软件开发
+JD087,Java开发实习生（垂直业务）-【商业化】,Java开发工程师,AI; AI应用开发; Java; Kafka; LLM; MySQL; Redis; 归因分析; 性能优化; 系统开发; 编程语言; 计算机体系结构; 软件开发
+JD088,Java开发实习生（游戏）-【商业化】,Java开发工程师,AI; AI应用开发; Java; Kafka; LLM; MySQL; Redis; 归因分析; 性能优化; 系统开发; 编程语言; 计算机体系结构; 软件开发
+JD089,数据挖掘算法工程师,数据挖掘算法工程师,Hadoop; Machine Learning; PyTorch; Spark; TensorFlow; 协同系统; 数据工程; 游戏与图形开发; 算法工程; 系统开发
+JD090,大模型应用后端开发工程师-多模态方向,后端开发工程师,AI算法; Java; LLM; Multimodal AI; NLP; 性能优化; 数据工程; 游戏与图形开发; 系统开发; 编程语言; 计算机体系结构; 软件开发
+JD091,资深全栈开发工程师/专家（HR系统）,全栈开发工程师,AI; Claude Code; Codex; Cursor; Java; MongoDB; MySQL; OpenCode; React; Redis; Spring; 信息安全; 性能优化; 游戏与图形开发; 系统开发; 编程语言; 调试工具; 软件开发
+JD092,技术解决方案工程师-国际化（北京/上海）,解决方案工程师,Go; Java; JavaScript; Machine Learning; Python; Web; 协同系统; 系统开发; 编程语言; 调试工具; 软件开发
+JD093,数据治理实习生-隐私和数据保护办公室,数据治理工程师,AI算法; LLM; Python; Spark; SQL; 信息安全; 协同系统; 数据工程; 模型工程; 游戏与图形开发
+JD094,Java 开发实习生（商家平台组）-【生活服务】,Java开发工程师,Agent; AI; Java; MCP协议; Python; 协同系统; 性能优化; 游戏与图形开发; 研发效能; 系统开发; 编程语言; 软件工程; 软件开发
+JD095,NLP算法工程师-抖音AI分身,NLP算法工程师,AI; Deep Learning; LLM; Machine Learning; Multimodal AI; NLP; RAG; Reinforcement Learning; RLHF; 上下文工程; 垂直领域模型; 机器人与自动驾驶; 游戏与图形开发; 算法工程; 编程语言; 计算机体系结构
+JD096,资深Android开发工程师,Android开发工程师,AI; Android; 协同系统; 机器人与自动驾驶; 模型评测; 游戏与图形开发; 物联网; 系统开发; 软件工程
+JD097,CPG-语音算法工程师,语音算法工程师,AI框架; AI算法; ASR; C/C++; Linux; LLM; Multimodal AI; Python; TTS; 信号处理; 模型压缩; 模型推理; 游戏与图形开发; 算法工程; 编程语言; 音视频技术
+JD098,《王者荣耀》游戏AI Bot算法研究员,AI Agent算法工程师,Agent; AI??; AI算法; C/C++; Linux; Machine Learning; Python; PyTorch; TensorFlow; 模型训练; 模型调优; 游戏与图形开发; 特征工程; 编程语言
+JD099,AI安全开发实习生-豆包手机助手,AI安全工程师,Agent; AI; AI大模型攻击方法; AI大模型架构; AI安全; AI应用开发; AI算法; LLM; Machine Learning; 信息安全; 协同系统; 多方安全计算; 大模型安全; 感知算法; 模型推理; 游戏与图形开发; 系统开发; 软件开发
+JD100,AI产品经理,AI产品经理,AI; AI应用开发; LLM; 交互技术; 协同系统; 归因分析; 数据工程; 模型评测; 游戏与图形开发; 系统开发

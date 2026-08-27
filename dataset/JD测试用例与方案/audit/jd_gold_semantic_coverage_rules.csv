@@ -1,0 +1,23 @@
+case_id,gold_skill,decision,accepted_system_skills,rationale
+JD008,Benchmark,cover,软件测试,基准测试属于测试/评测能力；该JD已抽取软件测试
+JD008,算子优化,cover,性能优化,算子优化是面向算子的性能优化；该JD已抽取性能优化
+JD011,前端框架,cover,软件开发,前端框架属于软件开发实现能力；该JD已抽取软件开发
+JD013,AI Copilot,cover,Agent,AI Copilot在本JD语境中是智能助手/代理应用；该JD已抽取Agent
+JD022,传感器融合,cover,惯性导航,惯性导航依赖多传感器融合定位；该JD已抽取惯性导航
+JD028,操作系统,cover,IT基础设施,操作系统是云平台基础设施能力；该JD已抽取IT基础设施
+JD031,代码评审,cover,软件工程,代码评审属于软件工程实践；该JD已抽取软件工程
+JD031,微服务架构,delete,,B盘技能词典没有可用于本JD评分的稳定等价项，按人工复核从有效金标中剔除
+JD032,微服务架构,delete,,B盘技能词典没有可用于本JD评分的稳定等价项，按人工复核从有效金标中剔除
+JD041,模型加速,cover,模型压缩,模型压缩是实现模型推理加速的直接技术路径；该JD已抽取模型压缩
+JD043,模型加速,cover,模型压缩,模型压缩是实现模型推理加速的直接技术路径；该JD已抽取模型压缩
+JD045,数据统计,cover,数据工程,数据统计属于数据工程处理能力；该JD已抽取数据工程
+JD048,模型加速,cover,模型压缩,模型压缩是实现模型推理加速的直接技术路径；该JD已抽取模型压缩
+JD060,策略优化,cover,多目标优化,多目标优化是该策略优化场景的直接算法实现；该JD已抽取多目标优化
+JD064,DevOps,cover,Docker; IT基础设施,Docker与IT基础设施共同覆盖持续交付和运维工程能力
+JD066,SFT,cover,参数调优,SFT是大模型定向调优方式；该JD已抽取参数调优
+JD068,算法设计,cover,AI算法,该JD中的算法设计对应AI算法研发能力；系统已抽取AI算法
+JD070,计算机网络,cover,网络技术,计算机网络对应系统网络技术能力；该JD已抽取网络技术
+JD080,C,cover,编程语言,系统以编程语言这一上位能力输出，覆盖C语言
+JD080,Java,cover,编程语言,系统以编程语言这一上位能力输出，覆盖Java
+JD080,Python,cover,编程语言,系统以编程语言这一上位能力输出，覆盖Python
+JD091,Ai coding,cover,Claude Code; Codex; Cursor; OpenCode,四项均为系统实际抽取的AI编码工具，覆盖AI Coding能力
